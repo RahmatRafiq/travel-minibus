@@ -22,5 +22,10 @@ class Vehicle extends Model
     {
         return $this->hasMany(Schedule::class);
     }
+    
+    public function bookings()
+    {
+        return $this->hasManyThrough(Booking::class, Schedule::class, 'vehicle_id', 'schedule_id');
+    }
 }
 
