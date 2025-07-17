@@ -10,11 +10,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Nonaktifkan event selama seeding
+        \App\Models\User::unsetEventDispatcher();
+
         $this->call([
             RoleSeeder::class,
             PermissionSeeder::class,
             RolePermissionSeeder::class,
             UserSeeder::class,
+            DriverSeeder::class,
+            RouteSeeder::class,
+            VehicleSeeder::class,
+            ScheduleSeeder::class,
+            BookingSeeder::class,
         ]);
     }
 }
