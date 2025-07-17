@@ -36,13 +36,13 @@ export default function VehicleForm({
         brand: vehicle ? vehicle.brand : '',
         seat_capacity: vehicle ? vehicle.seat_capacity : 1,
         driver_id: vehicle && vehicle.driver ? vehicle.driver.id : null,
-        driver_name: '',
-        driver_phone: '',
+        driver_name: vehicle && vehicle.driver ? vehicle.driver.name : '',
+        driver_phone: vehicle && vehicle.driver ? vehicle.driver.phone ?? '' : '',
         route_id: vehicle && vehicle.route ? vehicle.route.id : null,
-        route_name: '',
-        route_origin: '',
-        route_destination: '',
-        route_duration: '',
+        route_name: vehicle && vehicle.route ? vehicle.route.name : '',
+        route_origin: vehicle && vehicle.route ? vehicle.route.origin ?? '' : '',
+        route_destination: vehicle && vehicle.route ? vehicle.route.destination ?? '' : '',
+        route_duration: vehicle && vehicle.route ? vehicle.route.duration ?? '' : '',
     });
 
     const breadcrumbs: BreadcrumbItem[] = [

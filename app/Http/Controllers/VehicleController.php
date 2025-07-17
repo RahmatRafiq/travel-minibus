@@ -12,9 +12,6 @@ use Inertia\Inertia;
 
 class VehicleController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         $filter = $request->query('filter', 'active');
@@ -32,9 +29,6 @@ class VehicleController extends Controller
         ]);
     }
 
-    /**
-     * Return vehicles as JSON for DataTable.
-     */
     public function json(Request $request)
     {
         $search = $request->input('search.value', '');
@@ -79,10 +73,14 @@ class VehicleController extends Controller
                 'driver'        => $vehicle->driver ? [
                     'id'   => $vehicle->driver->id,
                     'name' => $vehicle->driver->name,
+                    'phone'=> $vehicle->driver->phone ?? '',
                 ] : null,
                 'route'         => $vehicle->route ? [
-                    'id'   => $vehicle->route->id,
-                    'name' => $vehicle->route->name,
+                    'id'         => $vehicle->route->id,
+                    'name'       => $vehicle->route->name,
+                    'origin'     => $vehicle->route->origin ?? '',
+                    'destination'=> $vehicle->route->destination ?? '',
+                    'duration'   => $vehicle->route->duration ?? '',
                 ] : null,
                 'trashed'       => method_exists($vehicle, 'trashed') ? $vehicle->trashed() : false,
                 'created_at'    => $vehicle->created_at ? $vehicle->created_at->toDateTimeString() : null,
@@ -94,9 +92,6 @@ class VehicleController extends Controller
         return response()->json($data);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return Inertia::render('Vehicle/Form', [
@@ -105,9 +100,6 @@ class VehicleController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         DB::beginTransaction();
@@ -116,11 +108,9 @@ class VehicleController extends Controller
                 'plate_number'  => 'required|unique:vehicles,plate_number',
                 'brand'         => 'required|string|max:255',
                 'seat_capacity' => 'required|integer|min:1',
-                // Driver
                 'driver_id'     => 'nullable|exists:drivers,id',
                 'driver_name'   => 'nullable|string|max:255',
                 'driver_phone'  => 'nullable|string|max:255',
-                // Route
                 'route_id'      => 'nullable|exists:routes,id',
                 'route_name'    => 'nullable|string|max:255',
                 'route_origin'  => 'nullable|string|max:255',
@@ -128,7 +118,6 @@ class VehicleController extends Controller
                 'route_duration'    => 'nullable|string|max:255',
             ]);
 
-            // Handle Driver
             $driverId = $request->driver_id;
             if (!$driverId && $request->driver_name) {
                 $driver = Driver::create([
@@ -138,7 +127,6 @@ class VehicleController extends Controller
                 $driverId = $driver->id;
             }
 
-            // Handle Route
             $routeId = $request->route_id;
             if (!$routeId && $request->route_name) {
                 $route = Route::create([
@@ -166,12 +154,9 @@ class VehicleController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit($id)
     {
-        $vehicle = Vehicle::withTrashed()->findOrFail($id);
+        $vehicle = Vehicle::with(['driver', 'route'])->withTrashed()->findOrFail($id);
 
         return Inertia::render('Vehicle/Form', [
             'vehicle' => $vehicle,
@@ -180,9 +165,6 @@ class VehicleController extends Controller
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, $id)
     {
         DB::beginTransaction();
@@ -193,11 +175,9 @@ class VehicleController extends Controller
                 'plate_number'  => 'required|string|max:255|unique:vehicles,plate_number,' . $vehicle->id,
                 'brand'         => 'required|string|max:255',
                 'seat_capacity' => 'required|integer|min:1',
-                // Driver
                 'driver_id'     => 'nullable|exists:drivers,id',
                 'driver_name'   => 'nullable|string|max:255',
                 'driver_phone'  => 'nullable|string|max:255',
-                // Route
                 'route_id'      => 'nullable|exists:routes,id',
                 'route_name'    => 'nullable|string|max:255',
                 'route_origin'  => 'nullable|string|max:255',
@@ -205,7 +185,6 @@ class VehicleController extends Controller
                 'route_duration'    => 'nullable|string|max:255',
             ]);
 
-            // Handle Driver
             $driverId = $request->driver_id;
             if (!$driverId && $request->driver_name) {
                 $driver = Driver::create([
@@ -215,7 +194,6 @@ class VehicleController extends Controller
                 $driverId = $driver->id;
             }
 
-            // Handle Route
             $routeId = $request->route_id;
             if (!$routeId && $request->route_name) {
                 $route = Route::create([
@@ -243,9 +221,6 @@ class VehicleController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy($id)
     {
         $vehicle = Vehicle::withTrashed()->findOrFail($id);
@@ -253,21 +228,16 @@ class VehicleController extends Controller
         return redirect()->route('vehicles.index')->with('success', 'Vehicle deleted successfully.');
     }
 
-    /**
-     * Restore the specified trashed resource.
-     */
     public function restore($id)
     {
         Vehicle::onlyTrashed()->where('id', $id)->restore();
         return redirect()->route('vehicles.index')->with('success', 'Vehicle restored successfully.');
     }
 
-    /**
-     * Force delete the specified trashed resource.
-     */
     public function forceDelete($id)
     {
         Vehicle::onlyTrashed()->where('id', $id)->forceDelete();
         return redirect()->route('vehicles.index')->with('success', 'Vehicle permanently deleted.');
     }
 }
+
