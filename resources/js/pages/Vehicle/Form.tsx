@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { BreadcrumbItem } from '@/types';
 import AppLayout from '@/layouts/app-layout';
 import { Vehicle, Driver, Route } from '@/types/Vehicle';
+import VehicleSidebar from '@/components/vehicle-sidebar';
 
 export default function VehicleForm({
     vehicle,
@@ -66,19 +67,7 @@ export default function VehicleForm({
                 <h1 className="text-2xl font-semibold mb-4">Vehicle Management</h1>
                 <div className="flex flex-col space-y-8 lg:flex-row lg:space-y-0 lg:space-x-12">
                     {/* Sidebar */}
-                    <aside className="w-full max-w-xl lg:w-48">
-                        <nav className="flex flex-col space-y-1">
-                            <Button asChild variant="ghost" size="sm" className="justify-start">
-                                <Link href="/vehicles">Vehicle List</Link>
-                            </Button>
-                            <Button asChild variant="ghost" size="sm" className="justify-start">
-                                <Link href="/drivers">Driver List</Link>
-                            </Button>
-                            <Button asChild variant="ghost" size="sm" className="justify-start">
-                                <Link href="/routes">Route List</Link>
-                            </Button>
-                        </nav>
-                    </aside>
+                    <VehicleSidebar />
                     <div className="flex-1 md:max-w-2xl space-y-6">
                         <HeadingSmall
                             title={isEdit ? 'Edit Vehicle' : 'Create Vehicle'}

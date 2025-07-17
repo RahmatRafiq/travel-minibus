@@ -42,6 +42,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('vehicles/{id}/restore', [\App\Http\Controllers\VehicleController::class, 'restore'])->name('vehicles.restore');
     Route::delete('vehicles/{id}/force-delete', [\App\Http\Controllers\VehicleController::class, 'forceDelete'])->name('vehicles.force-delete');
 
+    Route::get('drivers', [\App\Http\Controllers\DriverController::class, 'index'])->name('drivers.index');
+    Route::post('drivers/json', [\App\Http\Controllers\DriverController::class, 'json'])->name('drivers.json');
+
+    Route::get('routes', [\App\Http\Controllers\RouteController::class, 'index'])->name('routes.index');
+    Route::post('routes/json', [\App\Http\Controllers\RouteController::class, 'json'])->name('routes.json');
+
     Route::post('logout', [SocialAuthController::class, 'logout'])->name('logout');
 
 });
