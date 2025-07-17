@@ -41,6 +41,12 @@ const mainNavItems: NavItem[] = [
             },
         ],
     },
+    {
+        title: 'Vehicle Management',
+        href: '/vehicles',
+        icon: Settings,
+    },
+
 ];
 
 const footerNavItems: NavItem[] = [
