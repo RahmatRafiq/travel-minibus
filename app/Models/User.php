@@ -46,7 +46,7 @@ class User extends Authenticatable implements HasMedia
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password'          => 'hashed',
+        'password' => 'hashed',
     ];
 
     /**
@@ -60,11 +60,16 @@ class User extends Authenticatable implements HasMedia
             ->logOnly(['name', 'email', 'password'])
             ->logOnlyDirty()
             ->setDescriptionForEvent(function (string $eventName) {
-                $user     = auth()->user();
+                $user = auth()->user();
                 $userName = $user ? $user->name : 'unknown';
-                $userId   = $user ? $user->id : 'unknown';
+                $userId = $user ? $user->id : 'unknown';
                 return "User {$this->name} (ID: {$this->id}) telah di{$eventName} oleh {$userName} (ID: {$userId})";
             });
     }
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
+
 
 }
