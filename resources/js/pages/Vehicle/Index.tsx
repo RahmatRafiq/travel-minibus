@@ -162,7 +162,7 @@ export default function VehicleIndexAccordion({ filter: initialFilter, success }
         <h1 className="text-2xl font-semibold mb-4">Vehicle Management</h1>
         <div className="flex flex-col space-y-8 lg:flex-row lg:space-y-0 lg:space-x-12">
           <Separator className="my-6 md:hidden" />
-          <div className="col-md-12">
+          <div className="w-full flex-grow">
             <HeadingSmall title="Vehicles" description="Manage vehicles for your application" />
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Vehicle List</h2>
