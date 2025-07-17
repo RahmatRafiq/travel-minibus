@@ -2,78 +2,87 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Booking;
-use App\Models\Route;
 use App\Models\Vehicle;
 use App\Models\Schedule;
+use App\Models\Booking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class BookingController extends Controller
 {
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'route_id' => 'required|exists:routes,id',
+        // 1. Validasi input
+        $data = $request->validate([
+            'route_id'  => ['required', 'exists:routes,id'],
+            'direction' => ['sometimes', 'in:outbound,return'],
         ]);
 
-        $userId = Auth::id();
+        $userId    = Auth::id();
+        $routeId   = $data['route_id'];
+        // ubah direction ke enum is_return
+        $isReturn  = ($data['direction'] ?? 'outbound') === 'return' ? 'yes' : 'no';
 
-        // Ambil semua kendaraan di rute tersebut
-        $vehicles = Vehicle::where('route_id', $validated['route_id'])->pluck('id');
+        // 2. Core booking logic dalam transaction & lockForUpdate
+        $booking = DB::transaction(function () use ($routeId, $isReturn, $userId) {
 
-        if ($vehicles->isEmpty()) {
-            return response()->json(['error' => 'Tidak ada kendaraan pada rute ini.'], 422);
-        }
+            // ambil semua vehicle di route
+            $vehicleIds = Vehicle::where('route_id', $routeId)->pluck('id');
 
-        $booking = null;
-        $chosenSchedule = null;
-        $chosenVehicle = null;
-
-        DB::beginTransaction();
-        try {
-            // Cari schedule yang tersedia
-            $schedule = Schedule::whereIn('vehicle_id', $vehicles)
-                ->where('departure_time', '>', Carbon::now())
+            // query all eligible schedules
+            $schedule = Schedule::whereIn('vehicle_id', $vehicleIds)
+                ->where('route_id', $routeId)
+                ->where('is_return', $isReturn)
                 ->where('status', 'open')
-                ->with('vehicle')
-                ->withCount('bookings')
-                ->orderBy('departure_time', 'asc')
+                ->where('departure_time', '>', now())
+                ->with('vehicle')               // agar seat_capacity bisa dipakai
+                ->withCount('bookings')         // hitung pemesanan
+                ->orderBy('departure_time')
                 ->lockForUpdate()
                 ->get()
-                ->filter(function ($sch) {
-                    return $sch->bookings_count < $sch->vehicle->seat_capacity;
-                })
-                ->first();
+                ->first(fn($s) => $s->bookings_count < $s->vehicle->seat_capacity);
 
-            if (!$schedule) {
-                DB::rollBack();
-                return response()->json(['error' => 'Tidak ada jadwal tersedia.'], 422);
+            if (! $schedule) {
+                abort(422, 'Maaf, tidak ada jadwal tersedia untuk rute ini.');
             }
 
+            // buat booking
             $booking = Booking::create([
-                'user_id'     => $userId,
-                'schedule_id' => $schedule->id,
-                'booking_time'=> now(),
-                'status'      => 'pending',
+                'user_id'      => $userId,
+                'schedule_id'  => $schedule->id,
+                'booking_time' => now(),
+                'status'       => 'pending',
             ]);
 
-            DB::commit();
+            // jika penuh setelah ini, tutup schedule
+            if ($schedule->bookings_count + 1 >= $schedule->vehicle->seat_capacity) {
+                $schedule->update(['status' => 'closed']);
+            }
 
-            $chosenSchedule = $schedule;
-            $chosenVehicle = $schedule->vehicle;
+            return $booking;
+        });
 
-            return response()->json([
-                'success'  => true,
-                'booking'  => $booking,
-                'schedule' => $chosenSchedule,
-                'vehicle'  => $chosenVehicle,
-            ]);
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            return response()->json(['error' => 'Terjadi kesalahan saat booking.'], 500);
-        }
+        // 3. Load relations & computed attributes
+        $booking->load('schedule.vehicle.route');
+        $schedule = $booking->schedule;
+
+        return response()->json([
+            'message'  => 'Booking berhasil!',
+            'booking'  => $booking,
+            'schedule' => [
+                'id'             => $schedule->id,
+                'departure_time' => $schedule->departure_time->toDateTimeString(),
+                'origin'         => $schedule->origin,       // computed
+                'destination'    => $schedule->destination,  // computed
+                'is_return'      => $schedule->is_return,
+            ],
+            'vehicle'  => [
+                'id'            => $schedule->vehicle->id,
+                'plate_number'  => $schedule->vehicle->plate_number,
+                'brand'         => $schedule->vehicle->brand,
+                'seat_capacity' => $schedule->vehicle->seat_capacity,
+            ],
+        ], 201);
     }
 }
