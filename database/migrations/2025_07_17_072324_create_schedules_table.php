@@ -13,8 +13,10 @@ return new class extends Migration {
         Schema::create('schedules', function (Blueprint $table) {
             $table->id();
             $table->foreignId('vehicle_id')->constrained()->onDelete('cascade');
+            $table->foreignId('route_id')->constrained()->onDelete('cascade');
             $table->timestamp('departure_time');
             $table->enum('status', ['open', 'closed'])->default('open');
+            $table->enum('is_return', ['yes', 'no'])->nullable()->default('no');
             $table->timestamps();
             $table->softDeletes();
         });
