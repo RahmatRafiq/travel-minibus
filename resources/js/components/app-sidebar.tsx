@@ -42,7 +42,7 @@ const mainNavItems: NavItem[] = [
         ],
     },
     {
-        title: 'Vehicle Management',
+        title: 'Travel Management',
         href: '/vehicles',
         icon: Settings,
     },
