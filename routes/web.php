@@ -37,6 +37,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('users/{user}/restore', [\App\Http\Controllers\UserRolePermission\UserController::class, 'restore'])->name('users.restore');
     Route::delete('users/{user}/force-delete', [\App\Http\Controllers\UserRolePermission\UserController::class, 'forceDelete'])->name('users.force-delete');
 
+    Route::post('vehicles/json', [\App\Http\Controllers\VehicleController::class, 'json'])->name('vehicles.json');
+    Route::resource('vehicles', \App\Http\Controllers\VehicleController::class);
+    Route::post('vehicles/{id}/restore', [\App\Http\Controllers\VehicleController::class, 'restore'])->name('vehicles.restore');
+    Route::delete('vehicles/{id}/force-delete', [\App\Http\Controllers\VehicleController::class, 'forceDelete'])->name('vehicles.force-delete');
+
     Route::post('logout', [SocialAuthController::class, 'logout'])->name('logout');
 
 });
@@ -51,4 +56,5 @@ require __DIR__ . '/auth.php';
 // "datatables.net": "^2.2.2",
 // "datatables.net-dt": "^2.2.2",
 // "datatables.net-react": "^1.0.0",
+// "jquery": "^3.7.1",
 // "jquery": "^3.7.1",
