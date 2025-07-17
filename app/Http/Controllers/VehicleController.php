@@ -8,6 +8,7 @@ use App\Models\Driver;
 use App\Models\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class VehicleController extends Controller
@@ -150,6 +151,7 @@ class VehicleController extends Controller
             return redirect()->route('vehicles.index')->with('success', 'Vehicle, Driver, and Route created successfully.');
         } catch (\Throwable $e) {
             DB::rollBack();
+            Log::error('Vehicle store error: ' . $e->getMessage(), ['exception' => $e]);
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
@@ -186,7 +188,16 @@ class VehicleController extends Controller
             ]);
 
             $driverId = $request->driver_id;
-            if (!$driverId && $request->driver_name) {
+            if ($driverId && ($request->driver_name || $request->driver_phone)) {
+                // Update driver jika ada perubahan
+                $driver = Driver::find($driverId);
+                if ($driver) {
+                    $driver->update([
+                        'name'  => $request->driver_name ?? $driver->name,
+                        'phone' => $request->driver_phone ?? $driver->phone,
+                    ]);
+                }
+            } elseif (!$driverId && $request->driver_name) {
                 $driver = Driver::create([
                     'name'  => $request->driver_name,
                     'phone' => $request->driver_phone,
@@ -195,7 +206,17 @@ class VehicleController extends Controller
             }
 
             $routeId = $request->route_id;
-            if (!$routeId && $request->route_name) {
+            if ($routeId && ($request->route_name || $request->route_origin || $request->route_destination || $request->route_duration)) {
+                $route = Route::find($routeId);
+                if ($route) {
+                    $route->update([
+                        'name'        => $request->route_name ?? $route->name,
+                        'origin'      => $request->route_origin ?? $route->origin,
+                        'destination' => $request->route_destination ?? $route->destination,
+                        'duration'    => $request->route_duration ?? $route->duration,
+                    ]);
+                }
+            } elseif (!$routeId && $request->route_name) {
                 $route = Route::create([
                     'name'        => $request->route_name,
                     'origin'      => $request->route_origin,
@@ -217,6 +238,7 @@ class VehicleController extends Controller
             return redirect()->route('vehicles.index')->with('success', 'Vehicle, Driver, and Route updated successfully.');
         } catch (\Throwable $e) {
             DB::rollBack();
+            Log::error('Vehicle update error: ' . $e->getMessage(), ['exception' => $e]);
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
