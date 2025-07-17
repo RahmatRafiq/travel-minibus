@@ -17,8 +17,8 @@ return new class extends Migration {
             $table->timestamp('booking_time')->useCurrent();
             $table->enum('status', ['pending', 'confirmed', 'cancelled'])->default('confirmed');
             $table->timestamps();
+            $table->softDeletes();
         });
-
     }
 
     /**

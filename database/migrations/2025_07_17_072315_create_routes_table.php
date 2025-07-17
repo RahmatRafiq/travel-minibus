@@ -17,6 +17,7 @@ return new class extends Migration {
             $table->string('destination');
             $table->time('duration')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
 
     }

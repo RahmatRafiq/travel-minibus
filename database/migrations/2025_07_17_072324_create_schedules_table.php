@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->timestamp('departure_time');
             $table->enum('status', ['open', 'closed'])->default('open');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

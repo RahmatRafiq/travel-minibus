@@ -18,6 +18,7 @@ return new class extends Migration {
             $table->foreignId('driver_id')->constrained()->onDelete('cascade');
             $table->foreignId('route_id')->constrained()->onDelete('cascade');
             $table->timestamps();
+            $table->softDeletes();
         });
 
     }
