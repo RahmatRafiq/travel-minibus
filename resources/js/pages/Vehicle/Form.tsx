@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { Separator } from '@/components/ui/separator';
-import CustomSelect from '@/components/select';
+// import CustomSelect from '@/components/select';
 import { Vehicle, Driver, Route } from '@/types/Vehicle';
 
 export default function VehicleForm({
@@ -24,14 +24,26 @@ export default function VehicleForm({
     plate_number: string;
     brand: string;
     seat_capacity: number;
-    driver_id: number;
-    route_id: number;
+    driver_id: number | null;
+    driver_name: string;
+    driver_phone: string;
+    route_id: number | null;
+    route_name: string;
+    route_origin: string;
+    route_destination: string;
+    route_duration: string;
   }>({
     plate_number: vehicle ? vehicle.plate_number : '',
     brand: vehicle ? vehicle.brand : '',
     seat_capacity: vehicle ? vehicle.seat_capacity : 1,
-    driver_id: vehicle && vehicle.driver ? vehicle.driver.id : (drivers[0]?.id ?? 0),
-    route_id: vehicle && vehicle.route ? vehicle.route.id : (routes[0]?.id ?? 0),
+    driver_id: vehicle && vehicle.driver ? vehicle.driver.id : null,
+    driver_name: '',
+    driver_phone: '',
+    route_id: vehicle && vehicle.route ? vehicle.route.id : null,
+    route_name: '',
+    route_origin: '',
+    route_destination: '',
+    route_duration: '',
   });
 
   const breadcrumbs = [
@@ -107,23 +119,67 @@ export default function VehicleForm({
               </div>
               <div>
                 <Label htmlFor="driver_id">Driver</Label>
-                <CustomSelect
+                {/* <CustomSelect
                   id="driver_id"
                   options={driverOptions}
                   value={driverOptions.find((option) => option.value === data.driver_id)}
                   onChange={(selected) => setData('driver_id', (selected as { value: number }).value)}
-                />
+                  isClearable
+                /> */}
                 <InputError message={errors.driver_id} />
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <Input
+                    id="driver_name"
+                    placeholder="New Driver Name"
+                    value={data.driver_name}
+                    onChange={e => setData('driver_name', e.target.value)}
+                  />
+                  <Input
+                    id="driver_phone"
+                    placeholder="New Driver Phone"
+                    value={data.driver_phone}
+                    onChange={e => setData('driver_phone', e.target.value)}
+                  />
+                </div>
+                <InputError message={errors.driver_name || errors.driver_phone} />
               </div>
               <div>
                 <Label htmlFor="route_id">Route</Label>
-                <CustomSelect
+                {/* <CustomSelect
                   id="route_id"
                   options={routeOptions}
                   value={routeOptions.find((option) => option.value === data.route_id)}
                   onChange={(selected) => setData('route_id', (selected as { value: number }).value)}
-                />
+                  isClearable
+                /> */}
                 <InputError message={errors.route_id} />
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <Input
+                    id="route_name"
+                    placeholder="New Route Name"
+                    value={data.route_name}
+                    onChange={e => setData('route_name', e.target.value)}
+                  />
+                  <Input
+                    id="route_origin"
+                    placeholder="Origin"
+                    value={data.route_origin}
+                    onChange={e => setData('route_origin', e.target.value)}
+                  />
+                  <Input
+                    id="route_destination"
+                    placeholder="Destination"
+                    value={data.route_destination}
+                    onChange={e => setData('route_destination', e.target.value)}
+                  />
+                  <Input
+                    id="route_duration"
+                    placeholder="Duration"
+                    value={data.route_duration}
+                    onChange={e => setData('route_duration', e.target.value)}
+                  />
+                </div>
+                <InputError message={errors.route_name || errors.route_origin || errors.route_destination || errors.route_duration} />
               </div>
               <div className="flex items-center space-x-4">
                 <Button disabled={processing}>

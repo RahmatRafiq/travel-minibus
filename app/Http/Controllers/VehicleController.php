@@ -7,6 +7,7 @@ use App\Models\Vehicle;
 use App\Models\Driver;
 use App\Models\Route;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class VehicleController extends Controller
@@ -109,19 +110,60 @@ class VehicleController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'plate_number'  => 'required|unique:vehicles,plate_number',
-            'brand'         => 'required|string|max:255',
-            'seat_capacity' => 'required|integer|min:1',
-            'driver_id'     => 'required|exists:drivers,id',
-            'route_id'      => 'required|exists:routes,id',
-        ]);
+        DB::beginTransaction();
+        try {
+            $request->validate([
+                'plate_number'  => 'required|unique:vehicles,plate_number',
+                'brand'         => 'required|string|max:255',
+                'seat_capacity' => 'required|integer|min:1',
+                // Driver
+                'driver_id'     => 'nullable|exists:drivers,id',
+                'driver_name'   => 'nullable|string|max:255',
+                'driver_phone'  => 'nullable|string|max:255',
+                // Route
+                'route_id'      => 'nullable|exists:routes,id',
+                'route_name'    => 'nullable|string|max:255',
+                'route_origin'  => 'nullable|string|max:255',
+                'route_destination' => 'nullable|string|max:255',
+                'route_duration'    => 'nullable|string|max:255',
+            ]);
 
-        Vehicle::create($request->only([
-            'plate_number', 'brand', 'seat_capacity', 'driver_id', 'route_id'
-        ]));
+            // Handle Driver
+            $driverId = $request->driver_id;
+            if (!$driverId && $request->driver_name) {
+                $driver = Driver::create([
+                    'name'  => $request->driver_name,
+                    'phone' => $request->driver_phone,
+                ]);
+                $driverId = $driver->id;
+            }
 
-        return redirect()->route('vehicles.index')->with('success', 'Vehicle created successfully.');
+            // Handle Route
+            $routeId = $request->route_id;
+            if (!$routeId && $request->route_name) {
+                $route = Route::create([
+                    'name'        => $request->route_name,
+                    'origin'      => $request->route_origin,
+                    'destination' => $request->route_destination,
+                    'duration'    => $request->route_duration,
+                ]);
+                $routeId = $route->id;
+            }
+
+            Vehicle::create([
+                'plate_number'  => $request->plate_number,
+                'brand'         => $request->brand,
+                'seat_capacity' => $request->seat_capacity,
+                'driver_id'     => $driverId,
+                'route_id'      => $routeId,
+            ]);
+
+            DB::commit();
+            return redirect()->route('vehicles.index')->with('success', 'Vehicle, Driver, and Route created successfully.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
     }
 
     /**
@@ -143,21 +185,62 @@ class VehicleController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $vehicle = Vehicle::withTrashed()->findOrFail($id);
+        DB::beginTransaction();
+        try {
+            $vehicle = Vehicle::withTrashed()->findOrFail($id);
 
-        $request->validate([
-            'plate_number'  => 'required|string|max:255|unique:vehicles,plate_number,' . $vehicle->id,
-            'brand'         => 'required|string|max:255',
-            'seat_capacity' => 'required|integer|min:1',
-            'driver_id'     => 'required|exists:drivers,id',
-            'route_id'      => 'required|exists:routes,id',
-        ]);
+            $request->validate([
+                'plate_number'  => 'required|string|max:255|unique:vehicles,plate_number,' . $vehicle->id,
+                'brand'         => 'required|string|max:255',
+                'seat_capacity' => 'required|integer|min:1',
+                // Driver
+                'driver_id'     => 'nullable|exists:drivers,id',
+                'driver_name'   => 'nullable|string|max:255',
+                'driver_phone'  => 'nullable|string|max:255',
+                // Route
+                'route_id'      => 'nullable|exists:routes,id',
+                'route_name'    => 'nullable|string|max:255',
+                'route_origin'  => 'nullable|string|max:255',
+                'route_destination' => 'nullable|string|max:255',
+                'route_duration'    => 'nullable|string|max:255',
+            ]);
 
-        $vehicle->update($request->only([
-            'plate_number', 'brand', 'seat_capacity', 'driver_id', 'route_id'
-        ]));
+            // Handle Driver
+            $driverId = $request->driver_id;
+            if (!$driverId && $request->driver_name) {
+                $driver = Driver::create([
+                    'name'  => $request->driver_name,
+                    'phone' => $request->driver_phone,
+                ]);
+                $driverId = $driver->id;
+            }
 
-        return redirect()->route('vehicles.index')->with('success', 'Vehicle updated successfully.');
+            // Handle Route
+            $routeId = $request->route_id;
+            if (!$routeId && $request->route_name) {
+                $route = Route::create([
+                    'name'        => $request->route_name,
+                    'origin'      => $request->route_origin,
+                    'destination' => $request->route_destination,
+                    'duration'    => $request->route_duration,
+                ]);
+                $routeId = $route->id;
+            }
+
+            $vehicle->update([
+                'plate_number'  => $request->plate_number,
+                'brand'         => $request->brand,
+                'seat_capacity' => $request->seat_capacity,
+                'driver_id'     => $driverId,
+                'route_id'      => $routeId,
+            ]);
+
+            DB::commit();
+            return redirect()->route('vehicles.index')->with('success', 'Vehicle, Driver, and Route updated successfully.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
     }
 
     /**
