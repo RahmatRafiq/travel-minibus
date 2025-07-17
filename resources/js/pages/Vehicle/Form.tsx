@@ -9,6 +9,7 @@ import { BreadcrumbItem } from '@/types';
 import AppLayout from '@/layouts/app-layout';
 import { Vehicle, Driver, Route } from '@/types/Vehicle';
 import VehicleSidebar from '@/components/vehicle-sidebar';
+import CustomSelect from '@/components/select';
 
 export default function VehicleForm({
     vehicle,
@@ -50,6 +51,12 @@ export default function VehicleForm({
         { title: 'Vehicle Management', href: '/vehicles' },
         { title: isEdit ? 'Edit Vehicle' : 'Create Vehicle', href: '#' },
     ];
+
+    // Define routeOptions for CustomSelect
+    const routeOptions: { label: string; value: number }[] = routes.map(route => ({
+        label: route.name,
+        value: route.id,
+    }));
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
@@ -110,14 +117,6 @@ export default function VehicleForm({
                             </div>
                             <div>
                                 <Label htmlFor="driver_id">Driver</Label>
-                                {/* <CustomSelect
-                  id="driver_id"
-                  options={driverOptions}
-                  value={driverOptions.find((option) => option.value === data.driver_id)}
-                  onChange={(selected) => setData('driver_id', (selected as { value: number }).value)}
-                  isClearable
-                /> */}
-                                <InputError message={errors.driver_id} />
                                 <div className="mt-2 grid grid-cols-2 gap-2">
                                     <Input
                                         id="driver_name"
@@ -132,17 +131,16 @@ export default function VehicleForm({
                                         onChange={e => setData('driver_phone', e.target.value)}
                                     />
                                 </div>
-                                <InputError message={errors.driver_name || errors.driver_phone} />
                             </div>
                             <div>
                                 <Label htmlFor="route_id">Route</Label>
-                                {/* <CustomSelect
-                  id="route_id"
-                  options={routeOptions}
-                  value={routeOptions.find((option) => option.value === data.route_id)}
-                  onChange={(selected) => setData('route_id', (selected as { value: number }).value)}
-                  isClearable
-                /> */}
+                                <CustomSelect
+                                    id="route_id"
+                                    options={routeOptions}
+                                    value={routeOptions.find((option: { value: number; label: string }) => option.value === data.route_id)}
+                                    onChange={(selected) => setData('route_id', (selected as { value: number }).value)}
+                                    isClearable
+                                />
                                 <InputError message={errors.route_id} />
                                 <div className="mt-2 grid grid-cols-2 gap-2">
                                     <Input
