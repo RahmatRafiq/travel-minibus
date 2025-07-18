@@ -16,7 +16,6 @@ return new class extends Migration {
             $table->string('brand');
             $table->unsignedInteger('seat_capacity');
             $table->foreignId('driver_id')->constrained()->onDelete('cascade');
-            $table->foreignId('route_id')->constrained()->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();
         });

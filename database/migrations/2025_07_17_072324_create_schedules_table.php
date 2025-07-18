@@ -13,6 +13,7 @@ return new class extends Migration {
         Schema::create('schedules', function (Blueprint $table) {
             $table->id();
             $table->foreignId('vehicle_id')->constrained()->onDelete('cascade');
+            $table->foreignId('route_id')->constrained()->onDelete('cascade'); // tambahkan ini
             $table->timestamp('departure_time');
             $table->enum('status', ['open', 'closed'])->default('open');
             $table->timestamps();
