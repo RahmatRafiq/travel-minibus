@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SocialAuthController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -58,6 +59,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('bookings/{id}', [\App\Http\Controllers\BookingController::class, 'destroy'])->name('bookings.destroy');
     Route::post('bookings/{id}/restore', [\App\Http\Controllers\BookingController::class, 'restore'])->name('bookings.restore');
     Route::delete('bookings/{id}/force-delete', [\App\Http\Controllers\BookingController::class, 'forceDelete'])->name('bookings.force-delete');
+
+    Route::resource('schedules', ScheduleController::class);
+    Route::post('schedules/json', [ScheduleController::class, 'json'])->name('schedules.json');
+    Route::post('schedules/{id}/restore', [ScheduleController::class, 'restore'])->name('schedules.restore');
+    Route::delete('schedules/{id}/force-delete', [ScheduleController::class, 'forceDelete'])->name('schedules.force-delete');
 
     Route::post('logout', [SocialAuthController::class, 'logout'])->name('logout');
 
