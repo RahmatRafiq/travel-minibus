@@ -28,7 +28,7 @@ const mainNavItems: NavItem[] = [
                 title: 'Roles',
                 href: '/roles',
                 icon: Shield,
-            },  
+            },
             {
                 title: 'Permissions',
                 href: '/permissions',
@@ -47,15 +47,21 @@ const mainNavItems: NavItem[] = [
         icon: Settings,
     },
     {
-         title: 'Bookings management',
+        title: 'Bookings management',
         href: '/bookings',
         icon: Settings,
+    },
+    {
+        title: 'Schedule Management',
+        href: '/schedules',
+        icon: BookOpen,
+
     }
 
 ];
 
 const footerNavItems: NavItem[] = [
-   
+
 ];
 
 export function AppSidebar() {
