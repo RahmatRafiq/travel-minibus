@@ -1,16 +1,3 @@
-export type Driver = {
-  id: number;
-  name: string;
-  phone?: string;
-};
-
-export type Route = {
-  id: number;
-  name: string;
-  origin?: string;
-  destination?: string;
-  duration?: string;
-};
 
 export type Vehicle = {
   id: number;
@@ -19,7 +6,7 @@ export type Vehicle = {
   seat_capacity: number;
   driver: Driver | null;
   route: Route | null;
-  routes?: Route[]; // tambahkan ini untuk relasi many-to-many
+  routes?: Route[]; 
   trashed?: boolean;
   created_at?: string;
   updated_at?: string;
