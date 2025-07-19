@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             DriverSeeder::class,
             RouteSeeder::class,
             VehicleSeeder::class,
+            RouteVehicleSeeder::class, // tambahkan ini
             ScheduleSeeder::class,
             BookingSeeder::class,
         ]);

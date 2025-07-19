@@ -112,11 +112,8 @@ class VehicleController extends Controller
                 'driver_id'     => 'nullable|exists:drivers,id',
                 'driver_name'   => 'nullable|string|max:255',
                 'driver_phone'  => 'nullable|string|max:255',
-                'route_id'      => 'nullable|exists:routes,id',
-                'route_name'    => 'nullable|string|max:255',
-                'route_origin'  => 'nullable|string|max:255',
-                'route_destination' => 'nullable|string|max:255',
-                'route_duration'    => 'nullable|string|max:255',
+                'route_ids'     => 'required|array|min:1',
+                'route_ids.*'   => 'exists:routes,id',
             ]);
 
             $driverId = $request->driver_id;
@@ -128,27 +125,18 @@ class VehicleController extends Controller
                 $driverId = $driver->id;
             }
 
-            $routeId = $request->route_id;
-            if (!$routeId && $request->route_name) {
-                $route = Route::create([
-                    'name'        => $request->route_name,
-                    'origin'      => $request->route_origin,
-                    'destination' => $request->route_destination,
-                    'duration'    => $request->route_duration,
-                ]);
-                $routeId = $route->id;
-            }
-
-            Vehicle::create([
+            $vehicle = Vehicle::create([
                 'plate_number'  => $request->plate_number,
                 'brand'         => $request->brand,
                 'seat_capacity' => $request->seat_capacity,
                 'driver_id'     => $driverId,
-                'route_id'      => $routeId,
             ]);
 
+            $vehicle->routes()->sync($request->route_ids);
+
+
             DB::commit();
-            return redirect()->route('vehicles.index')->with('success', 'Vehicle, Driver, and Route created successfully.');
+            return redirect()->route('vehicles.index')->with('success', 'Vehicle created successfully.');
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('Vehicle store error: ' . $e->getMessage(), ['exception' => $e]);
@@ -158,7 +146,7 @@ class VehicleController extends Controller
 
     public function edit($id)
     {
-        $vehicle = Vehicle::with(['driver', 'route'])->withTrashed()->findOrFail($id);
+        $vehicle = Vehicle::with(['driver', 'routes'])->withTrashed()->findOrFail($id);
 
         return Inertia::render('Vehicle/Form', [
             'vehicle' => $vehicle,
@@ -180,16 +168,12 @@ class VehicleController extends Controller
                 'driver_id'     => 'nullable|exists:drivers,id',
                 'driver_name'   => 'nullable|string|max:255',
                 'driver_phone'  => 'nullable|string|max:255',
-                'route_id'      => 'nullable|exists:routes,id',
-                'route_name'    => 'nullable|string|max:255',
-                'route_origin'  => 'nullable|string|max:255',
-                'route_destination' => 'nullable|string|max:255',
-                'route_duration'    => 'nullable|string|max:255',
+                'route_ids'     => 'required|array|min:1',
+                'route_ids.*'   => 'exists:routes,id',
             ]);
 
             $driverId = $request->driver_id;
             if ($driverId && ($request->driver_name || $request->driver_phone)) {
-                // Update driver jika ada perubahan
                 $driver = Driver::find($driverId);
                 if ($driver) {
                     $driver->update([
@@ -205,37 +189,20 @@ class VehicleController extends Controller
                 $driverId = $driver->id;
             }
 
-            $routeId = $request->route_id;
-            if ($routeId && ($request->route_name || $request->route_origin || $request->route_destination || $request->route_duration)) {
-                $route = Route::find($routeId);
-                if ($route) {
-                    $route->update([
-                        'name'        => $request->route_name ?? $route->name,
-                        'origin'      => $request->route_origin ?? $route->origin,
-                        'destination' => $request->route_destination ?? $route->destination,
-                        'duration'    => $request->route_duration ?? $route->duration,
-                    ]);
-                }
-            } elseif (!$routeId && $request->route_name) {
-                $route = Route::create([
-                    'name'        => $request->route_name,
-                    'origin'      => $request->route_origin,
-                    'destination' => $request->route_destination,
-                    'duration'    => $request->route_duration,
-                ]);
-                $routeId = $route->id;
-            }
-
             $vehicle->update([
                 'plate_number'  => $request->plate_number,
                 'brand'         => $request->brand,
                 'seat_capacity' => $request->seat_capacity,
                 'driver_id'     => $driverId,
-                'route_id'      => $routeId,
             ]);
 
+            // Update relasi pivot
+            $vehicle->routes()->sync($request->route_ids);
+
+            // (Opsional) Sinkronisasi jadwal jika perlu
+
             DB::commit();
-            return redirect()->route('vehicles.index')->with('success', 'Vehicle, Driver, and Route updated successfully.');
+            return redirect()->route('vehicles.index')->with('success', 'Vehicle updated successfully.');
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('Vehicle update error: ' . $e->getMessage(), ['exception' => $e]);
@@ -262,4 +229,3 @@ class VehicleController extends Controller
         return redirect()->route('vehicles.index')->with('success', 'Vehicle permanently deleted.');
     }
 }
-

@@ -1,5 +1,5 @@
 import { Head, useForm, Link } from '@inertiajs/react';
-import { FormEvent } from 'react';
+import React, { FormEvent, useState } from 'react';
 import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { BreadcrumbItem } from '@/types';
 import AppLayout from '@/layouts/app-layout';
 import { Vehicle, Driver, Route } from '@/types/Vehicle';
 import VehicleSidebar from '@/components/vehicle-sidebar';
+import CustomSelect from '@/components/select';
 
 export default function VehicleForm({
     vehicle,
@@ -27,11 +28,7 @@ export default function VehicleForm({
         driver_id: number | null;
         driver_name: string;
         driver_phone: string;
-        route_id: number | null;
-        route_name: string;
-        route_origin: string;
-        route_destination: string;
-        route_duration: string;
+        route_ids: number[]; // ganti jadi array
     }>({
         plate_number: vehicle ? vehicle.plate_number : '',
         brand: vehicle ? vehicle.brand : '',
@@ -39,12 +36,22 @@ export default function VehicleForm({
         driver_id: vehicle && vehicle.driver ? vehicle.driver.id : null,
         driver_name: vehicle && vehicle.driver ? vehicle.driver.name : '',
         driver_phone: vehicle && vehicle.driver ? vehicle.driver.phone ?? '' : '',
-        route_id: vehicle && vehicle.route ? vehicle.route.id : null,
-        route_name: vehicle && vehicle.route ? vehicle.route.name : '',
-        route_origin: vehicle && vehicle.route ? vehicle.route.origin ?? '' : '',
-        route_destination: vehicle && vehicle.route ? vehicle.route.destination ?? '' : '',
-        route_duration: vehicle && vehicle.route ? vehicle.route.duration ?? '' : '',
+        route_ids: vehicle && vehicle.routes ? vehicle.routes.map(r => r.id) : [], // ambil array id
     });
+
+    const [routeIds, setRouteIds] = useState<number[]>(data.route_ids);
+
+    React.useEffect(() => {
+        setData('route_ids', routeIds);
+    }, [routeIds]);
+
+    const addRouteSelect = () => setRouteIds([...routeIds, 0]);
+    const removeRouteSelect = (idx: number) => setRouteIds(routeIds.filter((_, i) => i !== idx));
+    const updateRouteSelect = (idx: number, value: number) => {
+        const updated = [...routeIds];
+        updated[idx] = value;
+        setRouteIds(updated);
+    };
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Vehicle Management', href: '/vehicles' },
@@ -59,6 +66,11 @@ export default function VehicleForm({
             post(route('vehicles.store'));
         }
     };
+
+    const routeOptions = routes.map(route => ({
+        value: route.id,
+        label: route.name || `${route.origin} - ${route.destination}`,
+    }));
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -135,42 +147,18 @@ export default function VehicleForm({
                                 <InputError message={errors.driver_name || errors.driver_phone} />
                             </div>
                             <div>
-                                <Label htmlFor="route_id">Route</Label>
-                                {/* <CustomSelect
-                  id="route_id"
-                  options={routeOptions}
-                  value={routeOptions.find((option) => option.value === data.route_id)}
-                  onChange={(selected) => setData('route_id', (selected as { value: number }).value)}
-                  isClearable
-                /> */}
-                                <InputError message={errors.route_id} />
-                                <div className="mt-2 grid grid-cols-2 gap-2">
-                                    <Input
-                                        id="route_name"
-                                        placeholder="New Route Name"
-                                        value={data.route_name}
-                                        onChange={e => setData('route_name', e.target.value)}
-                                    />
-                                    <Input
-                                        id="route_origin"
-                                        placeholder="Origin"
-                                        value={data.route_origin}
-                                        onChange={e => setData('route_origin', e.target.value)}
-                                    />
-                                    <Input
-                                        id="route_destination"
-                                        placeholder="Destination"
-                                        value={data.route_destination}
-                                        onChange={e => setData('route_destination', e.target.value)}
-                                    />
-                                    <Input
-                                        id="route_duration"
-                                        placeholder="Duration"
-                                        value={data.route_duration}
-                                        onChange={e => setData('route_duration', e.target.value)}
-                                    />
-                                </div>
-                                <InputError message={errors.route_name || errors.route_origin || errors.route_destination || errors.route_duration} />
+                                <Label htmlFor="route_ids">Routes</Label>
+                                <CustomSelect
+                                    id="route_ids"
+                                    isMulti
+                                    options={routeOptions}
+                                    value={routeOptions.filter(opt => data.route_ids.includes(opt.value))}
+                                    onChange={(selected: any) => {
+                                        setData('route_ids', selected ? selected.map((opt: any) => opt.value) : []);
+                                    }}
+                                    placeholder="Select routes..."
+                                />
+                                <InputError message={errors.route_ids} />
                             </div>
                             <div className="flex items-center space-x-4">
                                 <Button disabled={processing}>

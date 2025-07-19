@@ -19,6 +19,7 @@ export type Vehicle = {
   seat_capacity: number;
   driver: Driver | null;
   route: Route | null;
+  routes?: Route[]; // tambahkan ini untuk relasi many-to-many
   trashed?: boolean;
   created_at?: string;
   updated_at?: string;
