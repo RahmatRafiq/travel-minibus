@@ -4,58 +4,72 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
 import AppLogo from './app-logo';
-import { Users, Shield, Settings } from 'lucide-react';
+import { 
+    Gauge, // Dashboard
+    ActivitySquare, // Log Activity
+    Users2, // Users Management
+    KeyRound, // Roles
+    LockKeyhole, // Permissions
+    UserCog, // User
+    BusFront, // Travel Management
+    CalendarCheck2, // Bookings management
+    CalendarClock, // Schedule Management
+} from 'lucide-react';
 
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: '/dashboard',
-        icon: LayoutGrid,
+        icon: Gauge,
     },
     {
         title: 'Log Activity',
         href: '/activity-logs',
-        icon: LayoutGrid,
+        icon: ActivitySquare,
     },
     {
         title: 'Users Management',
         href: '',
-        icon: Users,
+        icon: Users2,
         children: [
             {
                 title: 'Roles',
                 href: '/roles',
-                icon: Shield,
-            },  
+                icon: KeyRound,
+            },
             {
                 title: 'Permissions',
                 href: '/permissions',
-                icon: Shield,
+                icon: LockKeyhole,
             },
             {
                 title: 'User',
                 href: '/users',
-                icon: Settings,
+                icon: UserCog,
             },
         ],
     },
     {
         title: 'Travel Management',
         href: '/vehicles',
-        icon: Settings,
+        icon: BusFront,
     },
     {
-         title: 'Bookings management',
+        title: 'Bookings management',
         href: '/bookings',
-        icon: Settings,
+        icon: CalendarCheck2,
+    },
+    {
+        title: 'Schedule Management',
+        href: '/schedules',
+        icon: CalendarClock,
     }
 
 ];
 
 const footerNavItems: NavItem[] = [
-   
+
 ];
 
 export function AppSidebar() {
