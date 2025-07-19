@@ -5,25 +5,18 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('schedules', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('vehicle_id')->constrained()->onDelete('cascade');
-            $table->foreignId('route_id')->constrained()->onDelete('cascade'); // tambahkan ini
+            $table->foreignId('route_vehicle_id')->constrained('route_vehicle')->onDelete('cascade');
             $table->timestamp('departure_time');
-            $table->enum('status', ['open', 'closed'])->default('open');
+            $table->enum('status', ['ready', 'departed', 'arrived', 'cancelled'])->default('ready');
             $table->timestamps();
             $table->softDeletes();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('schedules');
