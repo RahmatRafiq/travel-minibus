@@ -56,6 +56,14 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
     bookingRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const handleShowBookings = () => {
+    if (!isLoggedIn) {
+      router.get("/login");
+      return;
+    }
+    setShowBookings(true);
+  };
+
   const statusIcon = (status: string) => {
     if (status.toLowerCase() === "confirmed")
       return <CheckCircle className="text-green-500 w-5 h-5" />;
@@ -63,6 +71,9 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
       return <Clock className="text-yellow-500 w-5 h-5" />;
     return <XCircle className="text-red-500 w-5 h-5" />;
   };
+
+  // Hanya tampilkan bookings jika sudah login
+  const visibleBookings = isLoggedIn ? bookings : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-indigo-200 flex flex-col">
@@ -108,7 +119,7 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
                 Booking Sekarang
               </Link>
               <button
-                onClick={() => setShowBookings(true)}
+                onClick={handleShowBookings}
                 className="bg-white/70 backdrop-blur border border-indigo-200 text-indigo-700 px-8 py-3 rounded-full font-semibold shadow hover:bg-indigo-50 transition-all duration-200"
               >
                 Lihat Booking Saya
@@ -156,14 +167,13 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
         {/* Booking List */}
         <div className="flex-1 flex flex-col justify-center max-w-2xl mx-auto w-full mt-8 md:mt-0">
           <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-4 sm:p-8 md:p-10 border border-indigo-50 glassmorphism">
-            <BookingList bookings={bookings} />
+            <BookingList bookings={visibleBookings} isLoggedIn={isLoggedIn} />
           </div>
         </div>
       </section>
 
       {/* Footer */}
       <Footer />
-      {/* Floating Animation & Glassmorphism */}
       <style>{`
         @keyframes float {
           0%, 100% { transform: translateY(0); }
@@ -175,8 +185,7 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
           backdrop-filter: blur(8px);
         }
       `}</style>
-      {/* Modal Booking List (Mobile) */}
-      {showBookings && (
+      {showBookings && isLoggedIn ? (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center animate-fadeIn px-2">
           <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-2xl w-full max-w-lg p-4 sm:p-8 relative border border-indigo-100 glassmorphism">
             <button
@@ -186,63 +195,12 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
             >
               &times;
             </button>
-            <h2 className="text-xl font-bold text-indigo-700 mb-4 flex items-center gap-2">
-              <svg className="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8 17l4 4 4-4m0-5V3m-8 9v6a2 2 0 002 2h8a2 2 0 002-2v-6"></path>
-              </svg>
-              Bookingan Saya
-            </h2>
-            <ul className="divide-y divide-indigo-100 max-h-80 overflow-y-auto">
-              {bookings.length === 0 && (
-                <li className="py-8 text-gray-400 text-center flex flex-col items-center gap-2">
-                  <svg className="w-12 h-12 text-indigo-200 mb-2" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3"></path>
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" />
-                  </svg>
-                  <span>Belum ada booking.</span>
-                </li>
-              )}
-              {bookings.map((b) => (
-                <li key={b.id} className="py-4 flex flex-col gap-1 group hover:bg-indigo-50/60 rounded-lg transition">
-                  <div className="font-semibold text-indigo-800 flex items-center gap-2">
-                    {statusIcon(b.status)}
-                    {b.origin} <span className="mx-1">→</span> {b.destination}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {b.date} &middot; {b.vehicle} ({b.brand})
-                  </div>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full text-xs font-semibold">
-                      {b.seats} Kursi
-                    </span>
-                    <span
-                      className={
-                        "flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold " +
-                        (b.status === "Confirmed"
-                          ? "bg-green-100 text-green-700"
-                          : b.status === "Pending"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-red-100 text-red-700")
-                      }
-                    >
-                      {statusIcon(b.status)}
-                      {b.status}
-                    </span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-6 text-center">
-              <Link
-                href="/my-bookings"
-                className="inline-block bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 text-white px-6 py-2 rounded-full font-semibold shadow transition-all duration-200 transform hover:scale-105"
-              >
-                Lihat Semua Booking
-              </Link>
-            </div>
+            {/* Gunakan BookingList di modal */}
+            <BookingList bookings={visibleBookings} isLoggedIn={isLoggedIn} />
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
+                

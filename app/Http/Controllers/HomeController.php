@@ -52,6 +52,10 @@ class HomeController extends Controller
 
     public function userBookings()
     {
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
         $bookings = Booking::with([
             'schedule.routeVehicle.vehicle',
             'schedule.routeVehicle.route'
@@ -80,6 +84,7 @@ class HomeController extends Controller
         return Inertia::render('Home/Bookings', [
             'bookings' => $bookings,
             'userName' => auth()->user()?->name,
+            'isLoggedIn' => true,
         ]);
     }
 
@@ -152,6 +157,10 @@ class HomeController extends Controller
 
     public function storeBooking(\Illuminate\Http\Request $request)
     {
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
         \DB::beginTransaction();
         try {
             $request->validate([

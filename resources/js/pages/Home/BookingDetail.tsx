@@ -62,6 +62,10 @@ export default function BookingDetail({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isLoggedIn) {
+      router.get("/login");
+      return;
+    }
     if (!selectedSchedule) {
       setError("Pilih jadwal terlebih dahulu.");
       return;

@@ -73,6 +73,7 @@ Route::get('/dashboard/activity-logs', function () {
 
 Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-log.index');
 
+// Route untuk halaman booking saya dan booking action, hanya untuk user login
 Route::middleware(['auth'])->group(function () {
     Route::get('/my-bookings', [HomeController::class, 'userBookings'])->name('home.my-bookings');
     Route::post('/home-booking', [HomeController::class, 'storeBooking'])->name('home.booking.store');

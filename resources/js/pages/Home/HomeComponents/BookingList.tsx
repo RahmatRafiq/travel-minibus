@@ -15,6 +15,7 @@ type Booking = {
 
 type Props = {
   bookings: Booking[];
+  isLoggedIn?: boolean;
 };
 
 function statusIcon(status: string) {
@@ -25,7 +26,7 @@ function statusIcon(status: string) {
   return <XCircle className="text-red-500 w-5 h-5" />;
 }
 
-export default function BookingList({ bookings }: Props) {
+export default function BookingList({ bookings, isLoggedIn }: Props) {
   return (
     <div>
       <h2 className="text-2xl font-bold text-indigo-700 mb-4 flex items-center gap-2">
@@ -80,12 +81,14 @@ export default function BookingList({ bookings }: Props) {
         ))}
       </ul>
       <div className="mt-6 sm:mt-8 text-center">
-        <Link
-          href="/my-bookings"
-          className="inline-block bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 text-white px-6 sm:px-8 py-2 rounded-full font-semibold shadow-lg transition-all duration-200 transform hover:scale-105"
-        >
-          Lihat Semua Booking
-        </Link>
+        {isLoggedIn && (
+          <Link
+            href="/my-bookings"
+            className="inline-block bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 text-white px-6 sm:px-8 py-2 rounded-full font-semibold shadow-lg transition-all duration-200 transform hover:scale-105"
+          >
+            Lihat Semua Booking
+          </Link>
+        )}
       </div>
     </div>
   );
