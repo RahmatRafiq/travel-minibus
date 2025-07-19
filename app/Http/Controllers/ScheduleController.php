@@ -102,27 +102,55 @@ class ScheduleController extends Controller
     {
         DB::beginTransaction();
         try {
-            $request->validate([
-                'route_id' => 'required|exists:routes,id',
-                'vehicle_id' => 'required|exists:vehicles,id',
-                'departure_time' => 'required|date',
-                'status' => 'required|string|max:255',
-            ]);
+            if ($request->has('entries')) {
+                $entries = $request->input('entries');
+                if (!is_array($entries) || count($entries) === 0) {
+                    return back()->withErrors(['entries' => 'At least one schedule entry is required.']);
+                }
+                foreach ($entries as $i => $entry) {
+                    $validator = \Validator::make($entry, [
+                        'route_id' => 'required|exists:routes,id',
+                        'vehicle_id' => 'required|exists:vehicles,id',
+                        'departure_time' => 'required|date',
+                        'status' => 'required|string|max:255',
+                    ]);
+                    if ($validator->fails()) {
+                        return back()->withErrors(['entries' => "Entry #" . ($i+1) . ": " . implode(', ', $validator->errors()->all())]);
+                    }
 
-            // Find or create the route_vehicle pivot
-            $routeVehicle = RouteVehicle::firstOrCreate([
-                'route_id' => $request->route_id,
-                'vehicle_id' => $request->vehicle_id,
-            ]);
+                    $routeVehicle = RouteVehicle::firstOrCreate([
+                        'route_id' => $entry['route_id'],
+                        'vehicle_id' => $entry['vehicle_id'],
+                    ]);
 
-            $schedule = Schedule::create([
-                'route_vehicle_id' => $routeVehicle->id,
-                'departure_time' => $request->departure_time,
-                'status' => $request->status,
-            ]);
+                    Schedule::create([
+                        'route_vehicle_id' => $routeVehicle->id,
+                        'departure_time' => $entry['departure_time'],
+                        'status' => $entry['status'],
+                    ]);
+                }
+            } else {
+                $request->validate([
+                    'route_id' => 'required|exists:routes,id',
+                    'vehicle_id' => 'required|exists:vehicles,id',
+                    'departure_time' => 'required|date',
+                    'status' => 'required|string|max:255',
+                ]);
+
+                $routeVehicle = RouteVehicle::firstOrCreate([
+                    'route_id' => $request->route_id,
+                    'vehicle_id' => $request->vehicle_id,
+                ]);
+
+                Schedule::create([
+                    'route_vehicle_id' => $routeVehicle->id,
+                    'departure_time' => $request->departure_time,
+                    'status' => $request->status,
+                ]);
+            }
 
             DB::commit();
-            return redirect()->route('schedules.index')->with('success', 'Schedule created successfully.');
+            return redirect()->route('schedules.index')->with('success', 'Schedule(s) created successfully.');
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('Schedule store error: ' . $e->getMessage(), ['exception' => $e]);
@@ -193,3 +221,4 @@ class ScheduleController extends Controller
         return redirect()->route('schedules.index')->with('success', 'Schedule permanently deleted.');
     }
 }
+
