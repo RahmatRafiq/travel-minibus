@@ -7,13 +7,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Schedule extends Model
 {
-        use SoftDeletes;
+    use SoftDeletes;
 
-    protected $fillable = ['vehicle_id', 'departure_time', 'status'];
+    protected $fillable = ['route_vehicle_id', 'departure_time', 'status'];
 
-    public function vehicle()
+    public function routeVehicle()
     {
-        return $this->belongsTo(Vehicle::class);
+        return $this->belongsTo(RouteVehicle::class);
     }
 
     public function bookings()

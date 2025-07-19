@@ -7,33 +7,38 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Vehicle extends Model
 {
-        use SoftDeletes;
+    use SoftDeletes;
 
-    protected $fillable = ['plate_number', 'brand', 'seat_capacity', 'driver_id', 'route_id'];
+    protected $fillable = ['plate_number', 'brand', 'seat_capacity', 'driver_id'];
 
     public function driver()
     {
         return $this->belongsTo(Driver::class);
     }
 
-    public function route()
-    {
-        return $this->belongsTo(Route::class);
-    }
-
-    public function schedules()
-    {
-        return $this->hasMany(Schedule::class);
-    }
-    
-    public function bookings()
-    {
-        return $this->hasManyThrough(Booking::class, Schedule::class, 'vehicle_id', 'schedule_id');
-    }
-
+    // Relasi many-to-many ke Route via route_vehicle
     public function routes()
     {
-        return $this->belongsToMany(\App\Models\Route::class, 'route_vehicle');
+        return $this->belongsToMany(Route::class, 'route_vehicle');
+    }
+
+    // Relasi ke RouteVehicle (pivot)
+    public function routeVehicles()
+    {
+        return $this->hasMany(RouteVehicle::class);
+    }
+
+    // Relasi ke Schedule via route_vehicle
+    public function schedules()
+    {
+        return $this->hasManyThrough(
+            Schedule::class,
+            RouteVehicle::class,
+            'vehicle_id', // Foreign key di route_vehicle
+            'route_vehicle_id', // Foreign key di schedules
+            'id', // Local key di vehicles
+            'id' // Local key di route_vehicle
+        );
     }
 }
 
