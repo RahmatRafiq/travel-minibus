@@ -7,13 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { BreadcrumbItem } from '@/types';
 import AppLayout from '@/layouts/app-layout';
-import { Vehicle, Driver, Route } from '@/types/Vehicle';
 import VehicleSidebar from '@/components/vehicle-sidebar';
 import CustomSelect from '@/components/select';
+import { Vehicle } from '@/types/Vehicle';
+import { Driver } from '@/types/Driver';
 
 export default function VehicleForm({
     vehicle,
-    drivers,
     routes,
 }: {
     vehicle?: Vehicle;
@@ -28,7 +28,7 @@ export default function VehicleForm({
         driver_id: number | null;
         driver_name: string;
         driver_phone: string;
-        route_ids: number[]; // ganti jadi array
+        route_ids: number[];
     }>({
         plate_number: vehicle ? vehicle.plate_number : '',
         brand: vehicle ? vehicle.brand : '',
@@ -36,7 +36,7 @@ export default function VehicleForm({
         driver_id: vehicle && vehicle.driver ? vehicle.driver.id : null,
         driver_name: vehicle && vehicle.driver ? vehicle.driver.name : '',
         driver_phone: vehicle && vehicle.driver ? vehicle.driver.phone ?? '' : '',
-        route_ids: vehicle && vehicle.routes ? vehicle.routes.map(r => r.id) : [], // ambil array id
+        route_ids: vehicle && vehicle.routes ? vehicle.routes.map(r => r.id) : [],
     });
 
     const [routeIds, setRouteIds] = useState<number[]>(data.route_ids);

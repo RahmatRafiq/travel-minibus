@@ -5,44 +5,20 @@ import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import CustomSelect from '@/components/select';
+import type { Vehicle } from '@/types/Vehicle';
+import type { Schedule } from '@/types/Schedule';
+import type { Booking } from '@/types/Booking';
 
-type RouteType = {
-    id: number;
-    name?: string;
-    origin?: string;
-    destination?: string;
-    duration?: string;
-};
-
-type VehicleType = {
-    id: number;
-    plate_number: string;
-    brand: string;
-    seat_capacity?: number;
-};
-
-type ScheduleType = {
-    id: number;
-    departure_time: string;
-    available_seats: number;
-    vehicle: VehicleType;
-    route?: RouteType;
-};
 
 type Props = {
+    errors: any;
     origin?: string;
     destination?: string;
     route_id?: number;
-    routes?: RouteType[];
-    schedules?: ScheduleType[];
-    booking?: {
-        id: number;
-        schedule_id: number;
-        seats_booked: number;
-        status: string;
-    };
+    routes?: Route[];
+    schedules?: Schedule[];
+    booking?: Booking;
     success?: string;
-    errors?: any;
     allOrigins?: string[];
     allDestinations?: string[];
     departure_date?: string;
@@ -214,8 +190,8 @@ export default function BookingForm(props: Props) {
                                         const currentSchedule = props.schedules?.find(
                                             s => s.id === props.booking?.schedule_id
                                         );
-                                        const origin = props.origin ?? currentSchedule?.route?.origin ?? '-';
-                                        const destination = props.destination ?? currentSchedule?.route?.destination ?? '-';
+                                        const origin = props.origin ?? currentSchedule?.routeVehicle?.route?.origin ?? '-';
+                                        const destination = props.destination ?? currentSchedule?.routeVehicle?.route?.destination ?? '-';
                                         const departureDate = props.departure_date
                                             ? props.departure_date
                                             : (currentSchedule?.departure_time
@@ -268,7 +244,7 @@ export default function BookingForm(props: Props) {
                                                     className={selectedSchedule === sch.id ? '' : 'border-input'}
                                                     onClick={() => handleSelectSchedule(sch.id)}
                                                 >
-                                                    {sch.departure_time} | {sch.vehicle.plate_number} ({sch.vehicle.brand}) | Sisa kursi: {sch.available_seats}
+                                                    {sch.departure_time} | {sch.vehicle?.plate_number ?? '-'} ({sch.vehicle?.brand ?? '-'}) | Sisa kursi: {sch.available_seats}
                                                 </Button>
                                             </li>
                                         ))}

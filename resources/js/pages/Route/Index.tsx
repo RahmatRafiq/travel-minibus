@@ -5,7 +5,6 @@ import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import DataTableWrapper, { DataTableWrapperRef } from '@/components/datatables';
 import { BreadcrumbItem } from '@/types';
-import { Route as RouteType } from '@/types/Vehicle';
 import VehicleSidebar from '@/components/vehicle-sidebar';
 
 const breadcrumbs: BreadcrumbItem[] = [

@@ -10,15 +10,13 @@ import AppLayout from '@/layouts/app-layout';
 import CustomSelect from '@/components/select';
 import { DatePicker } from '@/components/DatePicker';
 import { TimePicker } from '@/components/TimePicker';
+import { Schedule } from '@/types/Schedule';
+import { Vehicle } from '@/types/Vehicle';
 
 type Entry = {
     departure_time: string;
 };
 
-type FormErrors = {
-    departure_times?: string;
-    [key: string]: string | undefined;
-};
 
 function combineDateTime(date: string, time: string) {
     if (!date && !time) return '';
@@ -38,9 +36,9 @@ export default function ScheduleForm({
     routes,
     vehicles,
 }: {
-    schedule?: any;
-    routes: any[];
-    vehicles: any[];
+    schedule?: Schedule;
+    routes: Route[];
+    vehicles: Vehicle[];
 }) {
     const isEdit = !!schedule;
 
