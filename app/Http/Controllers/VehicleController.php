@@ -17,9 +17,9 @@ class VehicleController extends Controller
     {
         $filter = $request->query('filter', 'active');
         $vehicles = match ($filter) {
-            'trashed' => Vehicle::onlyTrashed()->with(['driver', 'route'])->get(),
-            'all' => Vehicle::withTrashed()->with(['driver', 'route'])->get(),
-            default => Vehicle::with(['driver', 'route'])->get(),
+            'trashed' => Vehicle::onlyTrashed()->with(['driver', 'routes'])->get(),
+            'all' => Vehicle::withTrashed()->with(['driver', 'routes'])->get(),
+            default => Vehicle::with(['driver', 'routes'])->get(),
         };
 
         return Inertia::render('Vehicle/Index', [
@@ -36,9 +36,9 @@ class VehicleController extends Controller
         $filter = $request->input('filter', 'active');
 
         $query = match ($filter) {
-            'trashed' => Vehicle::onlyTrashed()->with(['driver', 'route']),
-            'all' => Vehicle::withTrashed()->with(['driver', 'route']),
-            default => Vehicle::with(['driver', 'route']),
+            'trashed' => Vehicle::onlyTrashed()->with(['driver', 'routes']),
+            'all' => Vehicle::withTrashed()->with(['driver', 'routes']),
+            default => Vehicle::with(['driver', 'routes']),
         };
 
         $columns = [
@@ -66,6 +66,8 @@ class VehicleController extends Controller
         $data = DataTable::paginate($query, $request);
 
         $data['data'] = collect($data['data'])->map(function ($vehicle) {
+            // Get the first route for compatibility
+            $route = $vehicle->routes && $vehicle->routes->count() > 0 ? $vehicle->routes->first() : null;
             return [
                 'id'            => $vehicle->id,
                 'plate_number'  => $vehicle->plate_number,
@@ -76,12 +78,12 @@ class VehicleController extends Controller
                     'name' => $vehicle->driver->name,
                     'phone'=> $vehicle->driver->phone ?? '',
                 ] : null,
-                'route'         => $vehicle->route ? [
-                    'id'         => $vehicle->route->id,
-                    'name'       => $vehicle->route->name,
-                    'origin'     => $vehicle->route->origin ?? '',
-                    'destination'=> $vehicle->route->destination ?? '',
-                    'duration'   => $vehicle->route->duration ?? '',
+                'route'         => $route ? [
+                    'id'         => $route->id,
+                    'name'       => $route->name,
+                    'origin'     => $route->origin ?? '',
+                    'destination'=> $route->destination ?? '',
+                    'duration'   => $route->duration ?? '',
                 ] : null,
                 'trashed'       => method_exists($vehicle, 'trashed') ? $vehicle->trashed() : false,
                 'created_at'    => $vehicle->created_at ? $vehicle->created_at->toDateTimeString() : null,

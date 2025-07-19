@@ -22,6 +22,12 @@ class Vehicle extends Model
         return $this->belongsToMany(Route::class, 'route_vehicle');
     }
 
+    // Add this: single route accessor for compatibility
+    public function route()
+    {
+        return $this->belongsToMany(Route::class, 'route_vehicle')->limit(1);
+    }
+
     // Relasi ke RouteVehicle (pivot)
     public function routeVehicles()
     {
