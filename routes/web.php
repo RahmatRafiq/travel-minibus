@@ -1,14 +1,13 @@
 <?php
 
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SocialAuthController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('welcome');
-})->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Route for login with OAuth (Google, GitHub)
 Route::get('auth/{provider}', [SocialAuthController::class, 'redirectToProvider'])->name('auth.redirect');
@@ -73,11 +72,20 @@ Route::get('/dashboard/activity-logs', function () {
 })->middleware(['auth']);
 
 Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-log.index');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/my-bookings', [HomeController::class, 'userBookings'])->name('home.my-bookings');
+    Route::post('/home-booking', [HomeController::class, 'storeBooking'])->name('home.booking.store');
+});
+Route::get('/booking-detail', [HomeController::class, 'bookingDetail'])->name('booking.detail');
+
+
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
 
 // "datatables.net": "^2.2.2",
 // "datatables.net-dt": "^2.2.2",
 // "datatables.net-react": "^1.0.0",
+// "jquery": "^3.7.1",
 // "jquery": "^3.7.1",
 // "jquery": "^3.7.1",
