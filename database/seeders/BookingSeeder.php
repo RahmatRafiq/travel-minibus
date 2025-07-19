@@ -19,6 +19,7 @@ class BookingSeeder extends Seeder
             'user_id' => $user1->id,
             'schedule_id' => $schedule1->id,
             'booking_time' => Carbon::now()->subMinutes(10),
+            'seats_booked' => 2,
             'status' => 'confirmed',
         ]);
 
@@ -26,6 +27,7 @@ class BookingSeeder extends Seeder
             'user_id' => $user2->id,
             'schedule_id' => $schedule2->id,
             'booking_time' => Carbon::now()->subMinutes(5),
+            'seats_booked' => 1,
             'status' => 'pending',
         ]);
     }
