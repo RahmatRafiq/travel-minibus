@@ -46,6 +46,11 @@ const mainNavItems: NavItem[] = [
         href: '/vehicles',
         icon: Settings,
     },
+    {
+         title: 'Bookings management',
+        href: '/bookings',
+        icon: Settings,
+    }
 
 ];
 
