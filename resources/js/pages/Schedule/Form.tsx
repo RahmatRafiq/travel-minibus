@@ -11,20 +11,15 @@ import CustomSelect from '@/components/select';
 import { DatePicker } from '@/components/DatePicker';
 import { TimePicker } from '@/components/TimePicker';
 
-
 type Entry = {
-    route_id: number | null;
-    vehicle_id: number | null;
     departure_time: string;
-    status: string;
 };
 
 type FormErrors = {
-    entries?: string;
+    departure_times?: string;
     [key: string]: string | undefined;
 };
 
-// Perbaiki combineDateTime agar tetap mengembalikan string walau salah satu kosong
 function combineDateTime(date: string, time: string) {
     if (!date && !time) return '';
     if (!date) return `T${time}`;
@@ -49,31 +44,36 @@ export default function ScheduleForm({
 }) {
     const isEdit = !!schedule;
 
-    const [entries, setEntries] = useState<Entry[]>(
+    const [routeId, setRouteId] = useState<number | null>(
+        isEdit ? schedule?.routeVehicle?.route?.id ?? null : null
+    );
+    const [vehicleId, setVehicleId] = useState<number | null>(
+        isEdit ? schedule?.routeVehicle?.vehicle?.id ?? null : null
+    );
+    const [status, setStatus] = useState<string>(
+        isEdit ? schedule?.status ?? 'ready' : 'ready'
+    );
+
+    const [departureTimes, setDepartureTimes] = useState<Entry[]>(
         isEdit
-            ? [{
-                route_id: schedule?.routeVehicle?.route?.id ?? null,
-                vehicle_id: schedule?.routeVehicle?.vehicle?.id ?? null,
-                departure_time: schedule?.departure_time ?? '',
-                status: schedule?.status ?? '',
-            }]
-            : [{
-                route_id: null,
-                vehicle_id: null,
-                departure_time: '',
-                status: '',
-            }]
+            ? [{ departure_time: schedule?.departure_time ?? '' }]
+            : [{ departure_time: '' }]
     );
 
     const { data, setData, post, put, processing, errors, setError, clearErrors } = useForm(
         isEdit
             ? {
-                route_id: entries[0].route_id,
-                vehicle_id: entries[0].vehicle_id,
-                departure_time: entries[0].departure_time,
-                status: entries[0].status,
+                route_id: routeId,
+                vehicle_id: vehicleId,
+                departure_time: departureTimes[0]?.departure_time,
+                status,
             }
-            : { entries }
+            : {
+                route_id: routeId,
+                vehicle_id: vehicleId,
+                status,
+                departure_times: departureTimes.map(dt => dt.departure_time),
+            }
     );
     const [generalError, setGeneralError] = useState<string>('');
 
@@ -82,64 +82,67 @@ export default function ScheduleForm({
         { title: isEdit ? 'Edit Schedule' : 'Create Schedule', href: '#' },
     ];
 
-    const handleChange = (idx: number, field: keyof Entry, value: any) => {
-        const updated = [...entries];
-        if (field === 'departure_time') {
-            // value: { date, time }
-            const combined = combineDateTime(value.date, value.time);
-            updated[idx].departure_time = combined;
-        } else {
-            updated[idx] = { ...updated[idx], [field]: value };
-        }
-        setEntries(updated);
-        setData('entries', updated);
+    const handleFieldChange = (field: 'route_id' | 'vehicle_id' | 'status', value: any) => {
+        if (field === 'route_id') setRouteId(value);
+        if (field === 'vehicle_id') setVehicleId(value);
+        if (field === 'status') setStatus(value);
+        setData(field, value);
         clearErrors();
     };
 
-    const handleEditChange = (field: keyof Entry, value: any) => {
-        if (field === 'departure_time') {
-            // value: { date, time }
-            const combined = combineDateTime(value.date, value.time);
-            setData(field, combined);
-        } else {
-            setData(field, value);
-        }
+    const handleDepartureTimeChange = (idx: number, value: { date: string, time: string }) => {
+        const updated = [...departureTimes];
+        updated[idx].departure_time = combineDateTime(value.date, value.time);
+        setDepartureTimes(updated);
+        setData('departure_times', updated.map(dt => dt.departure_time));
         clearErrors();
     };
 
-    const addEntry = () => {
-        const updated = [...entries, { route_id: null, vehicle_id: null, departure_time: '', status: '' }];
-        setEntries(updated);
-        setData('entries', updated);
+    const addDepartureTime = () => {
+        const last = departureTimes[departureTimes.length - 1];
+        let newDepartureTime = '';
+        if (last && last.departure_time) {
+            const { date, time } = splitDateTime(last.departure_time);
+            if (date) {
+                const nextDate = new Date(date);
+                nextDate.setDate(nextDate.getDate() + 1);
+                const formattedDate = nextDate.toISOString().slice(0, 10);
+                newDepartureTime = combineDateTime(formattedDate, time);
+            }
+        }
+        const updated = [...departureTimes, { departure_time: newDepartureTime }];
+        setDepartureTimes(updated);
+        setData('departure_times', updated.map(dt => dt.departure_time));
     };
-    const removeEntry = (idx: number) => {
-        const updated = entries.filter((_, i) => i !== idx);
-        setEntries(updated);
-        setData('entries', updated);
+    const removeDepartureTime = (idx: number) => {
+        const updated = departureTimes.filter((_, i) => i !== idx);
+        setDepartureTimes(updated);
+        setData('departure_times', updated.map(dt => dt.departure_time));
     };
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         clearErrors();
         setGeneralError('');
-        if (isEdit) {
-            if (!data.route_id || !data.vehicle_id || !data.departure_time || !data.status) {
-                setGeneralError('All fields are required.');
-                return;
-            }
-            put(route('schedules.update', schedule!.id));
-        } else {
-            if (entries.length === 0) {
-                setError('entries', 'At least one schedule entry is required.');
-                return;
-            }
-            for (let i = 0; i < entries.length; i++) {
-                const entry = entries[i];
-                if (!entry.route_id || !entry.vehicle_id || !entry.departure_time || !entry.status) {
-                    setError('entries', 'All fields are required.');
+        if (!routeId || !vehicleId || !status) {
+            setGeneralError('Route, Vehicle, and Status are required.');
+            return;
+        }
+        if (!isEdit && departureTimes.length === 0) {
+            setError('departure_times', 'At least one departure time is required.');
+            return;
+        }
+        if (!isEdit) {
+            for (let i = 0; i < departureTimes.length; i++) {
+                if (!departureTimes[i].departure_time) {
+                    setError('departure_times', 'All departure times are required.');
                     return;
                 }
             }
+        }
+        if (isEdit) {
+            put(route('schedules.update', schedule!.id));
+        } else {
             post(route('schedules.store'));
         }
     };
@@ -154,10 +157,12 @@ export default function ScheduleForm({
         label: vehicle.plate_number,
     }));
 
-    const getEntryError = (idx: number, field: keyof Entry) => {
-        const key = `entries.${idx}.${field}`;
-        return (errors as FormErrors)[key] || '';
-    };
+    const statusOptions = [
+        { value: 'ready', label: 'Ready' },
+        { value: 'departed', label: 'Departed' },
+        { value: 'arrived', label: 'Arrived' },
+        { value: 'cancelled', label: 'Cancelled' },
+    ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -165,192 +170,103 @@ export default function ScheduleForm({
             <div className="px-4 py-6">
                 <h1 className="text-2xl font-semibold mb-4 text-foreground">Schedule Management</h1>
                 <div className="flex flex-col space-y-8 lg:flex-row lg:space-y-0 lg:space-x-12">
-                    {/* <ScheduleSidebar /> */}
                     <div className="flex-1 md:max-w-2xl space-y-6">
                         <HeadingSmall
                             title={isEdit ? 'Edit Schedule' : 'Create Schedule'}
                             description="Fill in the details below"
                         />
                         <form onSubmit={handleSubmit} className="space-y-4">
-                            {isEdit ? (
-                                <div className="bg-muted border rounded p-6 mb-2">
-                                    <div className="space-y-4">
-                                        <div>
-                                            <Label htmlFor="route_id" className="text-foreground">Route</Label>
-                                            <CustomSelect
-                                                id="route_id"
-                                                options={routeOptions}
-                                                value={routeOptions.find((option) => option.value === data.route_id) || null}
-                                                onChange={(selected: any) => handleEditChange('route_id', selected ? selected.value : null)}
-                                                placeholder="Select route..."
-                                            />
-                                            <InputError message={errors.route_id as string} />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="vehicle_id" className="text-foreground">Vehicle</Label>
-                                            <CustomSelect
-                                                id="vehicle_id"
-                                                options={vehicleOptions}
-                                                value={vehicleOptions.find((option) => option.value === data.vehicle_id) || null}
-                                                onChange={(selected: any) => handleEditChange('vehicle_id', selected ? selected.value : null)}
-                                                placeholder="Select vehicle..."
-                                            />
-                                            <InputError message={errors.vehicle_id as string} />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="departure_time" className="text-foreground">Departure Time</Label>
-                                            {(() => {
-                                                const { date, time } = splitDateTime(data.departure_time ?? '');
-                                                return (
-                                                    <div className="flex gap-2">
-                                                        <DatePicker
-                                                            id={`departure_date`}
-                                                            value={date ? new Date(date) : undefined}
-                                                            onChange={(selectedDate: Date | null) => {
-                                                                // Format ke YYYY-MM-DD
-                                                                const formattedDate = selectedDate
-                                                                    ? selectedDate.toISOString().slice(0, 10)
-                                                                    : '';
-                                                                handleEditChange('departure_time', {
-                                                                    date: formattedDate,
-                                                                    time,
-                                                                });
-                                                            }}
-                                                            displayFormat="dd/MM/yyyy"
-                                                            locale="id" // Bahasa Indonesia
-                                                            required
-                                                        />
-                                                        <TimePicker
-                                                            id={`departure_time`}
-                                                            value={time}
-                                                            onChange={(selectedTime: string) => {
-                                                                handleEditChange('departure_time', {
-                                                                    date,
-                                                                    time: selectedTime,
-                                                                });
-                                                            }}
-                                                            format="HH:mm"
-                                                            required
-                                                        />
-                                                    </div>
-                                                );
-                                            })()}
-                                            <InputError message={errors.departure_time as string} />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="status" className="text-foreground">Status</Label>
-                                            <Input
-                                                id="status"
-                                                type="text"
-                                                value={data.status}
-                                                onChange={(e) => handleEditChange('status', e.target.value)}
-                                                required
-                                            />
-                                            <InputError message={errors.status as string} />
-                                        </div>
+                            <div className="border rounded p-6 mb-2">
+                                <div className="space-y-4">
+                                    <div>
+                                        <Label htmlFor="route_id" className="text-foreground">Route</Label>
+                                        <CustomSelect
+                                            id="route_id"
+                                            options={routeOptions}
+                                            value={routeOptions.find((option) => option.value === routeId) || null}
+                                            onChange={(selected: any) => handleFieldChange('route_id', selected ? selected.value : null)}
+                                            placeholder="Select route..."
+                                        />
+                                        <InputError message={errors.route_id as string} />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="vehicle_id" className="text-foreground">Vehicle</Label>
+                                        <CustomSelect
+                                            id="vehicle_id"
+                                            options={vehicleOptions}
+                                            value={vehicleOptions.find((option) => option.value === vehicleId) || null}
+                                            onChange={(selected: any) => handleFieldChange('vehicle_id', selected ? selected.value : null)}
+                                            placeholder="Select vehicle..."
+                                        />
+                                        <InputError message={errors.vehicle_id as string} />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="status" className="text-foreground">Status</Label>
+                                        <CustomSelect
+                                            id="status"
+                                            options={statusOptions}
+                                            value={statusOptions.find(option => option.value === status)}
+                                            onChange={(selected: any) => handleFieldChange('status', selected ? selected.value : 'ready')}
+                                            placeholder="Select status..."
+                                            isSearchable={false}
+                                        />
+                                        <InputError message={errors.status as string} />
                                     </div>
                                 </div>
-                            ) : (
-                                <>
-                                    {entries.map((entry, idx) => {
-                                        const { date, time } = splitDateTime(entry.departure_time);
-                                        return (
-                                            <div key={idx} className="border rounded p-6 mb-2">
-                                                <div className="flex justify-between items-center mb-2">
-                                                    <span className="font-semibold text-foreground">Schedule #{idx + 1}</span>
-                                                    {entries.length > 1 && (
-                                                        <Button
-                                                            type="button"
-                                                            className="text-red-600 hover:text-red-800 hover:underline text-xs"
-                                                            onClick={() => removeEntry(idx)}
-                                                        >
-                                                            Remove
-                                                        </Button>
-                                                    )}
-                                                </div>
-                                                <div className="space-y-4">
-                                                    <div>
-                                                        <Label htmlFor={`route_id_${idx}`} className="text-foreground">Route</Label>
-                                                        <CustomSelect
-                                                            id={`route_id_${idx}`}
-                                                            options={routeOptions}
-                                                            value={routeOptions.find((option) => option.value === entry.route_id) || null}
-                                                            onChange={(selected: any) => handleChange(idx, 'route_id', selected ? selected.value : null)}
-                                                            placeholder="Select route..."
-                                                        />
-                                                        <InputError message={getEntryError(idx, 'route_id')} />
-                                                    </div>
-                                                    <div>
-                                                        <Label htmlFor={`vehicle_id_${idx}`} className="text-foreground">Vehicle</Label>
-                                                        <CustomSelect
-                                                            id={`vehicle_id_${idx}`}
-                                                            options={vehicleOptions}
-                                                            value={vehicleOptions.find((option) => option.value === entry.vehicle_id) || null}
-                                                            onChange={(selected: any) => handleChange(idx, 'vehicle_id', selected ? selected.value : null)}
-                                                            placeholder="Select vehicle..."
-                                                        />
-                                                        <InputError message={getEntryError(idx, 'vehicle_id')} />
-                                                    </div>
-                                                    <div>
-                                                        <Label htmlFor={`departure_time_${idx}`} className="text-foreground">Departure Date & Time</Label>
-                                                        <div className="flex gap-2">
-                                                            {/* DatePicker untuk tanggal format Indonesia */}
-                                                            <DatePicker
-                                                                id={`departure_date_${idx}`}
-                                                                value={date ? new Date(date) : undefined}
-                                                                onChange={(selectedDate: Date | null) => {
-                                                                    // Format ke YYYY-MM-DD
-                                                                    const formattedDate = selectedDate
-                                                                        ? selectedDate.toISOString().slice(0, 10)
-                                                                        : '';
-                                                                    handleChange(idx, 'departure_time', {
-                                                                        date: formattedDate,
-                                                                        time,
-                                                                    });
-                                                                }}
-                                                                displayFormat="dd/MM/yyyy"
-                                                                locale="id" // Bahasa Indonesia
-                                                                required
-                                                            />
-                                                            {/* TimePicker untuk waktu 24 jam */}
-                                                            <TimePicker
-                                                                id={`departure_time_${idx}`}
-                                                                value={time}
-                                                                onChange={(selectedTime: string) => {
-                                                                    handleChange(idx, 'departure_time', {
-                                                                        date,
-                                                                        time: selectedTime,
-                                                                    });
-                                                                }}
-                                                                format="HH:mm"
-                                                                required
-                                                            />
-                                                        </div>
-                                                        <InputError message={getEntryError(idx, 'departure_time')} />
-                                                    </div>
-                                                    <div>
-                                                        <Label htmlFor={`status_${idx}`} className="text-foreground">Status</Label>
-                                                        <Input
-                                                            id={`status_${idx}`}
-                                                            type="text"
-                                                            value={entry.status}
-                                                            onChange={(e) => handleChange(idx, 'status', e.target.value)}
-                                                            required
-                                                        />
-                                                        <InputError message={getEntryError(idx, 'status')} />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                    <div>
-                                        <Button type="button" variant="outline" onClick={addEntry} className="border-primary text-primary hover:bg-primary/10">
-                                            + Add Another Schedule
-                                        </Button>
-                                    </div>
-                                    <InputError message={errors.entries && typeof errors.entries === 'string' ? errors.entries : ''} />
-                                </>
-                            )}
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-foreground">Departure Times</Label>
+                                {departureTimes.map((dt, idx) => {
+                                    const { date, time } = splitDateTime(dt.departure_time);
+                                    return (
+                                        <div key={idx} className="flex items-center gap-2 mb-2">
+                                            <DatePicker
+                                                id={`departure_date_${idx}`}
+                                                value={date ? new Date(date) : undefined}
+                                                onChange={(selectedDate: Date | null) => {
+                                                    const formattedDate = selectedDate
+                                                        ? selectedDate.toISOString().slice(0, 10)
+                                                        : '';
+                                                    handleDepartureTimeChange(idx, {
+                                                        date: formattedDate,
+                                                        time,
+                                                    });
+                                                }}
+                                                displayFormat="dd/MM/yyyy"
+                                                locale="id"
+                                                required
+                                                minDate={new Date()}
+                                            />
+                                            <TimePicker
+                                                id={`departure_time_${idx}`}
+                                                value={time}
+                                                onChange={(selectedTime: string) => {
+                                                    handleDepartureTimeChange(idx, {
+                                                        date,
+                                                        time: selectedTime,
+                                                    });
+                                                }}
+                                                format="HH:mm"
+                                                required
+                                            />
+                                            {departureTimes.length > 1 && (
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    className="text-red-600"
+                                                    onClick={() => removeDepartureTime(idx)}
+                                                >
+                                                    Remove
+                                                </Button>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                                <Button type="button" variant="outline" onClick={addDepartureTime} className="border-primary text-primary hover:bg-primary/10">
+                                    + Add Departure Time
+                                </Button>
+                                <InputError message={errors.departure_times as string} />
+                            </div>
                             {(generalError || (errors as any)?.form) && (
                                 <div className="p-2 bg-destructive/10 text-destructive rounded">
                                     {generalError || (errors as any)?.form}

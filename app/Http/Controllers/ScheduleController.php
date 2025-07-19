@@ -102,7 +102,38 @@ class ScheduleController extends Controller
     {
         DB::beginTransaction();
         try {
-            if ($request->has('entries')) {
+            if ($request->has('departure_times')) {
+                $departureTimes = $request->input('departure_times');
+                if (!is_array($departureTimes) || count($departureTimes) === 0) {
+                    return back()->withErrors(['departure_times' => 'At least one departure time is required.']);
+                }
+                $request->validate([
+                    'route_id' => 'required|exists:routes,id',
+                    'vehicle_id' => 'required|exists:vehicles,id',
+                    'status' => 'required|string|max:255',
+                ]);
+                $routeVehicle = RouteVehicle::firstOrCreate([
+                    'route_id' => $request->route_id,
+                    'vehicle_id' => $request->vehicle_id,
+                ]);
+                foreach ($departureTimes as $i => $departureTime) {
+                    if (!$departureTime) {
+                        return back()->withErrors(['departure_times' => "Departure time #".($i+1)." is required."]);
+                    }
+                    $validator = \Validator::make(['departure_time' => $departureTime], [
+                        'departure_time' => 'required|date',
+                    ]);
+                    if ($validator->fails()) {
+                        return back()->withErrors(['departure_times' => "Departure time #".($i+1).": ".$validator->errors()->first('departure_time')]);
+                    }
+                    Schedule::create([
+                        'route_vehicle_id' => $routeVehicle->id,
+                        'departure_time' => $departureTime,
+                        'status' => $request->status,
+                    ]);
+                }
+            }
+            else if ($request->has('entries')) {
                 $entries = $request->input('entries');
                 if (!is_array($entries) || count($entries) === 0) {
                     return back()->withErrors(['entries' => 'At least one schedule entry is required.']);
@@ -221,4 +252,3 @@ class ScheduleController extends Controller
         return redirect()->route('schedules.index')->with('success', 'Schedule permanently deleted.');
     }
 }
-

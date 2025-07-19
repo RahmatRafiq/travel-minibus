@@ -11,6 +11,7 @@ type DatePickerProps = {
     required?: boolean;
     className?: string;
     label?: string;
+    minDate?: Date;
 };
 
 export function DatePicker({
@@ -20,6 +21,7 @@ export function DatePicker({
     required,
     className = "",
     label,
+    minDate,
 }: DatePickerProps) {
     return (
         <div className={`flex flex-col gap-1 ${className}`}>
@@ -36,6 +38,7 @@ export function DatePicker({
                 className="rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-gray-700 bg-white shadow-sm"
                 placeholderText="Pilih tanggal"
                 dateFormat="yyyy-MM-dd"
+                minDate={minDate} // teruskan ke ReactDatePicker
             />
         </div>
     );
