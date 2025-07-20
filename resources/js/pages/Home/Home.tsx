@@ -4,6 +4,7 @@ import { CheckCircle, Clock, XCircle } from "lucide-react";
 import Footer from "./HomeComponents/Footer";
 import FormBooking from "./HomeComponents/FormBooking";
 import BookingList from "./HomeComponents/BookingList";
+import Header from "./HomeComponents/Header"; // <--- tambahkan ini
 
 type Booking = {
   id: number;
@@ -78,6 +79,10 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-indigo-200 flex flex-col">
       <Head title="Home - Travel Bone Makassar" />
+      <Header
+        title="Travel Minibus Booking"
+        subtitle="Pesan perjalanan antar kota dengan mudah, cepat, dan nyaman."
+      />
       {/* Hero Section */}
       <header className="relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
@@ -203,4 +208,3 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
     </div>
   );
 }
-                
