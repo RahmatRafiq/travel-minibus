@@ -25,7 +25,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Log Activity',
-        href: '/activity-logs',
+        href: '/dashboard/activity-logs',
         icon: ActivitySquare,
     },
     {
@@ -35,34 +35,34 @@ const mainNavItems: NavItem[] = [
         children: [
             {
                 title: 'Roles',
-                href: '/roles',
+                href: '/dashboard/roles',
                 icon: KeyRound,
             },
             {
                 title: 'Permissions',
-                href: '/permissions',
+                href: '/dashboard/permissions',
                 icon: LockKeyhole,
             },
             {
                 title: 'User',
-                href: '/users',
+                href: '/dashboard/users',
                 icon: UserCog,
             },
         ],
     },
     {
         title: 'Travel Management',
-        href: '/vehicles',
+        href: '/dashboard/vehicles',
         icon: BusFront,
     },
     {
         title: 'Bookings management',
-        href: '/bookings',
+        href: '/dashboard/bookings',
         icon: CalendarCheck2,
     },
     {
         title: 'Schedule Management',
-        href: '/schedules',
+        href: '/dashboard/schedules',
         icon: CalendarClock,
     }
 

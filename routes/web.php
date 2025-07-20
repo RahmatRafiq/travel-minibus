@@ -13,9 +13,9 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('auth/{provider}', [SocialAuthController::class, 'redirectToProvider'])->name('auth.redirect');
 Route::get('auth/{provider}/callback', [SocialAuthController::class, 'handleProviderCallback'])->name('auth.callback');
 
-// Middleware for pages that require authentication
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
+// Middleware for pages that require authentication and admin role
+Route::prefix('dashboard')->middleware(['auth', 'verified', 'role:admin'])->group(function () {
+    Route::get('/', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 
@@ -65,7 +65,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('schedules/{id}/force-delete', [ScheduleController::class, 'forceDelete'])->name('schedules.force-delete');
 
     Route::post('logout', [SocialAuthController::class, 'logout'])->name('logout');
-
 });
 Route::get('/dashboard/activity-logs', function () {
     return Inertia::render('ActivityLogList');
