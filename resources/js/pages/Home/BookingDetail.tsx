@@ -2,6 +2,8 @@ import React, { useState, useRef } from "react";
 import { router, Link, Head } from "@inertiajs/react";
 import Header from "./HomeComponents/Header";
 import Footer from "./HomeComponents/Footer";
+import FormBooking from "./HomeComponents/FormBooking";
+import CustomSelect from "@/components/select";
 
 type Schedule = {
   id: number;
@@ -51,7 +53,11 @@ export default function BookingDetail({
   const [error, setError] = useState<string | null>(null);
   const seatsRef = useRef<HTMLDivElement>(null);
 
-  const handleSearch = (e: React.FormEvent) => {
+  // Handler untuk FormBooking
+  const handleFormBookingChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setSearch({ ...search, [e.target.name]: e.target.value });
+  };
+  const handleFormBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     router.get("/booking-detail", {
       origin: search.origin,
@@ -82,9 +88,7 @@ export default function BookingDetail({
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
         <Head title="Cari Jadwal - Travel Bone Makassar" />
-        <Header
-          title="Cari Jadwal Travel"
-        >
+        <Header title="Cari Jadwal Travel">
           <Link
             href="/"
             className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-full font-semibold shadow transition"
@@ -94,52 +98,13 @@ export default function BookingDetail({
         </Header>
         <main className="container mx-auto px-6 py-12 flex-1">
           <div className="bg-white rounded-3xl shadow-2xl p-8 border border-indigo-100 max-w-lg mx-auto">
-            <form onSubmit={handleSearch} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Origin</label>
-                <select
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 bg-white"
-                  value={search.origin}
-                  onChange={e => setSearch(s => ({ ...s, origin: e.target.value }))}
-                  required
-                >
-                  <option value="">Pilih Origin</option>
-                  {allOrigins.map((o) => (
-                    <option key={o} value={o}>{o}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Destination</label>
-                <select
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 bg-white"
-                  value={search.destination}
-                  onChange={e => setSearch(s => ({ ...s, destination: e.target.value }))}
-                  required
-                >
-                  <option value="">Pilih Destination</option>
-                  {allDestinations.map((d) => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tanggal Berangkat</label>
-                <input
-                  type="date"
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 bg-white"
-                  value={search.date}
-                  onChange={e => setSearch(s => ({ ...s, date: e.target.value }))}
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 text-white py-3 rounded-xl font-bold text-lg shadow-lg transition-all duration-200 transform hover:scale-105"
-              >
-                Cari Jadwal
-              </button>
-            </form>
+            <FormBooking
+              form={search}
+              allOrigins={allOrigins}
+              allDestinations={allDestinations}
+              onChange={handleFormBookingChange}
+              onSubmit={handleFormBookingSubmit}
+            />
           </div>
         </main>
         <Footer />
@@ -166,85 +131,109 @@ export default function BookingDetail({
         <div className="bg-white rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 border border-indigo-100 max-w-xl mx-auto w-full">
           <h2 className="text-lg sm:text-xl font-bold text-indigo-700 mb-4">Jadwal Tersedia</h2>
           {schedules.length === 0 && (
-            <div className="text-gray-500 text-center">Tidak ada jadwal tersedia untuk pilihan Anda.</div>
+            <>
+              <div className="text-gray-500 text-center mb-6">Tidak ada jadwal tersedia untuk pilihan Anda.</div>
+              <FormBooking
+                form={search}
+                allOrigins={allOrigins}
+                allDestinations={allDestinations}
+                onChange={handleFormBookingChange}
+                onSubmit={handleFormBookingSubmit}
+              />
+            </>
           )}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <ul className="divide-y divide-indigo-100 mb-6">
-              {schedules.map((sch) => (
-                <li key={sch.id} className="py-3 sm:py-4 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
-                  <input
-                    type="radio"
-                    name="schedule"
-                    value={sch.id}
-                    checked={selectedSchedule === sch.id}
-                    onChange={() => {
-                      setSelectedSchedule(sch.id);
-                      setSeats(1); // reset kursi ke 1 setiap ganti jadwal
-                      setError(null);
-                      setTimeout(() => {
-                        seatsRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-                      }, 100);
-                    }}
-                    className="accent-indigo-600 mt-1 sm:mt-0"
-                  />
-                  <div>
-                    <div className="font-semibold text-indigo-800 text-base sm:text-lg">
-                      {sch.departure_time} &middot; {sch.vehicle.plate_number} ({sch.vehicle.brand})
+          {schedules.length > 0 && (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <ul className="divide-y divide-indigo-100 mb-6">
+                {schedules.map((sch) => (
+                  <li key={sch.id} className="py-3 sm:py-4 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+                    <input
+                      type="radio"
+                      name="schedule"
+                      value={sch.id}
+                      checked={selectedSchedule === sch.id}
+                      onChange={() => {
+                        setSelectedSchedule(sch.id);
+                        setSeats(1); // reset kursi ke 1 setiap ganti jadwal
+                        setError(null);
+                        setTimeout(() => {
+                          seatsRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }, 100);
+                      }}
+                      className="accent-indigo-600 mt-1 sm:mt-0"
+                    />
+                    <div>
+                      <div className="font-semibold text-indigo-800 text-base sm:text-lg">
+                        {sch.departure_time} &middot; {sch.vehicle.plate_number} ({sch.vehicle.brand})
+                      </div>
+                      <div className="text-xs sm:text-sm text-gray-500">
+                        Sisa kursi: {sch.available_seats}
+                      </div>
                     </div>
-                    <div className="text-xs sm:text-sm text-gray-500">
-                      Sisa kursi: {sch.available_seats}
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            {/* Pesan error jika belum memilih jadwal */}
-            {error && (
-              <div className="text-red-600 text-sm mb-2">{error}</div>
-            )}
-            <div ref={seatsRef}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Jumlah Kursi</label>
-              <select
-                value={seats}
-                onChange={e => setSeats(Number(e.target.value))}
-                className="w-full sm:w-32 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 bg-white"
-                disabled={!selectedSchedule}
-              >
-                {(() => {
-                  const maxSeats = selectedSchedule
-                    ? schedules.find(s => s.id === selectedSchedule)?.available_seats || 1
-                    : 1;
-                  // Jika belum memilih jadwal, hanya tampilkan 1 kursi
-                  return Array.from({ length: maxSeats }).map((_, i) => (
-                    <option key={i + 1} value={i + 1}>{i + 1}</option>
-                  ));
-                })()}
-              </select>
-              {!selectedSchedule && (
-                <div className="text-indigo-500 text-xs sm:text-sm mt-1">
-                  Pilih jadwal terlebih dahulu untuk menentukan jumlah kursi.
-                </div>
+                  </li>
+                ))}
+              </ul>
+              {error && (
+                <div className="text-red-600 text-sm mb-2">{error}</div>
               )}
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <button
-                type="submit"
-                disabled={!selectedSchedule}
-                className={
-                  "bg-indigo-600 hover:bg-indigo-700 text-white px-6 sm:px-8 py-2 rounded-full font-semibold shadow transition" +
-                  (!selectedSchedule ? " opacity-60 cursor-not-allowed" : "")
-                }
-              >
-                Booking Sekarang
-              </button>
-              <Link
-                href="/"
-                className="bg-muted text-foreground px-6 sm:px-8 py-2 rounded-full border border-input"
-              >
-                Batal
-              </Link>
-            </div>
-          </form>
+              <div ref={seatsRef}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Jumlah Kursi</label>
+                <CustomSelect
+                  value={
+                    selectedSchedule
+                      ? { value: seats, label: seats.toString() }
+                      : null
+                  }
+                  onChange={option => {
+                    if (Array.isArray(option)) {
+                      setSeats(1);
+                    } else if (option && typeof option === "object" && "value" in option) {
+                      setSeats(option.value);
+                    } else {
+                      setSeats(1);
+                    }
+                  }}
+                  options={
+                    (() => {
+                      const maxSeats = selectedSchedule
+                        ? schedules.find(s => s.id === selectedSchedule)?.available_seats || 1
+                        : 1;
+                      return Array.from({ length: maxSeats }).map((_, i) => ({
+                        value: i + 1,
+                        label: (i + 1).toString(),
+                      }));
+                    })()
+                  }
+                  className="w-full sm:w-32 px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-400 bg-white"
+                  isDisabled={!selectedSchedule}
+                  placeholder="Pilih jumlah kursi"
+                />
+                {!selectedSchedule && (
+                  <div className="text-indigo-500 text-xs sm:text-sm mt-1">
+                    Pilih jadwal terlebih dahulu untuk menentukan jumlah kursi.
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <button
+                  type="submit"
+                  disabled={!selectedSchedule}
+                  className={
+                    "bg-indigo-600 hover:bg-indigo-700 text-white px-6 sm:px-8 py-2 rounded-full font-semibold shadow transition" +
+                    (!selectedSchedule ? " opacity-60 cursor-not-allowed" : "")
+                  }
+                >
+                  Booking Sekarang
+                </button>
+                <Link
+                  href="/"
+                  className="bg-muted text-foreground px-6 sm:px-8 py-2 rounded-full border border-input"
+                >
+                  Batal
+                </Link>
+              </div>
+            </form>
+          )}
         </div>
       </main>
       <Footer />

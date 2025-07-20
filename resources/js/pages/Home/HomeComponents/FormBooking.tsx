@@ -1,4 +1,5 @@
 import React from "react";
+import CustomSelect from "@/components/select";
 
 type Props = {
   form: {
@@ -13,37 +14,40 @@ type Props = {
 };
 
 export default function FormBooking({ form, allOrigins, allDestinations, onChange, onSubmit }: Props) {
+  const originOptions = [{ label: "Pilih Origin", value: "" }, ...allOrigins.map(o => ({ label: o, value: o }))];
+  const destinationOptions = [{ label: "Pilih Destination", value: "" }, ...allDestinations.map(d => ({ label: d, value: d }))];
+
+  const handleSelectChange = (field: "origin" | "destination") => (selectedOption: any) => {
+    const fakeEvent = {
+      target: {
+        name: field,
+        value: selectedOption ? selectedOption.value : "",
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    onChange(fakeEvent);
+  };
+
   return (
     <form onSubmit={onSubmit} className="space-y-6">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Origin</label>
-        <select
+        <CustomSelect
           name="origin"
-          value={form.origin}
-          onChange={onChange}
-          className="w-full px-3 sm:px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 bg-white/80"
+          value={originOptions.find(option => option.value === form.origin)}
+          onChange={handleSelectChange("origin")}
+          options={originOptions}
           required
-        >
-          <option value="">Pilih Origin</option>
-          {allOrigins.map((o) => (
-            <option key={o} value={o}>{o}</option>
-          ))}
-        </select>
+        />
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Destination</label>
-        <select
+        <CustomSelect
           name="destination"
-          value={form.destination}
-          onChange={onChange}
-          className="w-full px-3 sm:px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 bg-white/80"
+          value={destinationOptions.find(option => option.value === form.destination)}
+          onChange={handleSelectChange("destination")}
+          options={destinationOptions}
           required
-        >
-          <option value="">Pilih Destination</option>
-          {allDestinations.map((d) => (
-            <option key={d} value={d}>{d}</option>
-          ))}
-        </select>
+        />
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Tanggal Berangkat</label>
