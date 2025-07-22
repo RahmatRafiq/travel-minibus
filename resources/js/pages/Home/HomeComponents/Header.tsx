@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { usePage, Link, router } from "@inertiajs/react";
 import { type SharedData } from "@/types";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 
 export default function Header() {
   const { auth } = usePage<SharedData>().props;
@@ -61,57 +62,69 @@ export default function Header() {
                 </Link>
               )}
             </div>
-            {/* Mobile menu button */}
+            {/* Mobile menu button pakai Radix */}
             <div className="flex sm:hidden items-center">
-              <button
-                className="p-2 rounded-md border border-indigo-200 text-indigo-700 focus:outline-none"
-                onClick={() => setMenuOpen((v) => !v)}
-                aria-label="Menu"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-              {menuOpen && (
-                <div className="absolute right-0 top-12 z-50 bg-white border border-indigo-100 rounded-lg shadow-lg min-w-[170px] py-2">
+              <DropdownMenu.Root>
+                <DropdownMenu.Trigger asChild>
+                  <button
+                    className="p-2 rounded-md border border-indigo-200 text-indigo-700 focus:outline-none"
+                    aria-label="Menu"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                  </button>
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Content
+                  align="end"
+                  className="z-50 bg-white border border-indigo-100 rounded-lg shadow-lg min-w-[170px] py-2"
+                >
                   {user ? (
-                    <div className="flex flex-col">
-                      <span className="px-4 py-2 text-indigo-700 font-semibold whitespace-nowrap">👤 {user.name}</span>
+                    <>
+                      <DropdownMenu.Label className="px-4 py-2 text-indigo-700 font-semibold whitespace-nowrap">
+                        👤 {user.name}
+                      </DropdownMenu.Label>
+                      <DropdownMenu.Separator className="my-1 h-px bg-indigo-100" />
                       {user.role === "admin" ? (
-                        <Link
-                          href={route('dashboard')}
-                          className="px-4 py-2 text-sm text-indigo-700 hover:bg-indigo-50 transition"
-                          onClick={() => setMenuOpen(false)}
-                        >
-                          Dashboard
-                        </Link>
+                        <DropdownMenu.Item asChild>
+                          <Link
+                            href={route('dashboard')}
+                            className="px-4 py-2 text-sm text-indigo-700 hover:bg-indigo-50 transition block"
+                          >
+                            Dashboard
+                          </Link>
+                        </DropdownMenu.Item>
                       ) : (
-                        <Link
-                          href="/my-bookings"
-                          className="px-4 py-2 text-sm text-indigo-700 hover:bg-indigo-50 transition"
-                          onClick={() => setMenuOpen(false)}
-                        >
-                          Booking Saya
-                        </Link>
+                        <DropdownMenu.Item asChild>
+                          <Link
+                            href="/my-bookings"
+                            className="px-4 py-2 text-sm text-indigo-700 hover:bg-indigo-50 transition block"
+                          >
+                            Booking Saya
+                          </Link>
+                        </DropdownMenu.Item>
                       )}
-                      <button
-                        onClick={handleLogout}
-                        className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 text-left transition"
-                      >
-                        Logout
-                      </button>
-                    </div>
+                      <DropdownMenu.Item asChild>
+                        <button
+                          onClick={handleLogout}
+                          className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 text-left w-full transition"
+                        >
+                          Logout
+                        </button>
+                      </DropdownMenu.Item>
+                    </>
                   ) : (
-                    <Link
-                      href="/login"
-                      className="block px-4 py-2 text-sm text-indigo-700 hover:bg-indigo-50 transition"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      Login
-                    </Link>
+                    <DropdownMenu.Item asChild>
+                      <Link
+                        href="/login"
+                        className="block px-4 py-2 text-sm text-indigo-700 hover:bg-indigo-50 transition"
+                      >
+                        Login
+                      </Link>
+                    </DropdownMenu.Item>
                   )}
-                </div>
-              )}
+                </DropdownMenu.Content>
+              </DropdownMenu.Root>
             </div>
           </div>
         </div>
@@ -119,4 +132,3 @@ export default function Header() {
     </header>
   );
 }
-              
