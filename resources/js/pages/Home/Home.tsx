@@ -80,8 +80,6 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
     <div className="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-indigo-200 flex flex-col">
       <Head title="Home - Travel Bone Makassar" />
       <Header
-        title="Travel Minibus Booking"
-        subtitle="Pesan perjalanan antar kota dengan mudah, cepat, dan nyaman."
       />
       {/* Hero Section */}
       <header className="relative overflow-hidden">

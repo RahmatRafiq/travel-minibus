@@ -88,14 +88,7 @@ export default function BookingDetail({
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
         <Head title="Cari Jadwal - Travel Bone Makassar" />
-        <Header title="Cari Jadwal Travel">
-          <Link
-            href="/"
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-full font-semibold shadow transition"
-          >
-            Kembali ke Home
-          </Link>
-        </Header>
+        <Header />
         <main className="container mx-auto px-6 py-12 flex-1">
           <div className="bg-white rounded-3xl shadow-2xl p-8 border border-indigo-100 max-w-lg mx-auto">
             <FormBooking
@@ -116,17 +109,7 @@ export default function BookingDetail({
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
       <Head title="Booking Detail - Travel Bone Makassar" />
-      <Header
-        title="Pilih Jadwal"
-        subtitle={`${origin} → ${destination} (${date})`}
-      >
-        <Link
-          href="/"
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-full font-semibold shadow transition"
-        >
-          Kembali ke Home
-        </Link>
-      </Header>
+      <Header />
       <main className="container mx-auto px-2 sm:px-4 md:px-6 py-6 sm:py-10 md:py-12 flex-1 w-full">
         <div className="bg-white rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 border border-indigo-100 max-w-xl mx-auto w-full">
           <h2 className="text-lg sm:text-xl font-bold text-indigo-700 mb-4">Jadwal Tersedia</h2>
@@ -240,3 +223,4 @@ export default function BookingDetail({
     </div>
   );
 }
+            

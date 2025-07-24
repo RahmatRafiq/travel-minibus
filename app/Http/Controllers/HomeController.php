@@ -143,7 +143,7 @@ class HomeController extends Controller
             }
         }
 
-        return Inertia::render('Home/BookingDetail', [
+        return Inertia::render('Home/BookingPage', [
             'origin' => $origin,
             'destination' => $destination,
             'date' => $date,

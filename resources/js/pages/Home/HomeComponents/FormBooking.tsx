@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useMemo } from "react";
 import CustomSelect from "@/components/select";
+import { DatePicker } from "@/components/DatePicker";
 
 type Props = {
   form: {
@@ -22,6 +23,20 @@ export default function FormBooking({ form, allOrigins, allDestinations, onChang
       target: {
         name: field,
         value: selectedOption ? selectedOption.value : "",
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    onChange(fakeEvent);
+  };
+
+  // Konversi string ke Date untuk DatePicker
+  const dateValue = useMemo(() => (form.date ? new Date(form.date) : undefined), [form.date]);
+
+  // Handler perubahan tanggal dari DatePicker
+  const handleDateChange = (date: Date | null) => {
+    const fakeEvent = {
+      target: {
+        name: "date",
+        value: date ? date.toISOString().slice(0, 10) : "",
       }
     } as React.ChangeEvent<HTMLInputElement>;
     onChange(fakeEvent);
@@ -50,14 +65,14 @@ export default function FormBooking({ form, allOrigins, allDestinations, onChang
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Tanggal Berangkat</label>
-        <input
-          type="date"
-          name="date"
-          value={form.date}
-          onChange={onChange}
-          className="w-full px-3 sm:px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 bg-white/80"
+        <DatePicker
+          id="booking-date"
+          label="Tanggal Berangkat"
+          value={dateValue}
+          onChange={handleDateChange}
           required
+          className="w-full"
+          minDate={new Date()}
         />
       </div>
       <button
