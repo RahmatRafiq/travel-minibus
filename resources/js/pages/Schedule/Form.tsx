@@ -112,6 +112,23 @@ export default function ScheduleForm({
         setDepartureTimes(updated);
         setData('departure_times', updated.map(dt => dt.departure_time));
     };
+
+    // Helper to bulk add departure times for a given count (e.g., 7 or 30 days)
+    const bulkAddDepartureTimes = (count: number) => {
+        const first = departureTimes[0];
+        if (!first || !first.departure_time) return;
+        const { date, time } = splitDateTime(first.departure_time);
+        if (!date || !time) return;
+        const newEntries: Entry[] = [];
+        for (let i = 0; i < count; i++) {
+            const d = new Date(date);
+            d.setDate(d.getDate() + i);
+            const formattedDate = d.toISOString().slice(0, 10);
+            newEntries.push({ departure_time: combineDateTime(formattedDate, time) });
+        }
+        setDepartureTimes(newEntries);
+        setData('departure_times', newEntries.map(dt => dt.departure_time));
+    };
     const removeDepartureTime = (idx: number) => {
         const updated = departureTimes.filter((_, i) => i !== idx);
         setDepartureTimes(updated);
@@ -152,7 +169,7 @@ export default function ScheduleForm({
 
     const vehicleOptions = vehicles.map(vehicle => ({
         value: vehicle.id,
-        label: vehicle.plate_number,
+        label: `${vehicle.plate_number} - ${vehicle.brand}`,
     }));
 
     const statusOptions = [
@@ -196,6 +213,14 @@ export default function ScheduleForm({
                                             onChange={(selected: any) => handleFieldChange('vehicle_id', selected ? selected.value : null)}
                                             placeholder="Select vehicle..."
                                         />
+                                        {(() => {
+                                            const selectedVehicle = vehicles.find(v => v.id === vehicleId);
+                                            return (
+                                                <div className="text-sm text-gray-500 mt-1">
+                                                    Brand: {selectedVehicle?.brand ?? '-'}
+                                                </div>
+                                            );
+                                        })()}
                                         <InputError message={errors.vehicle_id as string} />
                                     </div>
                                     <div>
@@ -244,7 +269,6 @@ export default function ScheduleForm({
                                                         time: selectedTime,
                                                     });
                                                 }}
-                                                format="HH:mm"
                                                 required
                                             />
                                             {departureTimes.length > 1 && (
@@ -260,9 +284,17 @@ export default function ScheduleForm({
                                         </div>
                                     );
                                 })}
-                                <Button type="button" variant="outline" onClick={addDepartureTime} className="border-primary text-primary hover:bg-primary/10">
-                                    + Add Departure Time
-                                </Button>
+                                <div className="flex flex-wrap gap-2">
+                                    <Button type="button" variant="outline" onClick={addDepartureTime} className="border-primary text-primary hover:bg-primary/10">
+                                        + Add Departure Time
+                                    </Button>
+                                    <Button type="button" variant="outline" onClick={() => bulkAddDepartureTimes(7)} className="border-primary text-primary hover:bg-primary/10">
+                                        Isi 1 Minggu
+                                    </Button>
+                                    <Button type="button" variant="outline" onClick={() => bulkAddDepartureTimes(30)} className="border-primary text-primary hover:bg-primary/10">
+                                        Isi 1 Bulan
+                                    </Button>
+                                </div>
                                 <InputError message={errors.departure_times as string} />
                             </div>
                             {(generalError || (errors as any)?.form) && (
