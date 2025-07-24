@@ -10,7 +10,7 @@ import ToggleTabs from '@/components/toggle-tabs';
 import { Schedule } from '@/types/Schedule';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Schedule Management', href: '/schedules' },
+    { title: 'Schedule Management', href: route('schedules.index') },
 ];
 
 function formatScheduleDetails(data: any): string {
@@ -104,7 +104,7 @@ export default function ScheduleIndexAccordion({ filter: initialFilter, success 
                 const root = ReactDOM.createRoot(cell);
                 root.render(
                     <Link
-                        href={`/schedules/${id}/edit`}
+                        href={route('schedules.edit', id)}
                         className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
                     >
                         Edit

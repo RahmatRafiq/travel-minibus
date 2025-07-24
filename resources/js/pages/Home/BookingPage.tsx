@@ -59,7 +59,7 @@ export default function BookingDetail({
   };
   const handleFormBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    router.get("/booking-detail", {
+    router.get(route('booking.detail'), {
       origin: search.origin,
       destination: search.destination,
       date: search.date,
@@ -77,7 +77,7 @@ export default function BookingDetail({
       return;
     }
     setError(null);
-    router.post("/home-booking", {
+    router.post(route('home.booking.store'), {
       schedule_id: selectedSchedule,
       seats_booked: seats,
     });

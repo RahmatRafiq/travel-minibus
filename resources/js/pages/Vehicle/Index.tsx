@@ -12,7 +12,7 @@ import { Vehicle } from '@/types/Vehicle';
 import VehicleSidebar from '@/components/vehicle-sidebar';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Vehicle Management', href: '/vehicles' },
+    { title: 'Vehicle Management', href: route('vehicles.index') },
 ];
 
 function formatVehicleDetails(data: any): string {
@@ -107,7 +107,7 @@ export default function VehicleIndexAccordion({ filter: initialFilter, success }
                 const root = ReactDOM.createRoot(cell);
                 root.render(
                     <Link
-                        href={`/vehicles/${id}/edit`}
+                        href={route('vehicles.edit', id)}
                         className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
                     >
                         Edit

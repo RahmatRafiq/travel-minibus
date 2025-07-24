@@ -77,7 +77,7 @@ export default function ActivityLogList() {
   };
 
   return (
-    <AppLayout breadcrumbs={[{ title: 'Activity Logs', href: '/dashboard/activity-logs' }]}>
+    <AppLayout breadcrumbs={[{ title: 'Activity Logs', href: route('activity-log.index') }]}> 
       <Head title="Live Activity Logs" />
       <div className="px-4 py-6">
         <h1 className="text-2xl font-bold mb-6">Live Activity Logs</h1>

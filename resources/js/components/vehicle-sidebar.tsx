@@ -6,13 +6,13 @@ export default function VehicleSidebar() {
     <aside className="w-full max-w-xl lg:w-48">
       <nav className="flex flex-col space-y-1">
         <Button asChild variant="ghost" size="sm" className="justify-start">
-          <Link href="/vehicles">Vehicle List</Link>
+          <Link href={route('vehicles.index')}>Vehicle List</Link>
         </Button>
         <Button asChild variant="ghost" size="sm" className="justify-start">
-          <Link href="/drivers">Driver List</Link>
+          <Link href={route('drivers.index')}>Driver List</Link>
         </Button>
         <Button asChild variant="ghost" size="sm" className="justify-start">
-          <Link href="/routes">Route List</Link>
+          <Link href={route('routes.index')}>Route List</Link>
         </Button>
       </nav>
     </aside>

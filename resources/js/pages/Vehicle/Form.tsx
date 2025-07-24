@@ -54,7 +54,7 @@ export default function VehicleForm({
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Vehicle Management', href: '/vehicles' },
+        { title: 'Vehicle Management', href: route('vehicles.index') },
         { title: isEdit ? 'Edit Vehicle' : 'Create Vehicle', href: '#' },
     ];
 

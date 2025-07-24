@@ -10,7 +10,7 @@ import { BreadcrumbItem } from '@/types';
 import ToggleTabs from '@/components/toggle-tabs';
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Booking Management', href: '/bookings' },
+  { title: 'Booking Management', href: route('bookings.index') },
 ];
 
 export default function BookingIndex({ filter: initialFilter, success }: { filter?: string; success?: string }) {
@@ -73,7 +73,7 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
         const root = ReactDOM.createRoot(cell);
         root.render(
           <Link
-            href={`/bookings/${id}/edit`}
+            href={route('bookings.edit', id)}
             className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
           >
             Edit

@@ -8,7 +8,7 @@ import { BreadcrumbItem } from '@/types';
 import VehicleSidebar from '@/components/vehicle-sidebar';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Driver Management', href: '/drivers' },
+    { title: 'Driver Management', href: route('drivers.index') },
 ];
 
 const columns = [

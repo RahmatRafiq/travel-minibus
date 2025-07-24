@@ -76,7 +76,7 @@ export default function ScheduleForm({
     const [generalError, setGeneralError] = useState<string>('');
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Schedule Management', href: '/schedules' },
+        { title: 'Schedule Management', href: route('schedules.index') },
         { title: isEdit ? 'Edit Schedule' : 'Create Schedule', href: '#' },
     ];
 
