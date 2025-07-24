@@ -55,7 +55,7 @@ export default function Dashboard() {
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Dashboard" />
-      <div className="flex flex-col gap-8 p-4">
+      <div className="flex flex-col gap-4 p-3">
         {/* Insight Section */}
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 bg-gradient-to-r from-indigo-200 to-indigo-50 dark:from-indigo-900 dark:to-gray-900 rounded-xl p-4 flex items-center gap-3 shadow border border-indigo-200 dark:border-indigo-900">
