@@ -18,8 +18,11 @@ export default function Header() {
         <div className="grid grid-cols-2 items-center">
           {/* Kiri: Branding */}
           <div>
-            <span className="text-xl sm:text-2xl font-bold text-indigo-700">
-              Travel Minibus
+            <span className="block text-xl sm:text-2xl font-bold text-indigo-700">
+              Zazy Travel
+            </span>
+            <span className="block text-base sm:text-lg text-indigo-500 font-medium">
+              Bone Makassar
             </span>
           </div>
           {/* Kanan: Avatar Dropdown */}
