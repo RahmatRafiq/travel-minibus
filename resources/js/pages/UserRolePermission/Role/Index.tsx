@@ -10,13 +10,13 @@ import { BreadcrumbItem } from '@/types';
 import { Role } from '@/types/UserRolePermission';
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Role Management', href: '/roles' },
+  { title: 'Manajemen Peran', href: '/roles' },
 ];
 
 function formatRolePermissions(data: Role): string {
   const role = data as Role;
   if (!role.permissions || role.permissions.length === 0) {
-    return '<div class="p-3 text-gray-500">No permissions assigned.</div>';
+    return '<div class="p-3 text-gray-500">Tidak ada izin yang diberikan.</div>';
   }
   const listItems = role.permissions
     .map(
@@ -26,12 +26,11 @@ function formatRolePermissions(data: Role): string {
     .join('');
   return `
     <div class="p-4 bg-gray-50 border border-gray-200 rounded shadow-sm">
-      <strong class="block text-gray-800 mb-2">Permissions:</strong>
+      <strong class="block text-gray-800 mb-2">Izin:</strong>
       <ul>${listItems}</ul>
     </div>
   `;
 }
-
 
 export default function RoleIndexAccordion({ success }: { success?: string }) {
   const dtRef = useRef<DataTableWrapperRef>(null);
@@ -46,13 +45,13 @@ export default function RoleIndexAccordion({ success }: { success?: string }) {
       render: () => '<span style="cursor: pointer;">+</span>',
     },
     { data: 'id', title: 'ID' },
-    { data: 'name', title: 'Name' },
+    { data: 'name', title: 'Nama' },
     { data: 'guard_name', title: 'Guard Name' },
-    { data: 'created_at', title: 'Created At' },
-    { data: 'updated_at', title: 'Updated At' },
+    { data: 'created_at', title: 'Dibuat Pada' },
+    { data: 'updated_at', title: 'Diperbarui Pada' },
     {
       data: null,
-      title: 'Actions',
+      title: 'Aksi',
       orderable: false,
       searchable: false,
       render: (_: null, __: string, row: unknown) => {
@@ -60,7 +59,7 @@ export default function RoleIndexAccordion({ success }: { success?: string }) {
         return `
           <span class="inertia-link-cell" data-id="${role.id}"></span>
           <button data-id="${role.id}" class="ml-2 px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 btn-delete">
-            Delete
+            Hapus
           </button>
         `;
       },
@@ -85,7 +84,7 @@ export default function RoleIndexAccordion({ success }: { success?: string }) {
             href={`/roles/${id}/edit`}
             className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
           >
-            Edit
+            Ubah
           </Link>
         );
       }
@@ -121,17 +120,17 @@ export default function RoleIndexAccordion({ success }: { success?: string }) {
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Roles" />
+      <Head title="Peran" />
       <div className="px-4 py-6">
-        <h1 className="text-2xl font-semibold mb-4">Role Management</h1>
+        <h1 className="text-2xl font-semibold mb-4">Manajemen Peran</h1>
         <div className="flex flex-col space-y-8 lg:flex-row lg:space-y-0 lg:space-x-12">
           <Separator className="my-6 md:hidden" />
           <div className="col-md-12">
-            <HeadingSmall title="Roles" description="Manage roles for your application" />
+            <HeadingSmall title="Peran" description="Kelola peran untuk aplikasi Anda" />
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Role List</h2>
+              <h2 className="text-xl font-semibold">Daftar Peran</h2>
               <Link href={route('roles.create')}>
-                <Button>Create Role</Button>
+                <Button>Buat Peran</Button>
               </Link>
             </div>
             {success && (

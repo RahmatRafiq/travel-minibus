@@ -10,7 +10,7 @@ import { BreadcrumbItem } from '@/types';
 import { Permission } from '@/types/UserRolePermission';
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Permission Management', href: '/permissions' },
+  { title: 'Manajemen Permission', href: '/permissions' },
 ];
 
 export default function PermissionIndex({ success }: { success?: string }) {
@@ -18,10 +18,10 @@ export default function PermissionIndex({ success }: { success?: string }) {
 
   const columns = [
     { data: 'id', title: 'ID' },
-    { data: 'name', title: 'Name' },
+    { data: 'name', title: 'Nama' },
     {
       data: null,
-      title: 'Actions',
+      title: 'Aksi',
       orderable: false,
       searchable: false,
       render: (_: null, __: string, row: unknown) => {
@@ -29,7 +29,7 @@ export default function PermissionIndex({ success }: { success?: string }) {
         return `
                 <span class="inertia-link-cell" data-id="${permission.id}"></span>
                 <button data-id="${permission.id}" class="ml-2 px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 btn-delete">
-                  Delete
+                  Hapus
                 </button>
                `;
       },
@@ -45,7 +45,6 @@ export default function PermissionIndex({ success }: { success?: string }) {
   };
 
   const drawCallback = () => {
-    // Render tombol Edit secara dinamis menggunakan React
     document.querySelectorAll('.inertia-link-cell').forEach((cell) => {
       const id = cell.getAttribute('data-id');
       if (id) {
@@ -55,7 +54,7 @@ export default function PermissionIndex({ success }: { success?: string }) {
             href={`/permissions/${id}/edit`}
             className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
           >
-            Edit
+            Ubah
           </Link>
         );
       }
@@ -64,17 +63,17 @@ export default function PermissionIndex({ success }: { success?: string }) {
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Permissions" />
+      <Head title="Permission" />
       <div className="px-4 py-6">
-        <h1 className="text-2xl font-semibold mb-4">Settings</h1>
+        <h1 className="text-2xl font-semibold mb-4">Pengaturan</h1>
         <div className="flex flex-col space-y-8 lg:flex-row lg:space-y-0 lg:space-x-12">
           <Separator className="my-6 md:hidden" />
           <div className="col-md-12">
-            <HeadingSmall title="Permissions" description="Manage permissions for your application" />
+            <HeadingSmall title="Permission" description="Kelola permission untuk aplikasi Anda" />
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Permission List</h2>
+              <h2 className="text-xl font-semibold">Daftar Permission</h2>
               <Link href={route('permissions.create')}>
-                <Button>Create Permission</Button>
+                <Button>Buat Permission</Button>
               </Link>
             </div>
             {success && (

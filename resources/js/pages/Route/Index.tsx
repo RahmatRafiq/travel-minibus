@@ -8,17 +8,17 @@ import { BreadcrumbItem } from '@/types';
 import VehicleSidebar from '@/components/vehicle-sidebar';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Route Management', href: '/routes' },
+    { title: 'Manajemen Rute', href: route('routes.index') },
 ];
 
 const columns = [
     { data: 'id', title: 'ID' },
-    { data: 'name', title: 'Name' },
-    { data: 'origin', title: 'Origin' },
-    { data: 'destination', title: 'Destination' },
-    { data: 'duration', title: 'Duration' },
-    { data: 'created_at', title: 'Created At' },
-    { data: 'updated_at', title: 'Updated At' },
+    { data: 'name', title: 'Nama' },
+    { data: 'origin', title: 'Asal' },
+    { data: 'destination', title: 'Tujuan' },
+    { data: 'duration', title: 'Durasi' },
+    { data: 'created_at', title: 'Dibuat Pada' },
+    { data: 'updated_at', title: 'Diperbarui Pada' },
 ];
 
 export default function RouteIndex() {
@@ -26,13 +26,13 @@ export default function RouteIndex() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Routes" />
+            <Head title="Rute" />
             <div className="px-4 py-6">
-                <h1 className="text-2xl font-semibold mb-4">Route Management</h1>
+                <h1 className="text-2xl font-semibold mb-4">Manajemen Rute</h1>
                 <div className="flex flex-col space-y-8 lg:flex-row lg:space-y-0 lg:space-x-12">
                     <VehicleSidebar />
                     <div className="w-full flex-grow">
-                        <HeadingSmall title="Routes" description="View all routes" />
+                        <HeadingSmall title="Rute" description="Lihat semua rute" />
                         <DataTableWrapper
                             ref={dtRef}
                             ajax={{

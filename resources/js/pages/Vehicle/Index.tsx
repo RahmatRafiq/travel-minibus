@@ -12,19 +12,19 @@ import { Vehicle } from '@/types/Vehicle';
 import VehicleSidebar from '@/components/vehicle-sidebar';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Vehicle Management', href: '/vehicles' },
+    { title: 'Manajemen Kendaraan', href: route('vehicles.index') },
 ];
 
 function formatVehicleDetails(data: any): string {
     if (!data) return '';
     return `
     <div class="p-4 bg-gray-50 border border-gray-200 rounded shadow-sm">
-      <strong class="block text-gray-800 mb-2">Details:</strong>
+      <strong class="block text-gray-800 mb-2">Detail:</strong>
       <ul>
-        <li class="ml-4 list-disc text-gray-700">Brand: ${data.brand}</li>
-        <li class="ml-4 list-disc text-gray-700">Seat Capacity: ${data.seat_capacity}</li>
-        <li class="ml-4 list-disc text-gray-700">Driver: ${data.driver ? data.driver.name : '-'}</li>
-        <li class="ml-4 list-disc text-gray-700">Route: ${data.route ? data.route.name : '-'}</li>
+        <li class="ml-4 list-disc text-gray-700">Merek: ${data.brand}</li>
+        <li class="ml-4 list-disc text-gray-700">Kapasitas Kursi: ${data.seat_capacity}</li>
+        <li class="ml-4 list-disc text-gray-700">Sopir: ${data.driver ? data.driver.name : '-'}</li>
+        <li class="ml-4 list-disc text-gray-700">Rute: ${data.route ? data.route.name : '-'}</li>
       </ul>
     </div>
   `;
@@ -44,35 +44,35 @@ export default function VehicleIndexAccordion({ filter: initialFilter, success }
             render: () => '<span style="cursor: pointer;">+</span>',
         },
         { data: 'id', title: 'ID' },
-        { data: 'plate_number', title: 'Plate Number' },
-        { data: 'brand', title: 'Brand' },
-        { data: 'seat_capacity', title: 'Seat Capacity' },
+        { data: 'plate_number', title: 'Nomor Polisi' },
+        { data: 'brand', title: 'Merek' },
+        { data: 'seat_capacity', title: 'Kapasitas Kursi' },
         {
             data: 'driver',
-            title: 'Driver',
+            title: 'Sopir',
             render: (data: any) => (data ? data.name : '-'),
         },
         {
             data: 'route',
-            title: 'Route',
+            title: 'Rute',
             render: (data: any) => (data ? data.name : '-'),
         },
-        { data: 'created_at', title: 'Created At' },
-        { data: 'updated_at', title: 'Updated At' },
+        { data: 'created_at', title: 'Dibuat Pada' },
+        { data: 'updated_at', title: 'Diperbarui Pada' },
         {
             data: null,
-            title: 'Actions',
+            title: 'Aksi',
             orderable: false,
             searchable: false,
             render: (_: null, __: string, vehicle: any) => {
                 let html = '';
                 if (vehicle.trashed) {
-                    html += `<button class="btn-restore ml-2 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700" data-id="${vehicle.id}">Restore</button>`;
-                    html += `<button class="btn-force-delete ml-2 px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700" data-id="${vehicle.id}">Force Delete</button>`;
+                    html += `<button class="btn-restore ml-2 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700" data-id="${vehicle.id}">Pulihkan</button>`;
+                    html += `<button class="btn-force-delete ml-2 px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700" data-id="${vehicle.id}">Hapus Permanen</button>`;
                 } else {
                     html += `<span class="inertia-link-cell" data-id="${vehicle.id}"></span>`;
                     html += `<button data-id="${vehicle.id}" class="ml-2 px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 btn-delete">
-            Delete
+            Hapus
           </button>`;
                 }
                 return html;
@@ -107,10 +107,10 @@ export default function VehicleIndexAccordion({ filter: initialFilter, success }
                 const root = ReactDOM.createRoot(cell);
                 root.render(
                     <Link
-                        href={`/vehicles/${id}/edit`}
+                        href={route('vehicles.edit', id)}
                         className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
                     >
-                        Edit
+                        Ubah
                     </Link>
                 );
             }
@@ -158,18 +158,18 @@ export default function VehicleIndexAccordion({ filter: initialFilter, success }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Vehicles" />
+            <Head title="Kendaraan" />
             <div className="px-4 py-6">
-                <h1 className="text-2xl font-semibold mb-4">Vehicle Management</h1>
+                <h1 className="text-2xl font-semibold mb-4">Manajemen Kendaraan</h1>
                 <div className="flex flex-col space-y-8 lg:flex-row lg:space-y-0 lg:space-x-12">
                     <VehicleSidebar />
 
                     <div className="w-full flex-grow">
-                        <HeadingSmall title="Vehicles" description="Manage vehicles for your application" />
+                        <HeadingSmall title="Kendaraan" description="Kelola kendaraan untuk aplikasi Anda" />
                         <div className="flex items-center justify-between">
-                            <h2 className="text-xl font-semibold">Vehicle List</h2>
+                            <h2 className="text-xl font-semibold">Daftar Kendaraan</h2>
                             <Link href={route('vehicles.create')}>
-                                <Button>Create Vehicle</Button>
+                                <Button>Buat Kendaraan</Button>
                             </Link>
                         </div>
                         <ToggleTabs tabs={['active', 'trashed', 'all']} active={filter} onChange={setFilter} />

@@ -10,18 +10,18 @@ import ToggleTabs from '@/components/toggle-tabs';
 import { Schedule } from '@/types/Schedule';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Schedule Management', href: '/schedules' },
+    { title: 'Manajemen Jadwal', href: route('schedules.index') },
 ];
 
 function formatScheduleDetails(data: any): string {
     if (!data) return '';
     return `
     <div class="p-4 bg-gray-50 border border-gray-200 rounded shadow-sm">
-      <strong class="block text-gray-800 mb-2">Details:</strong>
+      <strong class="block text-gray-800 mb-2">Detail:</strong>
       <ul>
-        <li class="ml-4 list-disc text-gray-700">Route: ${data.route_vehicle?.route?.name ?? '-'}</li>
-        <li class="ml-4 list-disc text-gray-700">Vehicle: ${data.route_vehicle?.vehicle?.plate_number ?? '-'}</li>
-        <li class="ml-4 list-disc text-gray-700">Departure Time: ${data.departure_time}</li>
+        <li class="ml-4 list-disc text-gray-700">Rute: ${data.route_vehicle?.route?.name ?? '-'}</li>
+        <li class="ml-4 list-disc text-gray-700">Kendaraan: ${data.route_vehicle?.vehicle?.plate_number ?? '-'}</li>
+        <li class="ml-4 list-disc text-gray-700">Waktu Keberangkatan: ${data.departure_time}</li>
         <li class="ml-4 list-disc text-gray-700">Status: ${data.status}</li>
       </ul>
     </div>
@@ -44,32 +44,32 @@ export default function ScheduleIndexAccordion({ filter: initialFilter, success 
         { data: 'id', title: 'ID' },
         {
             data: 'route_vehicle',
-            title: 'Route',
+            title: 'Rute',
             render: (data: any) => data?.route?.name ?? '-',
         },
         {
             data: 'route_vehicle',
-            title: 'Vehicle',
+            title: 'Kendaraan',
             render: (data: any) => data?.vehicle?.plate_number ?? '-',
         },
-        { data: 'departure_time', title: 'Departure Time' },
+        { data: 'departure_time', title: 'Waktu Keberangkatan' },
         { data: 'status', title: 'Status' },
-        { data: 'created_at', title: 'Created At' },
-        { data: 'updated_at', title: 'Updated At' },
+        { data: 'created_at', title: 'Dibuat Pada' },
+        { data: 'updated_at', title: 'Diperbarui Pada' },
         {
             data: null,
-            title: 'Actions',
+            title: 'Aksi',
             orderable: false,
             searchable: false,
             render: (_: null, __: string, schedule: any) => {
                 let html = '';
                 if (schedule.trashed) {
-                    html += `<button class="btn-restore ml-2 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700" data-id="${schedule.id}">Restore</button>`;
-                    html += `<button class="btn-force-delete ml-2 px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700" data-id="${schedule.id}">Force Delete</button>`;
+                    html += `<button class="btn-restore ml-2 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700" data-id="${schedule.id}">Pulihkan</button>`;
+                    html += `<button class="btn-force-delete ml-2 px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700" data-id="${schedule.id}">Hapus Permanen</button>`;
                 } else {
                     html += `<span class="inertia-link-cell" data-id="${schedule.id}"></span>`;
                     html += `<button data-id="${schedule.id}" class="ml-2 px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 btn-delete">
-            Delete
+            Hapus
           </button>`;
                 }
                 return html;
@@ -104,10 +104,10 @@ export default function ScheduleIndexAccordion({ filter: initialFilter, success 
                 const root = ReactDOM.createRoot(cell);
                 root.render(
                     <Link
-                        href={`/schedules/${id}/edit`}
+                        href={route('schedules.edit', id)}
                         className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
                     >
-                        Edit
+                        Ubah
                     </Link>
                 );
             }
@@ -155,17 +155,16 @@ export default function ScheduleIndexAccordion({ filter: initialFilter, success 
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Schedules" />
+            <Head title="Jadwal" />
             <div className="px-4 py-6">
-                <h1 className="text-2xl font-semibold mb-4">Schedule Management</h1>
+                <h1 className="text-2xl font-semibold mb-4">Manajemen Jadwal</h1>
                 <div className="flex flex-col space-y-8 lg:flex-row lg:space-y-0 lg:space-x-12">
-                    {/* You can add a ScheduleSidebar here if needed */}
                     <div className="w-full flex-grow">
-                        <HeadingSmall title="Schedules" description="Manage schedules for your application" />
+                        <HeadingSmall title="Jadwal" description="Kelola jadwal untuk aplikasi Anda" />
                         <div className="flex items-center justify-between">
-                            <h2 className="text-xl font-semibold">Schedule List</h2>
+                            <h2 className="text-xl font-semibold">Daftar Jadwal</h2>
                             <Link href={route('schedules.create')}>
-                                <Button>Create Schedule</Button>
+                                <Button>Buat Jadwal</Button>
                             </Link>
                         </div>
                         <ToggleTabs tabs={['active', 'trashed', 'all']} active={filter} onChange={setFilter} />

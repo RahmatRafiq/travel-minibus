@@ -17,9 +17,9 @@ export default function PermissionForm({ permission }: { permission?: Permission
   });
 
   const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Settings', href: '/settings' },
-    { title: 'Permission Management', href: '/permissions' },
-    { title: isEdit ? 'Edit Permission' : 'Create Permission', href: '#' },
+    { title: 'Pengaturan', href: '/settings' },
+    { title: 'Manajemen Hak Akses', href: '/permissions' },
+    { title: isEdit ? 'Ubah Hak Akses' : 'Buat Hak Akses', href: '#' },
   ];
 
   const handleSubmit = (e: FormEvent) => {
@@ -33,38 +33,36 @@ export default function PermissionForm({ permission }: { permission?: Permission
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title={isEdit ? 'Edit Permission' : 'Create Permission'} />
+      <Head title={isEdit ? 'Ubah Hak Akses' : 'Buat Hak Akses'} />
       <div className="px-4 py-6">
-        <h1 className="text-2xl font-semibold mb-4">Settings</h1>
+        <h1 className="text-2xl font-semibold mb-4">Pengaturan</h1>
 
         <div className="flex flex-col space-y-8 lg:flex-row lg:space-y-0 lg:space-x-12">
-          {/* Sidebar */}
           <aside className="w-full max-w-xl lg:w-48">
             <nav className="flex flex-col space-y-1">
               <Button asChild variant="ghost" size="sm" className="justify-start">
-                <Link href="/users">User List</Link>
+                <Link href="/users">Daftar Pengguna</Link>
               </Button>
               <Button asChild variant="ghost" size="sm" className="justify-start">
-                <Link href="/roles">Role Management</Link>
+                <Link href="/roles">Manajemen Peran</Link>
               </Button>
               <Button asChild variant="ghost" size="sm" className="justify-start">
-                <Link href="/permissions">Permission Management</Link>
+                <Link href="/permissions">Manajemen Hak Akses</Link>
               </Button>
             </nav>
           </aside>
 
           <Separator className="my-6 md:hidden" />
 
-          {/* Content */}
           <div className="flex-1 md:max-w-2xl space-y-6">
             <HeadingSmall
-              title={isEdit ? 'Edit Permission' : 'Create Permission'}
-              description="Fill in the details below"
+              title={isEdit ? 'Ubah Hak Akses' : 'Buat Hak Akses'}
+              description="Isi detail di bawah ini"
             />
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="name">Permission Name</Label>
+                <Label htmlFor="name">Nama Hak Akses</Label>
                 <Input
                   id="name"
                   type="text"
@@ -77,13 +75,13 @@ export default function PermissionForm({ permission }: { permission?: Permission
 
               <div className="flex items-center space-x-4">
                 <Button disabled={processing}>
-                  {isEdit ? 'Update Permission' : 'Create Permission'}
+                  {isEdit ? 'Perbarui Hak Akses' : 'Buat Hak Akses'}
                 </Button>
                 <Link
                   href={route('permissions.index')}
                   className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
                 >
-                  Cancel
+                  Batal
                 </Link>
               </div>
             </form>

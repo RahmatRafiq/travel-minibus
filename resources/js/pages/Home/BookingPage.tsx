@@ -59,7 +59,7 @@ export default function BookingDetail({
   };
   const handleFormBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    router.get("/booking-detail", {
+    router.get(route('booking.detail'), {
       origin: search.origin,
       destination: search.destination,
       date: search.date,
@@ -77,7 +77,7 @@ export default function BookingDetail({
       return;
     }
     setError(null);
-    router.post("/home-booking", {
+    router.post(route('home.booking.store'), {
       schedule_id: selectedSchedule,
       seats_booked: seats,
     });
@@ -112,7 +112,9 @@ export default function BookingDetail({
       <Header />
       <main className="container mx-auto px-2 sm:px-4 md:px-6 py-6 sm:py-10 md:py-12 flex-1 w-full">
         <div className="bg-white rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 border border-indigo-100 max-w-xl mx-auto w-full">
-          <h2 className="text-lg sm:text-xl font-bold text-indigo-700 mb-4">Jadwal Tersedia</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-indigo-700 mb-4">
+            Jadwal Tersedia Untuk Rute {origin && destination ? `${origin} → ${destination}` : ''}
+          </h2>
           {schedules.length === 0 && (
             <>
               <div className="text-gray-500 text-center mb-6">Tidak ada jadwal tersedia untuk pilihan Anda.</div>

@@ -27,10 +27,9 @@ export default function UserForm({
         role_id: user?.role_id || null,
     });
 
-
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'User Management', href: '/users' },
-        { title: isEdit ? 'Edit User' : 'Create User', href: '#' },
+        { title: 'Manajemen Pengguna', href: '/users' },
+        { title: isEdit ? 'Ubah Pengguna' : 'Tambah Pengguna', href: '#' },
     ];
 
     const handleSubmit = (e: FormEvent) => {
@@ -51,33 +50,32 @@ export default function UserForm({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={isEdit ? 'Edit User' : 'Create User'} />
+            <Head title={isEdit ? 'Ubah Pengguna' : 'Tambah Pengguna'} />
             <div className="px-4 py-6">
-                <h1 className="text-2xl font-semibold mb-4">User Management</h1>
+                <h1 className="text-2xl font-semibold mb-4">Manajemen Pengguna</h1>
                 <div className="flex flex-col space-y-8 lg:flex-row lg:space-y-0 lg:space-x-12">
-                    {/* Sidebar */}
                     <aside className="w-full max-w-xl lg:w-48">
                         <nav className="flex flex-col space-y-1">
                             <Button asChild variant="ghost" size="sm" className="justify-start">
-                                <Link href="/users">User List</Link>
+                                <Link href="/users">Daftar Pengguna</Link>
                             </Button>
                             <Button asChild variant="ghost" size="sm" className="justify-start">
-                                <Link href="/roles">Role Management</Link>
+                                <Link href="/roles">Manajemen Peran</Link>
                             </Button>
                             <Button asChild variant="ghost" size="sm" className="justify-start">
-                                <Link href="/permissions">Permission Management</Link>
+                                <Link href="/permissions">Manajemen Hak Akses</Link>
                             </Button>
                         </nav>
                     </aside>
                     <div className="flex-1 md:max-w-2xl space-y-6">
                         <HeadingSmall
-                            title={isEdit ? 'Edit User' : 'Create User'}
-                            description="Fill in the details below"
+                            title={isEdit ? 'Ubah Pengguna' : 'Tambah Pengguna'}
+                            description="Isi detail di bawah ini"
                         />
 
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
-                                <Label htmlFor="name">Name</Label>
+                                <Label htmlFor="name">Nama</Label>
                                 <Input
                                     id="name"
                                     type="text"
@@ -102,9 +100,9 @@ export default function UserForm({
 
                             <div>
                                 <Label htmlFor="password">
-                                    Password{' '}
+                                    Kata Sandi{' '}
                                     {isEdit && (
-                                        <span className="text-sm text-muted">(Leave blank if not changing)</span>
+                                        <span className="text-sm text-muted">(Kosongkan jika tidak ingin mengubah)</span>
                                     )}
                                 </Label>
                                 <Input
@@ -118,7 +116,7 @@ export default function UserForm({
                             </div>
 
                             <div>
-                                <Label htmlFor="password_confirmation">Confirm Password</Label>
+                                <Label htmlFor="password_confirmation">Konfirmasi Kata Sandi</Label>
                                 <Input
                                     id="password_confirmation"
                                     type="password"
@@ -130,7 +128,7 @@ export default function UserForm({
                             </div>
 
                             <div>
-                                <Label htmlFor="role_id">Role</Label>
+                                <Label htmlFor="role_id">Peran</Label>
                                 <CustomSelect
                                     id="role_id"
                                     isMulti={false}
@@ -145,13 +143,13 @@ export default function UserForm({
 
                             <div className="flex items-center space-x-4">
                                 <Button disabled={processing}>
-                                    {isEdit ? 'Update User' : 'Create User'}
+                                    {isEdit ? 'Perbarui Pengguna' : 'Tambah Pengguna'}
                                 </Button>
                                 <Link
                                     href={route('users.index')}
                                     className="px-4 py-2 bg-muted text-foreground rounded hover:bg-muted/70"
                                 >
-                                    Cancel
+                                    Batal
                                 </Link>
                             </div>
                         </form>

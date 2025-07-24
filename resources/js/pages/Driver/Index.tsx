@@ -8,29 +8,29 @@ import { BreadcrumbItem } from '@/types';
 import VehicleSidebar from '@/components/vehicle-sidebar';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Driver Management', href: '/drivers' },
+    { title: 'Manajemen Sopir', href: route('drivers.index') },
 ];
 
 const columns = [
     { data: 'id', title: 'ID' },
-    { data: 'name', title: 'Name' },
-    { data: 'phone', title: 'Phone' },
-    { data: 'created_at', title: 'Created At' },
-    { data: 'updated_at', title: 'Updated At' },
+    { data: 'name', title: 'Nama' },
+    { data: 'phone', title: 'Telepon' },
+    { data: 'created_at', title: 'Dibuat Pada' },
+    { data: 'updated_at', title: 'Diperbarui Pada' },
 ];
 
 export default function DriverIndex() {
     const dtRef = useRef<DataTableWrapperRef>(null);
 
-    return (
+    return (    
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Drivers" />
+            <Head title="Sopir" />
             <div className="px-4 py-6">
-                <h1 className="text-2xl font-semibold mb-4">Driver Management</h1>
+                <h1 className="text-2xl font-semibold mb-4">Manajemen Sopir</h1>
                 <div className="flex flex-col space-y-8 lg:flex-row lg:space-y-0 lg:space-x-12">
                     <VehicleSidebar />
                     <div className="w-full flex-grow">
-                        <HeadingSmall title="Drivers" description="View all drivers" />
+                        <HeadingSmall title="Sopir" description="Lihat semua sopir" />
                         <DataTableWrapper
                             ref={dtRef}
                             ajax={{

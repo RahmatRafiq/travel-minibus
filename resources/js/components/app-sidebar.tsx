@@ -19,53 +19,47 @@ import {
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
+        title: 'Beranda',
         href: '/dashboard',
         icon: Gauge,
     },
     {
-        title: 'Log Activity',
-        href: '/dashboard/activity-logs',
-        icon: ActivitySquare,
-    },
-    {
-        title: 'Users Management',
+        title: 'Manajemen Pengguna',
         href: '',
         icon: Users2,
         children: [
             {
-                title: 'Roles',
-                href: '/dashboard/roles',
+                title: 'Peran',
+                href: route('roles.index'),
                 icon: KeyRound,
             },
             {
-                title: 'Permissions',
-                href: '/dashboard/permissions',
+                title: 'Hak Akses',
+                href: route('permissions.index'),
                 icon: LockKeyhole,
             },
             {
-                title: 'User',
-                href: '/dashboard/users',
+                title: 'Pengguna',
+                href: route('users.index'),
                 icon: UserCog,
             },
         ],
     },
     {
-        title: 'Travel Management',
-        href: '/dashboard/vehicles',
+        title: 'Manajemen Armada',
+        href: route('vehicles.index'),
         icon: BusFront,
     },
     {
-        title: 'Bookings management',
-        href: '/dashboard/bookings',
+        title: 'Manajemen Booking',
+        href: route('bookings.index'),
         icon: CalendarCheck2,
     },
     {
-        title: 'Schedule Management',
-        href: '/dashboard/schedules',
+        title: 'Manajemen Jadwal',
+        href: route('schedules.index'),
         icon: CalendarClock,
     }
-
 ];
 
 const footerNavItems: NavItem[] = [
