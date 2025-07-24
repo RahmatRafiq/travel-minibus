@@ -39,6 +39,7 @@ export function DatePicker({
                 placeholderText="Pilih tanggal"
                 dateFormat="yyyy-MM-dd"
                 minDate={minDate}
+                popperPlacement="top-start"
             />
         </div>
     );
