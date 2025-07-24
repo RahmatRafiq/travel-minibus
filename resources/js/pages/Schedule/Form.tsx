@@ -76,8 +76,8 @@ export default function ScheduleForm({
     const [generalError, setGeneralError] = useState<string>('');
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Schedule Management', href: route('schedules.index') },
-        { title: isEdit ? 'Edit Schedule' : 'Create Schedule', href: '#' },
+        { title: 'Manajemen Jadwal', href: route('schedules.index') },
+        { title: isEdit ? 'Edit Jadwal' : 'Buat Jadwal', href: '#' },
     ];
 
     const handleFieldChange = (field: 'route_id' | 'vehicle_id' | 'status', value: any) => {
@@ -140,17 +140,17 @@ export default function ScheduleForm({
         clearErrors();
         setGeneralError('');
         if (!routeId || !vehicleId || !status) {
-            setGeneralError('Route, Vehicle, and Status are required.');
+            setGeneralError('Rute, Kendaraan, dan Status wajib diisi.');
             return;
         }
         if (!isEdit && departureTimes.length === 0) {
-            setError('departure_times', 'At least one departure time is required.');
+            setError('departure_times', 'Minimal satu waktu keberangkatan harus diisi.');
             return;
         }
         if (!isEdit) {
             for (let i = 0; i < departureTimes.length; i++) {
                 if (!departureTimes[i].departure_time) {
-                    setError('departure_times', 'All departure times are required.');
+                    setError('departure_times', 'Semua waktu keberangkatan harus diisi.');
                     return;
                 }
             }
@@ -173,51 +173,51 @@ export default function ScheduleForm({
     }));
 
     const statusOptions = [
-        { value: 'ready', label: 'Ready' },
-        { value: 'departed', label: 'Departed' },
-        { value: 'arrived', label: 'Arrived' },
-        { value: 'cancelled', label: 'Cancelled' },
+        { value: 'ready', label: 'Siap Berangkat' },
+        { value: 'departed', label: 'Berangkat' },
+        { value: 'arrived', label: 'Tiba' },
+        { value: 'cancelled', label: 'Dibatalkan' },
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={isEdit ? 'Edit Schedule' : 'Create Schedule'} />
+            <Head title={isEdit ? 'Edit Jadwal' : 'Buat Jadwal'} />
             <div className="px-4 py-6">
-                <h1 className="text-2xl font-semibold mb-4 text-foreground">Schedule Management</h1>
+                <h1 className="text-2xl font-semibold mb-4 text-foreground">Manajemen Jadwal</h1>
                 <div className="flex flex-col space-y-8 lg:flex-row lg:space-y-0 lg:space-x-12">
                     <div className="flex-1 md:max-w-2xl space-y-6">
                         <HeadingSmall
-                            title={isEdit ? 'Edit Schedule' : 'Create Schedule'}
-                            description="Fill in the details below"
+                            title={isEdit ? 'Edit Jadwal' : 'Buat Jadwal'}
+                            description="Isi detail jadwal di bawah ini"
                         />
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="border rounded p-6 mb-2">
                                 <div className="space-y-4">
                                     <div>
-                                        <Label htmlFor="route_id" className="text-foreground">Route</Label>
+                                        <Label htmlFor="route_id" className="text-foreground">Rute</Label>
                                         <CustomSelect
                                             id="route_id"
                                             options={routeOptions}
                                             value={routeOptions.find((option) => option.value === routeId) || null}
                                             onChange={(selected: any) => handleFieldChange('route_id', selected ? selected.value : null)}
-                                            placeholder="Select route..."
+                                            placeholder="Pilih rute..."
                                         />
                                         <InputError message={errors.route_id as string} />
                                     </div>
                                     <div>
-                                        <Label htmlFor="vehicle_id" className="text-foreground">Vehicle</Label>
+                                        <Label htmlFor="vehicle_id" className="text-foreground">Kendaraan</Label>
                                         <CustomSelect
                                             id="vehicle_id"
                                             options={vehicleOptions}
                                             value={vehicleOptions.find((option) => option.value === vehicleId) || null}
                                             onChange={(selected: any) => handleFieldChange('vehicle_id', selected ? selected.value : null)}
-                                            placeholder="Select vehicle..."
+                                            placeholder="Pilih kendaraan..."
                                         />
                                         {(() => {
                                             const selectedVehicle = vehicles.find(v => v.id === vehicleId);
                                             return (
                                                 <div className="text-sm text-gray-500 mt-1">
-                                                    Brand: {selectedVehicle?.brand ?? '-'}
+                                                    Merek: {selectedVehicle?.brand ?? '-'}
                                                 </div>
                                             );
                                         })()}
@@ -230,7 +230,7 @@ export default function ScheduleForm({
                                             options={statusOptions}
                                             value={statusOptions.find(option => option.value === status)}
                                             onChange={(selected: any) => handleFieldChange('status', selected ? selected.value : 'ready')}
-                                            placeholder="Select status..."
+                                            placeholder="Pilih status..."
                                             isSearchable={false}
                                         />
                                         <InputError message={errors.status as string} />
@@ -238,7 +238,7 @@ export default function ScheduleForm({
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-foreground">Departure Times</Label>
+                                <Label className="text-foreground">Waktu Keberangkatan</Label>
                                 {departureTimes.map((dt, idx) => {
                                     const { date, time } = splitDateTime(dt.departure_time);
                                     return (
@@ -278,7 +278,7 @@ export default function ScheduleForm({
                                                     className="text-red-600"
                                                     onClick={() => removeDepartureTime(idx)}
                                                 >
-                                                    Remove
+                                                    Hapus
                                                 </Button>
                                             )}
                                         </div>
@@ -286,7 +286,7 @@ export default function ScheduleForm({
                                 })}
                                 <div className="flex flex-wrap gap-2">
                                     <Button type="button" variant="outline" onClick={addDepartureTime} className="border-primary text-primary hover:bg-primary/10">
-                                        + Add Departure Time
+                                        + Tambah Waktu
                                     </Button>
                                     <Button type="button" variant="outline" onClick={() => bulkAddDepartureTimes(7)} className="border-primary text-primary hover:bg-primary/10">
                                         Isi 1 Minggu
@@ -304,13 +304,13 @@ export default function ScheduleForm({
                             )}
                             <div className="flex items-center space-x-4">
                                 <Button disabled={processing} className="bg-primary text-primary-foreground hover:bg-primary/90">
-                                    {isEdit ? 'Update Schedule' : 'Create Schedule(s)'}
+                                    {isEdit ? 'Perbarui Jadwal' : 'Buat Jadwal'}
                                 </Button>
                                 <Link
                                     href={route('schedules.index')}
                                     className="px-4 py-2 bg-muted text-foreground rounded hover:bg-muted/70"
                                 >
-                                    Cancel
+                                    Batal
                                 </Link>
                             </div>
                         </form>

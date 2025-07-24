@@ -11,23 +11,23 @@ import ToggleTabs from '@/components/toggle-tabs';
 
 const columns = (filter: string) => [
   { data: 'id', title: 'ID' },
-  { data: 'name', title: 'Name' },
+  { data: 'name', title: 'Nama' },
   { data: 'email', title: 'Email' },
-  { data: 'roles', title: 'Role(s)' },
+  { data: 'roles', title: 'Peran' },
   {
     data: null,
-    title: 'Actions',
+    title: 'Aksi',
     orderable: false,
     searchable: false,
     render: (_: null, __: string, row: unknown) => {
       const user = row as User;
       let html = '';
       if (filter === 'trashed' || (filter === 'all' && user.trashed)) {
-        html += `<button class="btn-restore ml-2 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700" data-id="${user.id}">Restore</button>`;
-        html += `<button class="btn-force-delete ml-2 px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700" data-id="${user.id}">Force Delete</button>`;
+        html += `<button class="btn-restore ml-2 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700" data-id="${user.id}">Pulihkan</button>`;
+        html += `<button class="btn-force-delete ml-2 px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700" data-id="${user.id}">Hapus Permanen</button>`;
       } else {
         html += `<span class="inertia-link-cell" data-id="${user.id}"></span>`;
-        html += `<button class="btn-delete ml-2 px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700" data-id="${user.id}">Delete</button>`;
+        html += `<button class="btn-delete ml-2 px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700" data-id="${user.id}">Hapus</button>`;
       }
       return html;
     },
@@ -35,7 +35,7 @@ const columns = (filter: string) => [
 ];
 
 export default function UserIndex({ filter: initialFilter, success }: { filter: string; success?: string }) {
-  const breadcrumbs: BreadcrumbItem[] = [{ title: 'User Management', href: '/users' }];
+  const breadcrumbs: BreadcrumbItem[] = [{ title: 'Manajemen Pengguna', href: '/users' }];
   const dtRef = useRef<DataTableWrapperRef>(null);
   const [filter, setFilter] = useState(initialFilter || 'active');
 
@@ -67,13 +67,12 @@ export default function UserIndex({ filter: initialFilter, success }: { filter: 
             href={`/users/${id}/edit`}
             className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
           >
-            Edit
+            Ubah
           </Link>
         );
       }
     });
 
-    // Attach event listener untuk tombol Delete, Restore, dan Force Delete
     document.querySelectorAll('.btn-delete').forEach((btn) => {
       btn.addEventListener('click', () => {
         const id = btn.getAttribute('data-id');
@@ -94,18 +93,17 @@ export default function UserIndex({ filter: initialFilter, success }: { filter: 
     });
   };
 
-
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Users" />
+      <Head title="Pengguna" />
       <div className="px-4 py-6">
-        <h1 className="text-2xl font-semibold mb-4">User Management</h1>
+        <h1 className="text-2xl font-semibold mb-4">Manajemen Pengguna</h1>
         <div className="col-md-12">
-          <HeadingSmall title="Users" description="Manage application users and their roles" />
+          <HeadingSmall title="Pengguna" description="Kelola pengguna aplikasi dan peran mereka" />
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">User List</h2>
+            <h2 className="text-xl font-semibold">Daftar Pengguna</h2>
             <Link href={route('users.create')}>
-              <Button>Create User</Button>
+              <Button>Buat Pengguna</Button>
             </Link>
           </div>
 

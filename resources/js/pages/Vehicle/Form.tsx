@@ -54,8 +54,8 @@ export default function VehicleForm({
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Vehicle Management', href: route('vehicles.index') },
-        { title: isEdit ? 'Edit Vehicle' : 'Create Vehicle', href: '#' },
+        { title: 'Manajemen Kendaraan', href: route('vehicles.index') },
+        { title: isEdit ? 'Edit Kendaraan' : 'Tambah Kendaraan', href: '#' },
     ];
 
     const handleSubmit = (e: FormEvent) => {
@@ -74,20 +74,19 @@ export default function VehicleForm({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={isEdit ? 'Edit Vehicle' : 'Create Vehicle'} />
+            <Head title={isEdit ? 'Edit Kendaraan' : 'Tambah Kendaraan'} />
             <div className="px-4 py-6">
-                <h1 className="text-2xl font-semibold mb-4">Vehicle Management</h1>
+                <h1 className="text-2xl font-semibold mb-4">Manajemen Kendaraan</h1>
                 <div className="flex flex-col space-y-8 lg:flex-row lg:space-y-0 lg:space-x-12">
-                    {/* Sidebar */}
                     <VehicleSidebar />
                     <div className="flex-1 md:max-w-2xl space-y-6">
                         <HeadingSmall
-                            title={isEdit ? 'Edit Vehicle' : 'Create Vehicle'}
-                            description="Fill in the details below"
+                            title={isEdit ? 'Edit Kendaraan' : 'Tambah Kendaraan'}
+                            description="Isi detail di bawah ini"
                         />
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
-                                <Label htmlFor="plate_number">Plate Number</Label>
+                                <Label htmlFor="plate_number">Nomor Polisi</Label>
                                 <Input
                                     id="plate_number"
                                     type="text"
@@ -98,7 +97,7 @@ export default function VehicleForm({
                                 <InputError message={errors.plate_number} />
                             </div>
                             <div>
-                                <Label htmlFor="brand">Brand</Label>
+                                <Label htmlFor="brand">Merek</Label>
                                 <Input
                                     id="brand"
                                     type="text"
@@ -109,7 +108,7 @@ export default function VehicleForm({
                                 <InputError message={errors.brand} />
                             </div>
                             <div>
-                                <Label htmlFor="seat_capacity">Seat Capacity</Label>
+                                <Label htmlFor="seat_capacity">Kapasitas Kursi</Label>
                                 <Input
                                     id="seat_capacity"
                                     type="number"
@@ -121,25 +120,18 @@ export default function VehicleForm({
                                 <InputError message={errors.seat_capacity} />
                             </div>
                             <div>
-                                <Label htmlFor="driver_id">Driver</Label>
-                                {/* <CustomSelect
-                  id="driver_id"
-                  options={driverOptions}
-                  value={driverOptions.find((option) => option.value === data.driver_id)}
-                  onChange={(selected) => setData('driver_id', (selected as { value: number }).value)}
-                  isClearable
-                /> */}
+                                <Label htmlFor="driver_id">Supir</Label>
                                 <InputError message={errors.driver_id} />
                                 <div className="mt-2 grid grid-cols-2 gap-2">
                                     <Input
                                         id="driver_name"
-                                        placeholder="New Driver Name"
+                                        placeholder="Nama Supir Baru"
                                         value={data.driver_name}
                                         onChange={e => setData('driver_name', e.target.value)}
                                     />
                                     <Input
                                         id="driver_phone"
-                                        placeholder="New Driver Phone"
+                                        placeholder="Nomor Telepon Supir Baru"
                                         value={data.driver_phone}
                                         onChange={e => setData('driver_phone', e.target.value)}
                                     />
@@ -147,7 +139,7 @@ export default function VehicleForm({
                                 <InputError message={errors.driver_name || errors.driver_phone} />
                             </div>
                             <div>
-                                <Label htmlFor="route_ids">Routes</Label>
+                                <Label htmlFor="route_ids">Rute</Label>
                                 <CustomSelect
                                     id="route_ids"
                                     isMulti
@@ -156,19 +148,19 @@ export default function VehicleForm({
                                     onChange={(selected: any) => {
                                         setData('route_ids', selected ? selected.map((opt: any) => opt.value) : []);
                                     }}
-                                    placeholder="Select routes..."
+                                    placeholder="Pilih rute..."
                                 />
                                 <InputError message={errors.route_ids} />
                             </div>
                             <div className="flex items-center space-x-4">
                                 <Button disabled={processing}>
-                                    {isEdit ? 'Update Vehicle' : 'Create Vehicle'}
+                                    {isEdit ? 'Perbarui Kendaraan' : 'Tambah Kendaraan'}
                                 </Button>
                                 <Link
                                     href={route('vehicles.index')}
                                     className="px-4 py-2 bg-muted text-foreground rounded hover:bg-muted/70"
                                 >
-                                    Cancel
+                                    Batal
                                 </Link>
                             </div>
                         </form>

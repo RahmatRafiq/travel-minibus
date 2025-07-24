@@ -9,7 +9,6 @@ import type { Vehicle } from '@/types/Vehicle';
 import type { Schedule } from '@/types/Schedule';
 import type { Booking } from '@/types/Booking';
 
-
 type Props = {
     errors: any;
     origin?: string;
@@ -105,43 +104,43 @@ export default function BookingForm(props: Props) {
     }
 
     const breadcrumbs = [
-        { title: 'Bookings', href: route('bookings.index') },
-        { title: isEdit ? 'Edit Booking' : 'Create Booking', href: '' }
+        { title: 'Pemesanan', href: route('bookings.index') },
+        { title: isEdit ? 'Edit Pemesanan' : 'Buat Pemesanan', href: '' }
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={isEdit ? 'Edit Booking' : 'Create Booking'} />
+            <Head title={isEdit ? 'Edit Pemesanan' : 'Buat Pemesanan'} />
             <div className="px-4 py-6">
-                <h1 className="text-2xl font-semibold mb-4">Booking Management</h1>
+                <h1 className="text-2xl font-semibold mb-4">Manajemen Pemesanan</h1>
                 <div className="flex flex-col space-y-8 lg:flex-row lg:space-y-0 lg:space-x-12">
                     {/* Sidebar bisa ditambahkan di sini jika ada */}
                     <div className="flex-1 md:max-w-2xl space-y-6">
                         <HeadingSmall
-                            title={isEdit ? 'Edit Booking' : 'Create Booking'}
-                            description="Isi detail booking di bawah ini"
+                            title={isEdit ? 'Edit Pemesanan' : 'Buat Pemesanan'}
+                            description="Isi detail pemesanan di bawah ini"
                         />
                         <div className="space-y-4">
                             {!isEdit ? (
                                 <form onSubmit={handleSearch} className="space-y-4">
                                     <div>
-                                        <label className="block text-xs text-muted-foreground mb-1">Origin</label>
+                                        <label className="block text-xs text-muted-foreground mb-1">Asal</label>
                                         <CustomSelect
                                             options={originOptions}
                                             value={originOptions.find(opt => opt.value === search.origin) || null}
                                             onChange={(opt: any) => setSearch(s => ({ ...s, origin: opt?.value || '' }))}
-                                            placeholder="Pilih Origin"
+                                            placeholder="Pilih Asal"
                                             isClearable
                                             required
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs text-muted-foreground mb-1">Destination</label>
+                                        <label className="block text-xs text-muted-foreground mb-1">Tujuan</label>
                                         <CustomSelect
                                             options={destinationOptions}
                                             value={destinationOptions.find(opt => opt.value === search.destination) || null}
                                             onChange={(opt: any) => setSearch(s => ({ ...s, destination: opt?.value || '' }))}
-                                            placeholder="Pilih Destination"
+                                            placeholder="Pilih Tujuan"
                                             isClearable
                                             required
                                         />
@@ -180,7 +179,7 @@ export default function BookingForm(props: Props) {
                                             href={route('bookings.index')}
                                             className="px-4 py-2 bg-muted text-foreground rounded hover:bg-muted/70 border border-input"
                                         >
-                                            Cancel
+                                            Batal
                                         </Link>
                                     </div>
                                 </form>
@@ -200,23 +199,23 @@ export default function BookingForm(props: Props) {
                                         return (
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                                                 <div>
-                                                    <label className="text-xs text-muted-foreground mb-1">Origin</label>
+                                                    <label className="text-xs text-muted-foreground mb-1">Asal</label>
                                                     <input
                                                         type="text"
                                                         value={origin}
                                                         className="border border-input rounded px-2 py-1 w-full bg-muted text-foreground"
                                                         disabled
-                                                        placeholder="Origin"
+                                                        placeholder="Asal"
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="text-xs text-muted-foreground mb-1">Destination</label>
+                                                    <label className="text-xs text-muted-foreground mb-1">Tujuan</label>
                                                     <input
                                                         type="text"
                                                         value={destination}
                                                         className="border border-input rounded px-2 py-1 w-full bg-muted text-foreground"
                                                         disabled
-                                                        placeholder="Destination"
+                                                        placeholder="Tujuan"
                                                     />
                                                 </div>
                                                 <div>
@@ -268,13 +267,13 @@ export default function BookingForm(props: Props) {
                                     </div>
                                     <div className="flex items-center space-x-4">
                                         <Button type="submit" disabled={processing}>
-                                            {isEdit ? 'Update Booking' : 'Create Booking'}
+                                            {isEdit ? 'Perbarui Pemesanan' : 'Buat Pemesanan'}
                                         </Button>
                                         <Link
                                             href={route('bookings.index')}
                                             className="px-4 py-2 bg-muted text-foreground rounded hover:bg-muted/70 border border-input"
                                         >
-                                            Cancel
+                                            Batal
                                         </Link>
                                     </div>
                                 </form>

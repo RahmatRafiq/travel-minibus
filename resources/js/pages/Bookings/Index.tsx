@@ -10,7 +10,7 @@ import { BreadcrumbItem } from '@/types';
 import ToggleTabs from '@/components/toggle-tabs';
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Booking Management', href: route('bookings.index') },
+  { title: 'Manajemen Pemesanan', href: route('bookings.index') },
 ];
 
 export default function BookingIndex({ filter: initialFilter, success }: { filter?: string; success?: string }) {
@@ -21,12 +21,12 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
     { data: 'id', title: 'ID' },
     {
       data: 'user',
-      title: 'User',
+      title: 'Pengguna',
       render: (data: any) => data ? data.name : '-',
     },
     {
       data: 'schedule',
-      title: 'Schedule',
+      title: 'Jadwal',
       render: (data: any) =>
         data
           ? `${data.departure_time} | ${data.vehicle?.plate_number ?? '-'} (${data.vehicle?.brand ?? '-'})`
@@ -34,31 +34,31 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
     },
     {
       data: 'schedule',
-      title: 'Route',
+      title: 'Rute',
       render: (data: any) =>
         data && data.route
           ? `${data.route.origin} - ${data.route.destination}`
           : '-',
     },
-    { data: 'seats_booked', title: 'Seats Booked' },
+    { data: 'seats_booked', title: 'Kursi Dipesan' },
     { data: 'status', title: 'Status' },
-    { data: 'booking_time', title: 'Booking Time' },
-    { data: 'created_at', title: 'Created At' },
-    { data: 'updated_at', title: 'Updated At' },
+    { data: 'booking_time', title: 'Waktu Pemesanan' },
+    { data: 'created_at', title: 'Dibuat Pada' },
+    { data: 'updated_at', title: 'Diperbarui Pada' },
     {
       data: null,
-      title: 'Actions',
+      title: 'Aksi',
       orderable: false,
       searchable: false,
       render: (_: null, __: string, booking: any) => {
         let html = '';
         if (booking.trashed) {
-          html += `<button class="btn-restore ml-2 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 border border-green-700" data-id="${booking.id}">Restore</button>`;
-          html += `<button class="btn-force-delete ml-2 px-2 py-1 bg-destructive text-white rounded hover:bg-destructive/80 border border-destructive" data-id="${booking.id}">Force Delete</button>`;
+          html += `<button class="btn-restore ml-2 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 border border-green-700" data-id="${booking.id}">Pulihkan</button>`;
+          html += `<button class="btn-force-delete ml-2 px-2 py-1 bg-destructive text-white rounded hover:bg-destructive/80 border border-destructive" data-id="${booking.id}">Hapus Permanen</button>`;
         } else {
           html += `<span class="inertia-link-cell" data-id="${booking.id}"></span>`;
           html += `<button data-id="${booking.id}" class="ml-2 px-2 py-1 bg-destructive text-white rounded hover:bg-destructive/80 border border-destructive btn-delete">
-            Delete
+            Hapus
           </button>`;
         }
         return html;
@@ -76,7 +76,7 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
             href={route('bookings.edit', id)}
             className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
           >
-            Edit
+            Ubah
           </Link>
         );
       }
@@ -113,16 +113,16 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Bookings" />
+      <Head title="Pemesanan" />
       <div className="px-4 py-6">
-        <h1 className="text-2xl font-semibold mb-4">Booking Management</h1>
+        <h1 className="text-2xl font-semibold mb-4">Manajemen Pemesanan</h1>
         <div className="flex flex-col space-y-8 lg:flex-row lg:space-y-0 lg:space-x-12">
           <div className="w-full flex-grow">
-            <HeadingSmall title="Bookings" description="Manage bookings for your application" />
+            <HeadingSmall title="Pemesanan" description="Kelola pemesanan untuk aplikasi Anda" />
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Booking List</h2>
+              <h2 className="text-xl font-semibold">Daftar Pemesanan</h2>
               <Link href={route('bookings.create')}>
-                <Button>Create Booking</Button>
+                <Button>Buat Pemesanan</Button>
               </Link>
             </div>
             <ToggleTabs tabs={['active', 'trashed', 'all']} active={filter} onChange={setFilter} />
