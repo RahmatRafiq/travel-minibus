@@ -15,9 +15,7 @@ Route::get('auth/{provider}/callback', [SocialAuthController::class, 'handleProv
 
 // Middleware for pages that require authentication and admin role
 Route::prefix('dashboard')->middleware(['auth', 'verified', 'role:admin'])->group(function () {
-    Route::get('/', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+   Route::get('/', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 
     Route::delete('/settings/profile/delete-file', [\App\Http\Controllers\Settings\ProfileController::class, 'deleteFile'])->name('profile.deleteFile');
     Route::post('/settings/profile/upload', [\App\Http\Controllers\Settings\ProfileController::class, 'upload'])->name('profile.upload');
