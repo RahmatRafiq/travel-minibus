@@ -32,7 +32,10 @@ export default function Register() {
     };
 
     return (
-        <AuthLayout title="Buat akun" description="Masukkan detail Anda di bawah ini untuk membuat akun">
+        <AuthLayout
+            title={"Zazy Travel\nBone Makassar"}
+            description={"Masukkan detail Anda di bawah ini untuk membuat akun"}
+        >
             <Head title="Daftar" />
             <form className="flex flex-col gap-6" onSubmit={submit}>
                 <div className="grid gap-6">

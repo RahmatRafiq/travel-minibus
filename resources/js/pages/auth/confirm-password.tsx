@@ -23,8 +23,8 @@ export default function ConfirmPassword() {
 
     return (
         <AuthLayout
-            title="Konfirmasi kata sandi Anda"
-            description="Ini adalah area aman aplikasi. Silakan konfirmasi kata sandi Anda sebelum melanjutkan."
+            title={"Zazy Travel\nBone Makassar"}
+            description={"Ini adalah area aman aplikasi.\nSilakan konfirmasi kata sandi Anda sebelum melanjutkan."}
         >
             <Head title="Konfirmasi kata sandi" />
 

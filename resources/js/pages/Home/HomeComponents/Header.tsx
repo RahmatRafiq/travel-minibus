@@ -16,16 +16,14 @@ export default function Header() {
     <header className="py-6 sm:py-8 bg-white shadow">
       <div className="container mx-auto px-3 sm:px-6">
         <div className="grid grid-cols-2 items-center">
-          {/* Kiri: Branding */}
           <div>
-            <span className="block text-xl sm:text-2xl font-bold text-indigo-700">
+            <Link href="/" className="block text-xl sm:text-2xl font-bold text-indigo-700 hover:underline">
               Zazy Travel
-            </span>
+            </Link>
             <span className="block text-base sm:text-lg text-indigo-500 font-medium">
               Bone Makassar
             </span>
           </div>
-          {/* Kanan: Avatar Dropdown */}
           <div className="flex justify-end items-center relative">
             <DropdownMenu.Root>
               <DropdownMenu.Trigger asChild>

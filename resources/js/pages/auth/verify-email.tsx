@@ -15,7 +15,10 @@ export default function VerifyEmail({ status }: { status?: string }) {
     };
 
     return (
-        <AuthLayout title="Verifikasi Email" description="Silakan verifikasi alamat email Anda dengan mengklik tautan yang baru saja kami kirimkan ke email Anda.">
+        <AuthLayout
+            title={"Zazy Travel\nBone Makassar"}
+            description={"Silakan verifikasi alamat email Anda dengan mengklik tautan yang baru saja kami kirimkan ke email Anda."}
+        >
             <Head title="Verifikasi Email" />
 
             {status === 'verification-link-sent' && (

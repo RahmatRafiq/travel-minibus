@@ -38,7 +38,17 @@ export default function Login({ status, canResetPassword }: LoginProps) {
     };
 
     return (
-        <AuthLayout title="Masuk ke akun Anda" description="Masukkan email dan kata sandi Anda di bawah ini untuk masuk">
+        // Logo aplikasi dapat diletakkan di sini jika ingin menampilkan branding visual.
+        // Logo Laravel default dihilangkan agar identitas aplikasi lebih jelas.
+        // Contoh penggunaan logo:
+        // import AppLogo from '@/components/app-logo';
+        // <AppLogo />
+        <AuthLayout
+            title={"Zazy Travel\nBone Makassar"}
+            description={
+                "Masukkan email dan kata sandi Anda di bawah ini untuk masuk ke aplikasi.\nZazy Travel Bone Makassar"
+            }
+        >
             <Head title="Masuk" />
 
             <form className="flex flex-col gap-6" onSubmit={submit}>

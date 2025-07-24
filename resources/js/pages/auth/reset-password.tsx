@@ -36,7 +36,10 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
     };
 
     return (
-        <AuthLayout title="Atur Ulang Kata Sandi" description="Silakan masukkan kata sandi baru Anda di bawah ini">
+        <AuthLayout
+            title={"Zazy Travel\nBone Makassar"}
+            description={"Silakan masukkan kata sandi baru Anda di bawah ini"}
+        >
             <Head title="Atur Ulang Kata Sandi" />
 
             <form onSubmit={submit}>

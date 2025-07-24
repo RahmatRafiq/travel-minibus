@@ -21,7 +21,10 @@ export default function ForgotPassword({ status }: { status?: string }) {
     };
 
     return (
-        <AuthLayout title="Lupa Kata Sandi" description="Masukkan email Anda untuk menerima tautan reset kata sandi">
+        <AuthLayout
+            title={"Zazy Travel\nBone Makassar"}
+            description={"Masukkan email Anda untuk menerima tautan reset kata sandi"}
+        >
             <Head title="Lupa Kata Sandi" />
 
             {status && <div className="mb-4 text-center text-sm font-medium text-green-600">{status}</div>}
