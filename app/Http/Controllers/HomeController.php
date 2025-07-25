@@ -153,6 +153,7 @@ class HomeController extends Controller
                                 'id' => $route->id,
                                 'origin' => $route->origin,
                                 'destination' => $route->destination,
+                                'price' => $route->price ?? 0,
                             ],
                         ];
                     }

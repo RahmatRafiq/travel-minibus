@@ -4,6 +4,7 @@ import Header from "./HomeComponents/Header";
 import Footer from "./HomeComponents/Footer";
 import FormBooking from "./HomeComponents/FormBooking";
 import SeatPickerComponent, { generateMinibusLayout } from "@/components/SeatPickerComponent";
+import BookingConfirmModal from "@/components/BookingConfirmModal";
 
 type Schedule = {
   id: number;
@@ -19,6 +20,7 @@ type Schedule = {
     id: number;
     origin: string;
     destination: string;
+    price?: number;
   };
 };
 
@@ -53,6 +55,7 @@ export default function BookingDetail({
   const [selectedSchedule, setSelectedSchedule] = useState<number | null>(null);
   const [selectedSeats, setSelectedSeats] = useState<(string | number)[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [showConfirm, setShowConfirm] = useState(false);
   const seatsRef = useRef<HTMLDivElement>(null);
 
   const handleFormBookingChange = (
@@ -85,6 +88,11 @@ export default function BookingDetail({
       return;
     }
     setError(null);
+    setShowConfirm(true);
+  };
+
+  const handleConfirmBooking = () => {
+    setShowConfirm(false);
     router.post(route("home.booking.store"), {
       schedule_id: selectedSchedule,
       seats_selected: selectedSeats,
@@ -184,6 +192,7 @@ export default function BookingDetail({
                     reservedSeats={reservedSeats}
                     selectedSeats={selectedSeats}
                     onSelect={(seats) => {
+                      console.log('Kursi dipilih sekarang:', seats);
                       setSelectedSeats(seats);
                       setError(null);
                     }}
@@ -210,6 +219,15 @@ export default function BookingDetail({
                   Batal
                 </Link>
               </div>
+              {showConfirm && (
+                <BookingConfirmModal
+                  open={showConfirm}
+                  onClose={() => setShowConfirm(false)}
+                  onConfirm={handleConfirmBooking}
+                  schedule={schedules.find(s => s.id === selectedSchedule) || null}
+                  selectedSeats={selectedSeats}
+                />
+              )}
             </form>
           )}
         </div>

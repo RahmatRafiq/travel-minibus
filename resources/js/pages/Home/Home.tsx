@@ -15,6 +15,7 @@ type Booking = {
   status: string;
   vehicle: string;
   brand: string;
+  amount: number;
 };
 
 type Props = {
@@ -23,9 +24,10 @@ type Props = {
   userName?: string;
   allOrigins?: string[];
   allDestinations?: string[];
+  totalAmount?: number;
 };
 
-export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], allDestinations = [] }: Props) {
+export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], allDestinations = [], totalAmount = 0 }: Props) {
   const [form, setForm] = useState({
     origin: "",
     destination: "",
@@ -75,6 +77,11 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
 
   // Hanya tampilkan bookings jika sudah login
   const visibleBookings = isLoggedIn ? bookings : [];
+
+  function formatRupiah(amount: number | undefined | null) {
+    if (typeof amount !== 'number' || isNaN(amount)) return '-';
+    return 'Rp ' + amount.toLocaleString('id-ID');
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-indigo-200 flex flex-col">
@@ -170,6 +177,11 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
         {/* Booking List */}
         <div className="flex-1 flex flex-col justify-center max-w-2xl mx-auto w-full mt-8 md:mt-0">
           <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-4 sm:p-8 md:p-10 border border-indigo-50 glassmorphism">
+            {/* Total Amount */}
+            <div className="mb-4 text-right">
+              <span className="text-sm text-gray-600 font-semibold">Total Booking: </span>
+              <span className="text-lg text-indigo-700 font-bold">{formatRupiah(typeof totalAmount !== 'undefined' ? totalAmount : 0)}</span>
+            </div>
             <BookingList bookings={visibleBookings} isLoggedIn={isLoggedIn} />
           </div>
         </div>
