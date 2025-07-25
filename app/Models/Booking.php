@@ -19,6 +19,10 @@ class Booking extends Model
         'amount'
     ];
 
+    protected $casts = [
+        'seats_selected' => 'array',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);

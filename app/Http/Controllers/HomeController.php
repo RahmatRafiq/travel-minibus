@@ -102,6 +102,7 @@ class HomeController extends Controller
         $origin = $request->origin;
         $destination = $request->destination;
         $date = $request->date;
+        $reservedSeats = [];
 
         if ($origin && $destination && $date) {
             $request->validate([
@@ -128,6 +129,14 @@ class HomeController extends Controller
                             ->sum('seats_booked');
                         $available_seats = $rv->vehicle->seat_capacity - $booked;
 
+                        // Ambil semua kursi yang sudah dipesan (pending/confirmed) untuk jadwal ini
+                        $bookedSeats = Booking::where('schedule_id', $schedule->id)
+                            ->whereIn('status', ['pending', 'confirmed'])
+                            ->pluck('seats_selected')
+                            ->flatten()
+                            ->toArray();
+                        $reservedSeats = array_merge($reservedSeats, $bookedSeats);
+
                         $schedules[] = [
                             'id' => $schedule->id,
                             'departure_time' => $schedule->departure_time,
@@ -136,6 +145,7 @@ class HomeController extends Controller
                                 'id' => $rv->vehicle->id,
                                 'plate_number' => $rv->vehicle->plate_number,
                                 'brand' => $rv->vehicle->brand,
+                                'seat_capacity' => $rv->vehicle->seat_capacity,
                             ],
                             'route' => [
                                 'id' => $route->id,
@@ -148,11 +158,15 @@ class HomeController extends Controller
             }
         }
 
+        // Pastikan reservedSeats unik
+        $reservedSeats = array_values(array_unique($reservedSeats));
+
         return Inertia::render('Home/BookingPage', [
             'origin' => $origin,
             'destination' => $destination,
             'date' => $date,
             'schedules' => $schedules,
+            'reservedSeats' => $reservedSeats,
             'isLoggedIn' => auth()->check(),
             'userName' => auth()->user()?->name,
             'allOrigins' => $allOrigins,
@@ -170,25 +184,48 @@ class HomeController extends Controller
         try {
             $request->validate([
                 'schedule_id' => 'required|exists:schedules,id',
-                'seats_booked' => 'required|integer|min:1',
+                'seats_selected' => 'required|array|min:1',
             ]);
 
-            $schedule = Schedule::with('routeVehicle.vehicle')->findOrFail($request->schedule_id);
+            $schedule = Schedule::with(['routeVehicle.vehicle', 'routeVehicle.route'])->findOrFail($request->schedule_id);
             $vehicle = $schedule->routeVehicle->vehicle;
+            $route = $schedule->routeVehicle->route;
 
-            $booked = Booking::where('schedule_id', $schedule->id)
+            // Ambil semua kursi yang sudah di-booking (pending/confirmed) untuk jadwal ini
+            $bookedSeats = Booking::where('schedule_id', $schedule->id)
                 ->whereIn('status', ['pending', 'confirmed'])
-                ->sum('seats_booked');
-            $available_seats = $vehicle->seat_capacity - $booked;
+                ->pluck('seats_selected')
+                ->flatten()
+                ->toArray();
 
-            if ($request->seats_booked > $available_seats) {
-                return back()->withErrors(['seats_booked' => 'Not enough available seats.']);
+            $selectedSeats = $request->input('seats_selected', []);
+            // Filter kursi sopir (id "D" atau "Sopir")
+            $selectedSeats = array_filter($selectedSeats, function($seat) {
+                return $seat !== "D" && $seat !== "Sopir";
+            });
+            $conflict = array_intersect($selectedSeats, $bookedSeats);
+            if (count($conflict) > 0) {
+                return back()->withErrors(['seats_selected' => 'Kursi sudah dipesan: ' . implode(', ', $conflict)]);
+            }
+
+            // Validasi kapasitas penumpang (tanpa sopir)
+            $penumpangCapacity = $vehicle->seat_capacity - 1; // 1 kursi untuk sopir
+            if (count($selectedSeats) > $penumpangCapacity) {
+                return back()->withErrors(['seats_selected' => 'Jumlah kursi melebihi kapasitas penumpang.']);
+            }
+
+            // Hitung amount: jumlah kursi x harga route
+            $amount = 0;
+            if ($route && isset($route->price)) {
+                $amount = count($selectedSeats) * $route->price;
             }
 
             Booking::create([
                 'user_id'      => auth()->id(),
                 'schedule_id'  => $request->schedule_id,
-                'seats_booked' => $request->seats_booked,
+                'seats_booked' => count($selectedSeats),
+                'seats_selected' => $selectedSeats,
+                'amount'       => $amount,
                 'status'       => 'pending',
             ]);
 
