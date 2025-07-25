@@ -1,4 +1,6 @@
 import { Head, useForm, router, Link } from '@inertiajs/react';
+import { DatePicker } from '@/components/DatePicker';
+import SeatPickerComponent, { generateMinibusLayout } from '@/components/SeatPickerComponent';
 import React, { useState } from 'react';
 import AppLayout from '@/layouts/app-layout';
 import HeadingSmall from '@/components/heading-small';
@@ -7,6 +9,9 @@ import { Button } from '@/components/ui/button';
 import CustomSelect from '@/components/select';
 import type { Vehicle } from '@/types/Vehicle';
 import type { Schedule } from '@/types/Schedule';
+type AdminSchedule = Schedule & {
+    reservedSeats?: (string|number)[];
+};
 import type { Booking } from '@/types/Booking';
 
 type Props = {
@@ -15,7 +20,7 @@ type Props = {
     destination?: string;
     route_id?: number;
     routes?: Route[];
-    schedules?: Schedule[];
+    schedules?: AdminSchedule[];
     booking?: Booking;
     success?: string;
     allOrigins?: string[];
@@ -37,12 +42,27 @@ export default function BookingForm(props: Props) {
     const [selectedSchedule, setSelectedSchedule] = useState<number | null>(
         isEdit ? props.booking?.schedule_id ?? null : null
     );
-    const [isManualDate, setIsManualDate] = useState(false);
+    const initialSeats = isEdit && Array.isArray((props.booking as any)?.seats_selected)
+        ? (props.booking as any).seats_selected
+        : [];
 
-    const { data, setData, post, put, processing, errors, reset } = useForm({
+    const { data, setData, post, put, processing, errors, reset } = useForm<{
+        schedule_id: string;
+        seats_booked: number;
+        seats_selected: (string|number)[];
+    }>({
         schedule_id: isEdit ? String(props.booking?.schedule_id) : '',
-        seats_booked: isEdit ? props.booking?.seats_booked : 1,
+        seats_booked: isEdit && typeof props.booking?.seats_booked === 'number' ? props.booking.seats_booked : 1,
+        seats_selected: initialSeats,
     });
+
+    const [selectedSeats, setSelectedSeats] = useState<(string|number)[]>(initialSeats);
+    const [formError, setFormError] = useState<string | null>(null);
+    React.useEffect(() => {
+        setData('seats_selected', selectedSeats.filter(seat => seat !== 'D' && seat !== 'Sopir'));
+    }, [selectedSeats]);
+
+    const validSelectedSeats = selectedSeats.filter(seat => seat !== 'D' && seat !== 'Sopir');
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -66,6 +86,17 @@ export default function BookingForm(props: Props) {
 
     const handleBooking = (e: React.FormEvent) => {
         e.preventDefault();
+        setFormError(null);
+        const seatsToSend = selectedSeats.filter(seat => seat !== 'D' && seat !== 'Sopir');
+        setData('seats_selected', seatsToSend);
+        if (!selectedSchedule) {
+            setFormError('Pilih jadwal terlebih dahulu.');
+            return;
+        }
+        if (seatsToSend.length === 0) {
+            setFormError('Pilih kursi terlebih dahulu.');
+            return;
+        }
         if (isEdit) {
             put(route('bookings.update', props.booking!.id));
         } else {
@@ -83,25 +114,20 @@ export default function BookingForm(props: Props) {
         label: String(i + 1),
     }));
 
-    const today = new Date();
-    const tomorrow = new Date();
-    tomorrow.setDate(today.getDate() + 1);
-    const formatDate = (d: Date) => d.toISOString().slice(0, 10);
+    const reservedSeats = props.schedules?.find(s => s.id === selectedSchedule)?.reservedSeats || [];
 
-    const dateOptions = [
-        { value: formatDate(today), label: 'Hari Ini' },
-        { value: formatDate(tomorrow), label: 'Besok' },
-        { value: 'manual', label: 'Pilih Tanggal...' },
-    ];
-
-    let dateSelectValue = null;
-    if (!isManualDate && search.departure_date === formatDate(today)) {
-        dateSelectValue = dateOptions[0];
-    } else if (!isManualDate && search.departure_date === formatDate(tomorrow)) {
-        dateSelectValue = dateOptions[1];
-    } else if (isManualDate) {
-        dateSelectValue = dateOptions[2];
-    }
+    // DatePicker
+    const dateValue = search.departure_date ? new Date(search.departure_date + 'T12:00:00') : undefined;
+    const handleDateChange = (date: Date | null) => {
+        if (date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            setSearch(s => ({ ...s, departure_date: `${year}-${month}-${day}` }));
+        } else {
+            setSearch(s => ({ ...s, departure_date: '' }));
+        }
+    };
 
     const breadcrumbs = [
         { title: 'Pemesanan', href: route('bookings.index') },
@@ -114,7 +140,6 @@ export default function BookingForm(props: Props) {
             <div className="px-4 py-6">
                 <h1 className="text-2xl font-semibold mb-4">Manajemen Pemesanan</h1>
                 <div className="flex flex-col space-y-8 lg:flex-row lg:space-y-0 lg:space-x-12">
-                    {/* Sidebar bisa ditambahkan di sini jika ada */}
                     <div className="flex-1 md:max-w-2xl space-y-6">
                         <HeadingSmall
                             title={isEdit ? 'Edit Pemesanan' : 'Buat Pemesanan'}
@@ -146,32 +171,15 @@ export default function BookingForm(props: Props) {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs text-muted-foreground mb-1">Tanggal</label>
-                                        <CustomSelect
-                                            options={dateOptions}
-                                            value={dateSelectValue}
-                                            onChange={(opt: any) => {
-                                                if (opt?.value === 'manual') {
-                                                    setIsManualDate(true);
-                                                    setSearch(s => ({ ...s, departure_date: '' }));
-                                                } else {
-                                                    setIsManualDate(false);
-                                                    setSearch(s => ({ ...s, departure_date: opt?.value || '' }));
-                                                }
-                                            }}
-                                            placeholder="Pilih Tanggal"
-                                            isClearable={false}
+                                        <label className="block text-xs text-muted-foreground mb-1">Tanggal Berangkat</label>
+                                        <DatePicker
+                                            id="booking-date"
+                                            value={dateValue}
+                                            onChange={handleDateChange}
+                                            required
+                                            className="w-full"
+                                            minDate={new Date()}
                                         />
-                                        {isManualDate && (
-                                            <input
-                                                type="date"
-                                                value={search.departure_date}
-                                                onChange={e => setSearch(s => ({ ...s, departure_date: e.target.value }))}
-                                                className="border border-input rounded px-2 py-1 mt-2 w-full bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                                                required
-                                                autoFocus
-                                            />
-                                        )}
                                     </div>
                                     <div className="flex items-center space-x-4">
                                         <Button type="submit" className="h-10">Cari Jadwal</Button>
@@ -252,21 +260,26 @@ export default function BookingForm(props: Props) {
                             )}
                             {selectedSchedule && (
                                 <form onSubmit={handleBooking} className="space-y-4">
-                                    <div>
-                                        <label htmlFor="seats_booked" className="block text-xs text-muted-foreground mb-1 font-medium">Jumlah Kursi</label>
-                                        <CustomSelect
-                                            inputId="seats_booked"
-                                            options={seatsOptions}
-                                            value={seatsOptions.find(opt => opt.value === data.seats_booked) || null}
-                                            onChange={(opt: any) => setData('seats_booked', opt?.value || 1)}
-                                            placeholder="Pilih jumlah kursi"
-                                            isClearable={false}
-                                            required
+                                    <div className="bg-white border border-input p-4">
+                                        <label className="block text-xs text-muted-foreground mb-1 font-medium">Pilih Kursi</label>
+                                        <SeatPickerComponent
+                                            layout={generateMinibusLayout(
+                                                props.schedules?.find(s => s.id === selectedSchedule)?.vehicle?.seat_capacity || 8,
+                                                [2,4,3],
+                                                true
+                                            )}
+                                            reservedSeats={reservedSeats}
+                                            selectedSeats={selectedSeats}
+                                            onSelect={(seats: (string|number)[]) => {
+                                                setSelectedSeats(Array.isArray(seats) ? seats : []);
+                                                setFormError(null);
+                                            }}
                                         />
-                                        <InputError message={errors.seats_booked} />
+                                        <InputError message={errors.seats_selected} />
+                                        {formError && <div className="text-red-600 text-sm mt-2">{formError}</div>}
                                     </div>
                                     <div className="flex items-center space-x-4">
-                                        <Button type="submit" disabled={processing}>
+                                        <Button type="submit" disabled={processing || !selectedSchedule || validSelectedSeats.length === 0}>
                                             {isEdit ? 'Perbarui Pemesanan' : 'Buat Pemesanan'}
                                         </Button>
                                         <Link
