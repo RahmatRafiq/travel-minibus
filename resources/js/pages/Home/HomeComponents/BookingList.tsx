@@ -10,6 +10,7 @@ type Booking = {
   status: string;
   vehicle: string;
   brand: string;
+  amount: number;
 };
 
 type Props = {
@@ -32,11 +33,9 @@ const BookingList: React.FC<Props> = ({ bookings }) => {
     return "Dibatalkan";
   };
 
-  // Format tanggal Indonesia
   function formatTanggal(dateStr: string) {
     const now = new Date();
     const tgl = new Date(dateStr);
-    // Hilangkan jam
     tgl.setHours(0,0,0,0);
     now.setHours(0,0,0,0);
     const diff = Math.round((tgl.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
@@ -45,7 +44,6 @@ const BookingList: React.FC<Props> = ({ bookings }) => {
     if (diff > 2) {
       return tgl.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
     }
-    // Jika hari ini atau sudah lewat
     return tgl.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
   }
 
@@ -89,6 +87,9 @@ const BookingList: React.FC<Props> = ({ bookings }) => {
             <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
               <span className="bg-indigo-100 text-indigo-700 px-2 sm:px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
                 {b.seats} Kursi
+              </span>
+              <span className="bg-yellow-50 text-yellow-700 px-2 sm:px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
+                Rp {b.amount?.toLocaleString('id-ID')}
               </span>
               <span
                 className={

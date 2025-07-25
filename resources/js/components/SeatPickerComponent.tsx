@@ -109,10 +109,10 @@ const SeatPickerComponent: React.FC<SeatPickerProps> = ({ layout, reservedSeats 
         {seatLayout.map((row, i) => {
           const seatCount = row.filter(seat => seat !== null).length;
           return (
-            <div key={i} className="flex justify-center items-center w-full px-0 gap-1 mb-4">
+            <div key={`row-${i}`} className="flex justify-center items-center w-full px-0 gap-1 mb-4">
               {row.map((seat, idx) =>
                 seat ? (
-                  <div key={seat.id} className={`relative group${idx !== row.length - 1 ? ' mr-0' : ''}`}>
+                  <div key={`row-${i}-seat-${idx}`} className={`relative group${idx !== row.length - 1 ? ' mr-0' : ''}`}>
                     <button
                       type="button"
                       disabled={reservedSeats.includes(seat.id) || seat.isReserved || seat.isDriver}
@@ -133,7 +133,7 @@ const SeatPickerComponent: React.FC<SeatPickerProps> = ({ layout, reservedSeats 
                     )}
                   </div>
                 ) : (
-                  <div key={idx} className="w-0 h-12"></div>
+                  <div key={`row-${i}-aisle-${idx}`} className="w-0 h-12"></div>
                 )
               )}
             </div>

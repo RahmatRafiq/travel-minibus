@@ -39,6 +39,7 @@ class HomeController extends Controller
                     ? $b->schedule->routeVehicle->vehicle->plate_number : '-',
                 'brand' => $b->schedule && $b->schedule->routeVehicle && $b->schedule->routeVehicle->vehicle
                     ? $b->schedule->routeVehicle->vehicle->brand : '-',
+                'amount' => $b->amount,
             ];
         })
         ->toArray();
@@ -82,6 +83,7 @@ class HomeController extends Controller
                     ? $b->schedule->routeVehicle->vehicle->plate_number : '-',
                 'brand' => $b->schedule && $b->schedule->routeVehicle && $b->schedule->routeVehicle->vehicle
                     ? $b->schedule->routeVehicle->vehicle->brand : '-',
+                'amount' => $b->amount,
             ];
         })
         ->toArray();
