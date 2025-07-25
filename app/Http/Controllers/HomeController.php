@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Inertia\Inertia;
 use App\Models\Booking;
+use App\Models\Route;
+use App\Models\Schedule;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class HomeController extends Controller
 {
@@ -38,8 +43,8 @@ class HomeController extends Controller
         })
         ->toArray();
 
-        $allOrigins = \App\Models\Route::query()->distinct()->pluck('origin')->filter()->values()->all();
-        $allDestinations = \App\Models\Route::query()->distinct()->pluck('destination')->filter()->values()->all();
+        $allOrigins = Route::query()->distinct()->pluck('origin')->filter()->values()->all();
+        $allDestinations = Route::query()->distinct()->pluck('destination')->filter()->values()->all();
 
         return Inertia::render('Home/Home', [
             'bookings' => $bookings,
@@ -88,10 +93,10 @@ class HomeController extends Controller
         ]);
     }
 
-    public function bookingDetail(\Illuminate\Http\Request $request)
+    public function bookingDetail(Request $request)
     {
-        $allOrigins = \App\Models\Route::query()->distinct()->pluck('origin')->filter()->values()->all();
-        $allDestinations = \App\Models\Route::query()->distinct()->pluck('destination')->filter()->values()->all();
+        $allOrigins = Route::query()->distinct()->pluck('origin')->filter()->values()->all();
+        $allDestinations = Route::query()->distinct()->pluck('destination')->filter()->values()->all();
 
         $schedules = [];
         $origin = $request->origin;
@@ -105,7 +110,7 @@ class HomeController extends Controller
                 'date' => 'required|date',
             ]);
 
-            $routes = \App\Models\Route::where('origin', $origin)
+            $routes = Route::where('origin', $origin)
                 ->where('destination', $destination)
                 ->get();
 
@@ -118,7 +123,7 @@ class HomeController extends Controller
                         ->get();
 
                     foreach ($availableSchedules as $schedule) {
-                        $booked = \App\Models\Booking::where('schedule_id', $schedule->id)
+                        $booked = Booking::where('schedule_id', $schedule->id)
                             ->whereIn('status', ['pending', 'confirmed'])
                             ->sum('seats_booked');
                         $available_seats = $rv->vehicle->seat_capacity - $booked;
@@ -155,23 +160,23 @@ class HomeController extends Controller
         ]);
     }
 
-    public function storeBooking(\Illuminate\Http\Request $request)
+    public function storeBooking(Request $request)
     {
         if (!auth()->check()) {
             return redirect()->route('login');
         }
 
-        \DB::beginTransaction();
+        DB::beginTransaction();
         try {
             $request->validate([
                 'schedule_id' => 'required|exists:schedules,id',
                 'seats_booked' => 'required|integer|min:1',
             ]);
 
-            $schedule = \App\Models\Schedule::with('routeVehicle.vehicle')->findOrFail($request->schedule_id);
+            $schedule = Schedule::with('routeVehicle.vehicle')->findOrFail($request->schedule_id);
             $vehicle = $schedule->routeVehicle->vehicle;
 
-            $booked = \App\Models\Booking::where('schedule_id', $schedule->id)
+            $booked = Booking::where('schedule_id', $schedule->id)
                 ->whereIn('status', ['pending', 'confirmed'])
                 ->sum('seats_booked');
             $available_seats = $vehicle->seat_capacity - $booked;
@@ -180,19 +185,20 @@ class HomeController extends Controller
                 return back()->withErrors(['seats_booked' => 'Not enough available seats.']);
             }
 
-            \App\Models\Booking::create([
+            Booking::create([
                 'user_id'      => auth()->id(),
                 'schedule_id'  => $request->schedule_id,
                 'seats_booked' => $request->seats_booked,
                 'status'       => 'pending',
             ]);
 
-            \DB::commit();
+            DB::commit();
             return redirect()->route('home.my-bookings')->with('success', 'Booking created successfully.');
         } catch (\Throwable $e) {
-            \DB::rollBack();
-            \Log::error('Booking store error: ' . $e->getMessage(), ['exception' => $e]);
+            DB::rollBack();
+            Log::error('Booking store error: ' . $e->getMessage(), ['exception' => $e]);
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
 }
+
