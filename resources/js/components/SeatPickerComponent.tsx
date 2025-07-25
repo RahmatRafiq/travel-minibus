@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Circle, Armchair as SeatIcon, User as DriverIcon } from "lucide-react";
 
 type Seat = {
   id: string | number;
@@ -77,42 +78,61 @@ const SeatPickerComponent: React.FC<SeatPickerProps> = ({ layout, reservedSeats 
 
   return (
     <div>
-      <h3 className="mb-2 font-semibold text-center">Pilih Kursi Minibus</h3>
+      <div className="flex gap-4 items-center mb-2">
+        <div className="flex items-center gap-1">
+          <span className="w-6 h-6 rounded bg-red-500 border border-gray-400 flex items-center justify-center">
+            <SeatIcon size={16} className="text-white" />
+          </span>
+          <span className="text-xs text-gray-700">Sudah dipesan</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="w-6 h-6 rounded bg-green-600 border border-gray-400 flex items-center justify-center">
+            <SeatIcon size={16} className="text-white" />
+          </span>
+          <span className="text-xs text-gray-700">Dipilih</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="w-6 h-6 rounded bg-gray-100 border border-gray-400 flex items-center justify-center">
+            <SeatIcon size={16} className="text-gray-500" />
+          </span>
+          <span className="text-xs text-gray-700">Tersedia</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="w-6 h-6 rounded bg-yellow-400 border border-gray-400 flex items-center justify-center">
+            <DriverIcon size={16} className="text-white" />
+          </span>
+          <span className="text-xs text-gray-700">Sopir</span>
+        </div>
+      </div>
+      <h3 className="mb-2 font-bold text-center text-blue-700 text-lg">Pilih Kursi Minibus</h3>
       <div className="flex flex-col gap-4 items-center bg-gray-50 p-6 rounded-xl shadow-lg">
         {seatLayout.map((row, i) => {
-          // Hitung jumlah kursi (bukan null) di baris ini
           const seatCount = row.filter(seat => seat !== null).length;
-          // Buat baris flex dengan justify-center dan gap antar kursi, tanpa celah kiri-kanan
-          // Gunakan gap yang lebih kecil dan padding-x otomatis agar benar-benar rata tengah
           return (
-            <div key={i} className="flex justify-center items-center w-full px-0 gap-2">
+            <div key={i} className="flex justify-center items-center w-full px-0 gap-1 mb-4">
               {row.map((seat, idx) =>
                 seat ? (
-                  <div key={seat.id} className="relative group">
+                  <div key={seat.id} className={`relative group${idx !== row.length - 1 ? ' mr-0' : ''}`}>
                     <button
                       type="button"
                       disabled={reservedSeats.includes(seat.id) || seat.isReserved || seat.isDriver}
                       onClick={() => handleSeatClick(seat)}
                       className={`w-12 h-12 rounded-lg border flex items-center justify-center text-base font-bold
-                        ${seat.isDriver ? "bg-yellow-500 text-white" : reservedSeats.includes(seat.id) || seat.isReserved ? "bg-red-400 text-white" : selectedSeats.includes(seat.id) ? "bg-green-500 text-white" : "bg-white"}
+                        ${seat.isDriver ? "bg-yellow-400 text-white" : reservedSeats.includes(seat.id) || seat.isReserved ? "bg-red-500 text-white" : selectedSeats.includes(seat.id) ? "bg-green-600 text-white" : "bg-gray-100 text-gray-700"}
                         border-gray-400 shadow-lg hover:scale-110 transition-all duration-150`}
                       title={seat.isDriver ? "Sopir" : reservedSeats.includes(seat.id) || seat.isReserved ? "Sudah dipesan" : "Kursi tersedia"}
                       aria-label={seat.isDriver ? "Sopir" : reservedSeats.includes(seat.id) || seat.isReserved ? "Sudah dipesan" : `Kursi ${seat.number}`}
                     >
-                      {seat.isDriver ? <span>🚗</span> : seat.number}
+                      {seat.isDriver
+                        ? <DriverIcon size={28} strokeWidth={2.5} className="mx-auto" />
+                        : <SeatIcon size={28} strokeWidth={2.5} className="mx-auto" />
+                      }
                     </button>
                     {seat.isDriver && (
                       <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-yellow-700 font-semibold">Sopir</span>
                     )}
-                    {reservedSeats.includes(seat.id) || seat.isReserved ? (
-                      <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-red-700 font-semibold">Reserved</span>
-                    ) : null}
-                    {selectedSeats.includes(seat.id) && (
-                      <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-green-700 font-semibold">Dipilih</span>
-                    )}
                   </div>
                 ) : (
-                  // Lorong/tengah
                   <div key={idx} className="w-0 h-12"></div>
                 )
               )}
