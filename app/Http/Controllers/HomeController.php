@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Inertia\Inertia;
 use App\Models\Booking;
+use App\Models\Route;
+use App\Models\Schedule;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class HomeController extends Controller
 {
@@ -34,12 +39,13 @@ class HomeController extends Controller
                     ? $b->schedule->routeVehicle->vehicle->plate_number : '-',
                 'brand' => $b->schedule && $b->schedule->routeVehicle && $b->schedule->routeVehicle->vehicle
                     ? $b->schedule->routeVehicle->vehicle->brand : '-',
+                'amount' => $b->amount,
             ];
         })
         ->toArray();
 
-        $allOrigins = \App\Models\Route::query()->distinct()->pluck('origin')->filter()->values()->all();
-        $allDestinations = \App\Models\Route::query()->distinct()->pluck('destination')->filter()->values()->all();
+        $allOrigins = Route::query()->distinct()->pluck('origin')->filter()->values()->all();
+        $allDestinations = Route::query()->distinct()->pluck('destination')->filter()->values()->all();
 
         return Inertia::render('Home/Home', [
             'bookings' => $bookings,
@@ -77,6 +83,7 @@ class HomeController extends Controller
                     ? $b->schedule->routeVehicle->vehicle->plate_number : '-',
                 'brand' => $b->schedule && $b->schedule->routeVehicle && $b->schedule->routeVehicle->vehicle
                     ? $b->schedule->routeVehicle->vehicle->brand : '-',
+                'amount' => $b->amount,
             ];
         })
         ->toArray();
@@ -88,15 +95,16 @@ class HomeController extends Controller
         ]);
     }
 
-    public function bookingDetail(\Illuminate\Http\Request $request)
+    public function bookingDetail(Request $request)
     {
-        $allOrigins = \App\Models\Route::query()->distinct()->pluck('origin')->filter()->values()->all();
-        $allDestinations = \App\Models\Route::query()->distinct()->pluck('destination')->filter()->values()->all();
+        $allOrigins = Route::query()->distinct()->pluck('origin')->filter()->values()->all();
+        $allDestinations = Route::query()->distinct()->pluck('destination')->filter()->values()->all();
 
         $schedules = [];
         $origin = $request->origin;
         $destination = $request->destination;
         $date = $request->date;
+        $reservedSeats = [];
 
         if ($origin && $destination && $date) {
             $request->validate([
@@ -105,7 +113,7 @@ class HomeController extends Controller
                 'date' => 'required|date',
             ]);
 
-            $routes = \App\Models\Route::where('origin', $origin)
+            $routes = Route::where('origin', $origin)
                 ->where('destination', $destination)
                 ->get();
 
@@ -118,10 +126,18 @@ class HomeController extends Controller
                         ->get();
 
                     foreach ($availableSchedules as $schedule) {
-                        $booked = \App\Models\Booking::where('schedule_id', $schedule->id)
+                        $booked = Booking::where('schedule_id', $schedule->id)
                             ->whereIn('status', ['pending', 'confirmed'])
                             ->sum('seats_booked');
                         $available_seats = $rv->vehicle->seat_capacity - $booked;
+
+                        // Ambil semua kursi yang sudah dipesan (pending/confirmed) untuk jadwal ini
+                        $bookedSeats = Booking::where('schedule_id', $schedule->id)
+                            ->whereIn('status', ['pending', 'confirmed'])
+                            ->pluck('seats_selected')
+                            ->flatten()
+                            ->toArray();
+                        $reservedSeats = array_merge($reservedSeats, $bookedSeats);
 
                         $schedules[] = [
                             'id' => $schedule->id,
@@ -131,11 +147,13 @@ class HomeController extends Controller
                                 'id' => $rv->vehicle->id,
                                 'plate_number' => $rv->vehicle->plate_number,
                                 'brand' => $rv->vehicle->brand,
+                                'seat_capacity' => $rv->vehicle->seat_capacity,
                             ],
                             'route' => [
                                 'id' => $route->id,
                                 'origin' => $route->origin,
                                 'destination' => $route->destination,
+                                'price' => $route->price ?? 0,
                             ],
                         ];
                     }
@@ -143,11 +161,15 @@ class HomeController extends Controller
             }
         }
 
+        // Pastikan reservedSeats unik
+        $reservedSeats = array_values(array_unique($reservedSeats));
+
         return Inertia::render('Home/BookingPage', [
             'origin' => $origin,
             'destination' => $destination,
             'date' => $date,
             'schedules' => $schedules,
+            'reservedSeats' => $reservedSeats,
             'isLoggedIn' => auth()->check(),
             'userName' => auth()->user()?->name,
             'allOrigins' => $allOrigins,
@@ -155,44 +177,68 @@ class HomeController extends Controller
         ]);
     }
 
-    public function storeBooking(\Illuminate\Http\Request $request)
+    public function storeBooking(Request $request)
     {
         if (!auth()->check()) {
             return redirect()->route('login');
         }
 
-        \DB::beginTransaction();
+        DB::beginTransaction();
         try {
             $request->validate([
                 'schedule_id' => 'required|exists:schedules,id',
-                'seats_booked' => 'required|integer|min:1',
+                'seats_selected' => 'required|array|min:1',
             ]);
 
-            $schedule = \App\Models\Schedule::with('routeVehicle.vehicle')->findOrFail($request->schedule_id);
+            $schedule = Schedule::with(['routeVehicle.vehicle', 'routeVehicle.route'])->findOrFail($request->schedule_id);
             $vehicle = $schedule->routeVehicle->vehicle;
+            $route = $schedule->routeVehicle->route;
 
-            $booked = \App\Models\Booking::where('schedule_id', $schedule->id)
+            // Ambil semua kursi yang sudah di-booking (pending/confirmed) untuk jadwal ini
+            $bookedSeats = Booking::where('schedule_id', $schedule->id)
                 ->whereIn('status', ['pending', 'confirmed'])
-                ->sum('seats_booked');
-            $available_seats = $vehicle->seat_capacity - $booked;
+                ->pluck('seats_selected')
+                ->flatten()
+                ->toArray();
 
-            if ($request->seats_booked > $available_seats) {
-                return back()->withErrors(['seats_booked' => 'Not enough available seats.']);
+            $selectedSeats = $request->input('seats_selected', []);
+            // Filter kursi sopir (id "D" atau "Sopir")
+            $selectedSeats = array_filter($selectedSeats, function($seat) {
+                return $seat !== "D" && $seat !== "Sopir";
+            });
+            $conflict = array_intersect($selectedSeats, $bookedSeats);
+            if (count($conflict) > 0) {
+                return back()->withErrors(['seats_selected' => 'Kursi sudah dipesan: ' . implode(', ', $conflict)]);
             }
 
-            \App\Models\Booking::create([
+            // Validasi kapasitas penumpang (tanpa sopir)
+            $penumpangCapacity = $vehicle->seat_capacity - 1; // 1 kursi untuk sopir
+            if (count($selectedSeats) > $penumpangCapacity) {
+                return back()->withErrors(['seats_selected' => 'Jumlah kursi melebihi kapasitas penumpang.']);
+            }
+
+            // Hitung amount: jumlah kursi x harga route
+            $amount = 0;
+            if ($route && isset($route->price)) {
+                $amount = count($selectedSeats) * $route->price;
+            }
+
+            Booking::create([
                 'user_id'      => auth()->id(),
                 'schedule_id'  => $request->schedule_id,
-                'seats_booked' => $request->seats_booked,
+                'seats_booked' => count($selectedSeats),
+                'seats_selected' => $selectedSeats,
+                'amount'       => $amount,
                 'status'       => 'pending',
             ]);
 
-            \DB::commit();
+            DB::commit();
             return redirect()->route('home.my-bookings')->with('success', 'Booking created successfully.');
         } catch (\Throwable $e) {
-            \DB::rollBack();
-            \Log::error('Booking store error: ' . $e->getMessage(), ['exception' => $e]);
+            DB::rollBack();
+            Log::error('Booking store error: ' . $e->getMessage(), ['exception' => $e]);
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
 }
+
