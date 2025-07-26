@@ -78,6 +78,33 @@ class BookingController extends Controller
         ]);
     }
 
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,confirmed,cancelled',
+        ]);
+        $booking = Booking::withTrashed()->findOrFail($id);
+        $booking->status = $request->status;
+        $booking->save();
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'status' => $booking->status]);
+        }
+        return redirect()->route('bookings.index')->with('success', 'Status booking berhasil diupdate.');
+    }
+
+    public function updateStatusBulk(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'status' => 'required|in:pending,confirmed,cancelled',
+        ]);
+        Booking::whereIn('id', $request->ids)->update(['status' => $request->status]);
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
+        return redirect()->route('bookings.index')->with('success', 'Status booking berhasil diupdate (bulk).');
+    }
+
     public function json(Request $request)
     {
         $search = $request->input('search.value', '');
@@ -247,7 +274,6 @@ class BookingController extends Controller
             $vehicle = $schedule->routeVehicle->vehicle;
             $route = $schedule->routeVehicle->route;
 
-            // Ambil semua kursi yang sudah di-booking (pending/confirmed) untuk jadwal ini
             $bookedSeats = Booking::where('schedule_id', $schedule->id)
                 ->whereIn('status', ['pending', 'confirmed'])
                 ->pluck('seats_selected')
@@ -255,7 +281,6 @@ class BookingController extends Controller
                 ->toArray();
 
             $selectedSeats = $request->input('seats_selected', []);
-            // Filter kursi sopir (id "D" atau "Sopir")
             $selectedSeats = array_filter($selectedSeats, function($seat) {
                 return $seat !== "D" && $seat !== "Sopir";
             });
@@ -264,13 +289,11 @@ class BookingController extends Controller
                 return back()->withErrors(['seats_selected' => 'Kursi sudah dipesan: ' . implode(', ', $conflict)]);
             }
 
-            // Validasi kapasitas penumpang (tanpa sopir)
-            $penumpangCapacity = $vehicle->seat_capacity - 1; // 1 kursi untuk sopir
+            $penumpangCapacity = $vehicle->seat_capacity - 1;
             if (count($selectedSeats) > $penumpangCapacity) {
                 return back()->withErrors(['seats_selected' => 'Jumlah kursi melebihi kapasitas penumpang.']);
             }
 
-            // Hitung amount: jumlah kursi x harga route
             $amount = 0;
             if ($route && isset($route->price)) {
                 $amount = count($selectedSeats) * $route->price;
@@ -380,7 +403,6 @@ class BookingController extends Controller
             $vehicle = $schedule->routeVehicle->vehicle;
             $route = $schedule->routeVehicle->route;
 
-            // Ambil semua kursi yang sudah di-booking (pending/confirmed) untuk jadwal ini
             $bookedSeats = Booking::where('schedule_id', $schedule->id)
                 ->whereIn('status', ['pending', 'confirmed'])
                 ->pluck('seats_selected')
@@ -388,7 +410,6 @@ class BookingController extends Controller
                 ->toArray();
 
             $selectedSeats = $request->input('seats_selected', []);
-            // Filter kursi sopir (id "D" atau "Sopir")
             $selectedSeats = array_filter($selectedSeats, function($seat) {
                 return $seat !== "D" && $seat !== "Sopir";
             });
@@ -397,13 +418,11 @@ class BookingController extends Controller
                 return back()->withErrors(['seats_selected' => 'Kursi sudah dipesan: ' . implode(', ', $conflict)]);
             }
 
-            // Validasi kapasitas penumpang (tanpa sopir)
-            $penumpangCapacity = $vehicle->seat_capacity - 1; // 1 kursi untuk sopir
+            $penumpangCapacity = $vehicle->seat_capacity - 1;
             if (count($selectedSeats) > $penumpangCapacity) {
                 return back()->withErrors(['seats_selected' => 'Jumlah kursi melebihi kapasitas penumpang.']);
             }
 
-            // Hitung amount: jumlah kursi x harga route
             $amount = 0;
             if ($route && isset($route->price)) {
                 $amount = count($selectedSeats) * $route->price;
