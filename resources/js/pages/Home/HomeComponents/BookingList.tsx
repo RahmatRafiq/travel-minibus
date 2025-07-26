@@ -3,6 +3,7 @@ import { CheckCircle, Clock, XCircle } from "lucide-react";
 
 type Booking = {
   id: number;
+  reference: string;
   origin: string;
   destination: string;
   date: string;
@@ -126,12 +127,16 @@ const BookingList: React.FC<Props> = ({ bookings }) => {
               </div>
               <div className="flex flex-col gap-1 items-end">
                 <span className="text-xs text-gray-500">Kode Tiket</span>
-                <span className="font-bold text-indigo-700 text-sm">TRV-{b.id.toString().padStart(6, '0')}</span>
+                <span className="font-bold text-indigo-700 text-sm">{b.reference}</span>
               </div>
             </div>
-            {/* Barcode dummy */}
+            {/* Barcode */}
             <div className="flex justify-center pb-4">
-              <div className="h-8 w-40 bg-gradient-to-r from-indigo-300 via-indigo-500 to-indigo-300 rounded-sm" style={{maskImage: 'linear-gradient(90deg, #000 10%, transparent 90%)'}}></div>
+              <img
+              src={`https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(`${b.id}-${b.reference}`)}&code=Code128&multiplebarcodes=false&translate-esc=false&unit=Fit&dpi=96&imagetype=png&rotation=0&color=%23000000&bgcolor=%23ffffff&quiet=0`}
+              alt="Barcode"
+              className="h-12 w-56 object-contain bg-white rounded-sm"
+              />
             </div>
           </div>
         ))}
