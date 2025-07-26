@@ -135,7 +135,7 @@ const BookingList: React.FC<Props> = ({ bookings }) => {
               <img
               src={`https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(`${b.id}-${b.reference}`)}&code=Code128&multiplebarcodes=false&translate-esc=false&unit=Fit&dpi=96&imagetype=png&rotation=0&color=%23000000&bgcolor=%23ffffff&quiet=0`}
               alt="Barcode"
-              className="h-12 w-56 object-contain bg-white rounded-sm"
+              className="h-8 w-40 object-contain bg-white rounded-sm"
               />
             </div>
           </div>
