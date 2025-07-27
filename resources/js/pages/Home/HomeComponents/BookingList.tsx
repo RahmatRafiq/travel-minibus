@@ -12,6 +12,7 @@ type Booking = {
   vehicle: string;
   brand: string;
   amount: number;
+  seats_selected?: string[];
 };
 
 type Props = {
@@ -69,40 +70,40 @@ const BookingList: React.FC<Props> = ({ bookings }) => {
         {bookings.map((b) => (
           <div
             key={b.id}
-            className="relative w-full max-w-xl mx-auto bg-white rounded-3xl shadow-lg border border-indigo-100 overflow-hidden"
+            className="relative w-full max-w-xl mx-auto bg-gradient-to-br from-indigo-50 via-white to-indigo-100 rounded-[2.5rem] shadow-2xl border-2 border-indigo-200 overflow-hidden"
+            style={{ boxShadow: "0 8px 32px rgba(80, 80, 180, 0.15)" }}
           >
-            {/* Ticket top section */}
-            <div className="px-6 pt-6 pb-2 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-3">
+            <div className="px-8 pt-8 pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-4">
                 {statusIcon(b.status)}
-                <span className="font-bold text-indigo-800 text-lg">
+                <span className="font-extrabold text-indigo-900 text-xl tracking-wide">
                   {b.origin}
                 </span>
-                <span className="mx-1 text-indigo-400">→</span>
-                <span className="font-bold text-indigo-800 text-lg">
+                <span className="mx-2 text-indigo-400 text-2xl">→</span>
+                <span className="font-extrabold text-indigo-900 text-xl tracking-wide">
                   {b.destination}
                 </span>
               </div>
-              <div className="flex items-center gap-3 mt-2 sm:mt-0">
-                <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
-                  {b.seats} Kursi
-                </span>
-                <span className="bg-yellow-50 text-yellow-700 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
+              <div className="flex items-center gap-4 mt-3 sm:mt-0">
+                <span className="bg-yellow-100 text-yellow-900 px-4 py-2 rounded-full text-sm font-bold shadow">
                   Rp {b.amount?.toLocaleString('id-ID')}
                 </span>
               </div>
             </div>
-            {/* Dashed border divider */}
-            <div className="border-b border-dashed border-indigo-200 mx-6 my-4"></div>
-            {/* Ticket middle section */}
-            <div className="px-6 pb-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <div className="flex flex-col gap-1">
-                <span className="text-xs text-gray-500"><span className="font-medium">Tanggal:</span> {formatTanggal(b.date)}</span>
-                <span className="text-xs text-gray-500"><span className="font-medium">Armada:</span> {b.vehicle} ({b.brand})</span>
+            <div className="border-b border-dashed border-indigo-300 mx-8 my-4"></div>
+            <div className="px-8 pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div className="flex flex-col gap-2">
+                <span className="text-sm text-gray-600"><span className="font-semibold">Tanggal:</span> {formatTanggal(b.date)}</span>
+                <span className="text-sm text-gray-600"><span className="font-semibold">Armada:</span> {b.vehicle} ({b.brand})</span>
+                <span className="text-sm text-gray-600">
+                  <span className="font-semibold">Kursi:</span> {b.seats_selected && b.seats_selected.length > 0
+                    ? `${b.seats_selected.length} (${b.seats_selected.join(", ")})`
+                    : "-"}
+                </span>
               </div>
               <span
                 className={
-                  "flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold shadow-sm " +
+                  "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold shadow " +
                   (b.status.toLowerCase() === "confirmed"
                     ? "bg-green-100 text-green-700"
                     : b.status.toLowerCase() === "pending"
@@ -114,28 +115,28 @@ const BookingList: React.FC<Props> = ({ bookings }) => {
                 {statusLabel(b.status)}
               </span>
             </div>
-            {/* Dashed border divider */}
-            <div className="border-b border-dashed border-indigo-200 mx-6 my-4 relative">
-              <div className="absolute rounded-full w-5 h-5 bg-indigo-100 -top-3 -left-5"></div>
-              <div className="absolute rounded-full w-5 h-5 bg-indigo-100 -top-3 -right-5"></div>
+            <div className="border-b border-dashed border-indigo-300 mx-8 my-4 relative">
+              <div className="absolute rounded-full w-7 h-7 bg-indigo-100 -top-4 -left-7"></div>
+              <div className="absolute rounded-full w-7 h-7 bg-indigo-100 -top-4 -right-7"></div>
             </div>
-            {/* Ticket bottom section */}
-            <div className="px-6 pb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div className="px-8 pb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div className="flex flex-col gap-1">
                 <span className="text-xs text-gray-500">ID Booking</span>
-                <span className="font-bold text-indigo-700 text-sm">{b.id}</span>
+                <span className="font-bold text-indigo-700 text-base tracking-wider">{b.id}</span>
               </div>
               <div className="flex flex-col gap-1 items-end">
                 <span className="text-xs text-gray-500">Kode Tiket</span>
-                <span className="font-bold text-indigo-700 text-sm">{b.reference}</span>
+                <span className="font-bold text-indigo-700 text-base tracking-wider">{b.reference}</span>
               </div>
             </div>
-            {/* Barcode */}
-            <div className="flex justify-center pb-4">
+            <div className="flex justify-center pb-6">
               <img
-              src={`https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(`${b.id}-${b.reference}`)}&code=Code128&multiplebarcodes=false&translate-esc=false&unit=Fit&dpi=96&imagetype=png&rotation=0&color=%23000000&bgcolor=%23ffffff&quiet=0`}
-              alt="Barcode"
-              className="h-8 w-40 object-contain bg-white rounded-sm"
+                src={`https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(`${b.id}-${b.reference}`)}&code=Code128&multiplebarcodes=false&translate-esc=false&unit=Fit&dpi=120&imagetype=png&rotation=0&color=%23000000&bgcolor=%23ffffff&quiet=0`}
+                alt={`Barcode untuk booking ${b.reference}`}
+                className="h-16 w-64 object-contain bg-white rounded-md border border-indigo-100 shadow"
+                loading="lazy"
+                width="256"
+                height="64"
               />
             </div>
           </div>

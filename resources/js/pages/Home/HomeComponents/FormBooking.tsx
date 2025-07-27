@@ -28,15 +28,23 @@ export default function FormBooking({ form, allOrigins, allDestinations, onChang
     onChange(fakeEvent);
   };
 
-  // Konversi string ke Date untuk DatePicker
-  const dateValue = useMemo(() => (form.date ? new Date(form.date) : undefined), [form.date]);
+  const dateValue = useMemo(() => {
+    if (!form.date) return undefined;
+    const parts = form.date.split('-');
+    if (parts.length === 3) {
+      return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    }
+    return undefined;
+  }, [form.date]);
 
-  // Handler perubahan tanggal dari DatePicker
   const handleDateChange = (date: Date | null) => {
+    const value = date
+      ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+      : "";
     const fakeEvent = {
       target: {
         name: "date",
-        value: date ? date.toISOString().slice(0, 10) : "",
+        value,
       }
     } as React.ChangeEvent<HTMLInputElement>;
     onChange(fakeEvent);
