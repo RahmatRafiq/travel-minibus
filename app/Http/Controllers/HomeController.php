@@ -85,6 +85,7 @@ class HomeController extends Controller
                 'brand' => $b->schedule && $b->schedule->routeVehicle && $b->schedule->routeVehicle->vehicle
                     ? $b->schedule->routeVehicle->vehicle->brand : '-',
                 'amount' => $b->amount,
+                'reference' => $b->reference,
             ];
         })
         ->toArray();

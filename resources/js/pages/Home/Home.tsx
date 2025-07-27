@@ -7,15 +7,16 @@ import BookingList from "./HomeComponents/BookingList";
 import Header from "./HomeComponents/Header"; // <--- tambahkan ini
 
 type Booking = {
-  id: number;
-  origin: string;
-  destination: string;
-  date: string;
-  seats: number;
-  status: string;
-  vehicle: string;
-  brand: string;
-  amount: number;
+id: number;
+origin: string;
+destination: string;
+date: string;
+seats: number;
+status: string;
+vehicle: string;
+brand: string;
+amount: number;
+reference: string;
 };
 
 type Props = {
@@ -182,7 +183,10 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
               <span className="text-sm text-gray-600 font-semibold">Total Booking: </span>
               <span className="text-lg text-indigo-700 font-bold">{formatRupiah(typeof totalAmount !== 'undefined' ? totalAmount : 0)}</span>
             </div>
-            <BookingList bookings={visibleBookings} isLoggedIn={isLoggedIn} />
+            {/* Make BookingList scrollable with fixed max height */}
+            <div style={{ maxHeight: '420px', overflowY: 'auto' }}>
+              <BookingList bookings={visibleBookings} isLoggedIn={isLoggedIn} />
+            </div>
           </div>
         </div>
       </section>
