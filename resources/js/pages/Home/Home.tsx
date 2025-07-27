@@ -7,15 +7,16 @@ import BookingList from "./HomeComponents/BookingList";
 import Header from "./HomeComponents/Header"; // <--- tambahkan ini
 
 type Booking = {
-  id: number;
-  origin: string;
-  destination: string;
-  date: string;
-  seats: number;
-  status: string;
-  vehicle: string;
-  brand: string;
-  amount: number;
+id: number;
+origin: string;
+destination: string;
+date: string;
+seats: number;
+status: string;
+vehicle: string;
+brand: string;
+amount: number;
+reference: string;
 };
 
 type Props = {
@@ -64,7 +65,7 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
       router.get("/login");
       return;
     }
-    setShowBookings(true);
+    router.get("/my-bookings");
   };
 
   const statusIcon = (status: string) => {
@@ -139,14 +140,18 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
           <div className="flex-1 flex justify-center mt-10 md:mt-0">
             <div className="relative">
               <img
-                src="https://undraw.co/api/illustrations/undraw_traveling_yhxq.svg"
-                alt="Travel Illustration"
-                className="w-64 sm:w-80 md:w-[380px] h-auto drop-shadow-2xl animate-float"
-                style={{ animation: "float 3s ease-in-out infinite" }}
+              srcSet="/travel.webp 1x, /travel.png 1x"
+              src="/travel.png"
+              alt="Ilustrasi Minibus Travel Zazy"
+              className="w-64 sm:w-80 md:w-[380px] h-auto drop-shadow-2xl animate-float"
+              style={{ animation: "float 3s ease-in-out infinite" }}
+              loading="lazy"
+              width="380"
+              height="240"
               />
               <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-white/60 backdrop-blur rounded-2xl px-6 py-2 shadow-lg flex items-center gap-2 border border-indigo-100">
-                <span className="text-indigo-700 font-bold">#1</span>
-                <span className="text-gray-700 text-sm">Pilihan Travel Modern</span>
+              <span className="text-indigo-700 font-bold">#1</span>
+              <span className="text-gray-700 text-sm">Pilihan Travel Modern</span>
               </div>
             </div>
           </div>
@@ -159,7 +164,7 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
         ref={bookingRef}
         className="container mx-auto px-2 sm:px-4 md:px-6 py-10 sm:py-16 flex flex-col md:flex-row gap-8 md:gap-12"
       >
-        <div className="flex-1 bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-4 sm:p-8 md:p-10 border border-indigo-100 glassmorphism max-w-2xl mx-auto w-full">
+        <div className="flex-1 bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-4 sm:p-8 md:p-10 border border-indigo-100 glassmorphism max-w-2xl w-full">
           <h2 className="text-2xl sm:text-3xl font-bold text-indigo-700 mb-6 flex items-center gap-2">
             <svg className="w-8 h-8 text-indigo-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 01-8 0M12 3v4m0 0a4 4 0 01-4 4H4m8-4a4 4 0 014 4h4"></path>
@@ -175,14 +180,12 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
           />
         </div>
         {/* Booking List */}
-        <div className="flex-1 flex flex-col justify-center max-w-2xl mx-auto w-full mt-8 md:mt-0">
+        <div className="flex-1 flex flex-col justify-center max-w-2xl w-full mt-8 md:mt-0">
           <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-4 sm:p-8 md:p-10 border border-indigo-50 glassmorphism">
-            {/* Total Amount */}
-            <div className="mb-4 text-right">
-              <span className="text-sm text-gray-600 font-semibold">Total Booking: </span>
-              <span className="text-lg text-indigo-700 font-bold">{formatRupiah(typeof totalAmount !== 'undefined' ? totalAmount : 0)}</span>
+            {/* Make BookingList scrollable with fixed max height */}
+            <div style={{ maxHeight: '420px', overflowY: 'auto' }}>
+              <BookingList bookings={visibleBookings} isLoggedIn={isLoggedIn} />
             </div>
-            <BookingList bookings={visibleBookings} isLoggedIn={isLoggedIn} />
           </div>
         </div>
       </section>
@@ -200,21 +203,7 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
           backdrop-filter: blur(8px);
         }
       `}</style>
-      {showBookings && isLoggedIn ? (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center animate-fadeIn px-2">
-          <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-2xl w-full max-w-lg p-4 sm:p-8 relative border border-indigo-100 glassmorphism">
-            <button
-              className="absolute top-4 right-4 text-gray-400 hover:text-indigo-600 text-2xl"
-              onClick={() => setShowBookings(false)}
-              aria-label="Close"
-            >
-              &times;
-            </button>
-            {/* Gunakan BookingList di modal */}
-            <BookingList bookings={visibleBookings} isLoggedIn={isLoggedIn} />
-          </div>
-        </div>
-      ) : null}
+      {/* Modal booking dihapus, redirect ke /my-bookings */}
     </div>
   );
 }

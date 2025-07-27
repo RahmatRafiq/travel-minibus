@@ -56,6 +56,8 @@ Route::prefix('dashboard')->middleware(['auth', 'verified', 'role:admin'])->grou
     Route::delete('bookings/{id}', [\App\Http\Controllers\BookingController::class, 'destroy'])->name('bookings.destroy');
     Route::post('bookings/{id}/restore', [\App\Http\Controllers\BookingController::class, 'restore'])->name('bookings.restore');
     Route::delete('bookings/{id}/force-delete', [\App\Http\Controllers\BookingController::class, 'forceDelete'])->name('bookings.force-delete');
+    Route::post('bookings/{id}/update-status', [\App\Http\Controllers\BookingController::class, 'updateStatus'])->name('bookings.update-status');
+    Route::post('bookings/update-status-bulk', [\App\Http\Controllers\BookingController::class, 'updateStatusBulk'])->name('bookings.update-status-bulk');
 
     Route::resource('schedules', ScheduleController::class);
     Route::post('schedules/json', [ScheduleController::class, 'json'])->name('schedules.json');

@@ -34,12 +34,14 @@ class HomeController extends Controller
                     ? $b->schedule->routeVehicle->route->destination : '-',
                 'date' => $b->schedule ? substr($b->schedule->departure_time, 0, 10) : '-',
                 'seats' => $b->seats_booked,
+                'seats_selected' => $b->seats_selected ?? [],
                 'status' => ucfirst($b->status),
                 'vehicle' => $b->schedule && $b->schedule->routeVehicle && $b->schedule->routeVehicle->vehicle
                     ? $b->schedule->routeVehicle->vehicle->plate_number : '-',
                 'brand' => $b->schedule && $b->schedule->routeVehicle && $b->schedule->routeVehicle->vehicle
                     ? $b->schedule->routeVehicle->vehicle->brand : '-',
                 'amount' => $b->amount,
+                'reference' => $b->reference,
             ];
         })
         ->toArray();
@@ -78,12 +80,14 @@ class HomeController extends Controller
                     ? $b->schedule->routeVehicle->route->destination : '-',
                 'date' => $b->schedule ? substr($b->schedule->departure_time, 0, 10) : '-',
                 'seats' => $b->seats_booked,
+                'seats_selected' => $b->seats_selected ?? [],
                 'status' => ucfirst($b->status),
                 'vehicle' => $b->schedule && $b->schedule->routeVehicle && $b->schedule->routeVehicle->vehicle
                     ? $b->schedule->routeVehicle->vehicle->plate_number : '-',
                 'brand' => $b->schedule && $b->schedule->routeVehicle && $b->schedule->routeVehicle->vehicle
                     ? $b->schedule->routeVehicle->vehicle->brand : '-',
                 'amount' => $b->amount,
+                'reference' => $b->reference,
             ];
         })
         ->toArray();

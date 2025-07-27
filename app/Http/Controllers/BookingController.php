@@ -78,6 +78,33 @@ class BookingController extends Controller
         ]);
     }
 
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,confirmed,cancelled',
+        ]);
+        $booking = Booking::withTrashed()->findOrFail($id);
+        $booking->status = $request->status;
+        $booking->save();
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'status' => $booking->status]);
+        }
+        return redirect()->route('bookings.index')->with('success', 'Status booking berhasil diupdate.');
+    }
+
+    public function updateStatusBulk(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'status' => 'required|in:pending,confirmed,cancelled',
+        ]);
+        Booking::whereIn('id', $request->ids)->update(['status' => $request->status]);
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
+        return redirect()->route('bookings.index')->with('success', 'Status booking berhasil diupdate (bulk).');
+    }
+
     public function json(Request $request)
     {
         $search = $request->input('search.value', '');
@@ -123,12 +150,9 @@ class BookingController extends Controller
             $query->orderBy($columns[$request->order[0]['column']], $request->order[0]['dir']);
         }
 
-        // DataTable::paginate sudah menerima query dengan eager loading, jadi tidak perlu query tambahan
         $data = DataTable::paginate($query, $request);
 
-        // Mapping data tanpa query tambahan (semua relasi sudah di-eager load)
         $data['data'] = collect($data['data'])->map(function ($booking) {
-            // Semua relasi sudah di-load, tidak ada query baru di sini
             return [
                 'id' => $booking->id,
                 'user' => $booking->user ? [
@@ -199,6 +223,12 @@ class BookingController extends Controller
                         ->sum('seats_booked');
                     $available_seats = $vehicle->seat_capacity - $booked;
 
+                    $bookedSeats = Booking::where('schedule_id', $schedule->id)
+                        ->whereIn('status', ['pending', 'confirmed'])
+                        ->pluck('seats_selected')
+                        ->flatten()
+                        ->toArray();
+
                     $schedules[] = [
                         'id' => $schedule->id,
                         'departure_time' => $schedule->departure_time,
@@ -207,7 +237,9 @@ class BookingController extends Controller
                             'id' => $vehicle->id,
                             'plate_number' => $vehicle->plate_number,
                             'brand' => $vehicle->brand,
+                            'seat_capacity' => $vehicle->seat_capacity,
                         ],
+                        'reservedSeats' => array_values(array_unique($bookedSeats)),
                     ];
                 }
             }
@@ -226,29 +258,53 @@ class BookingController extends Controller
 
     public function store(Request $request)
     {
+        Log::info('BookingController@store seats_selected', [
+            'seats_selected' => $request->input('seats_selected'),
+            'schedule_id' => $request->input('schedule_id'),
+            'all' => $request->all(),
+        ]);
         DB::beginTransaction();
         try {
             $request->validate([
                 'schedule_id' => 'required|exists:schedules,id',
-                'seats_booked' => 'required|integer|min:1',
+                'seats_selected' => 'required|array|min:1',
             ]);
 
-            $schedule = Schedule::with('routeVehicle.vehicle')->findOrFail($request->schedule_id);
+            $schedule = Schedule::with(['routeVehicle.vehicle', 'routeVehicle.route'])->findOrFail($request->schedule_id);
             $vehicle = $schedule->routeVehicle->vehicle;
+            $route = $schedule->routeVehicle->route;
 
-            $booked = Booking::where('schedule_id', $schedule->id)
+            $bookedSeats = Booking::where('schedule_id', $schedule->id)
                 ->whereIn('status', ['pending', 'confirmed'])
-                ->sum('seats_booked');
-            $available_seats = $vehicle->seat_capacity - $booked;
+                ->pluck('seats_selected')
+                ->flatten()
+                ->toArray();
 
-            if ($request->seats_booked > $available_seats) {
-                return back()->withErrors(['seats_booked' => 'Not enough available seats.']);
+            $selectedSeats = $request->input('seats_selected', []);
+            $selectedSeats = array_filter($selectedSeats, function($seat) {
+                return $seat !== "D" && $seat !== "Sopir";
+            });
+            $conflict = array_intersect($selectedSeats, $bookedSeats);
+            if (count($conflict) > 0) {
+                return back()->withErrors(['seats_selected' => 'Kursi sudah dipesan: ' . implode(', ', $conflict)]);
+            }
+
+            $penumpangCapacity = $vehicle->seat_capacity - 1;
+            if (count($selectedSeats) > $penumpangCapacity) {
+                return back()->withErrors(['seats_selected' => 'Jumlah kursi melebihi kapasitas penumpang.']);
+            }
+
+            $amount = 0;
+            if ($route && isset($route->price)) {
+                $amount = count($selectedSeats) * $route->price;
             }
 
             Booking::create([
                 'user_id'      => auth()->id(),
                 'schedule_id'  => $request->schedule_id,
-                'seats_booked' => $request->seats_booked,
+                'seats_booked' => count($selectedSeats),
+                'seats_selected' => $selectedSeats,
+                'amount'       => $amount,
                 'status'       => 'pending',
             ]);
 
@@ -263,29 +319,24 @@ class BookingController extends Controller
 
     public function edit($id)
     {
-        // Eager load all necessary relationships for the booking
         $booking = Booking::with([
             'schedule.routeVehicle.vehicle',
             'schedule.routeVehicle.route'
         ])->withTrashed()->findOrFail($id);
 
-        // Get all ready schedules with their vehicles and routes in one go
         $schedules = Schedule::with([
             'routeVehicle.vehicle',
             'routeVehicle.route'
         ])->where('status', 'ready')->get();
 
-        // Collect all schedule IDs for batch querying booked seats
         $scheduleIds = $schedules->pluck('id')->all();
 
-        // Get booked seats for all schedules in one query
         $bookedSeats = Booking::whereIn('schedule_id', $scheduleIds)
             ->whereIn('status', ['pending', 'confirmed'])
             ->select('schedule_id', DB::raw('SUM(seats_booked) as total_booked'))
             ->groupBy('schedule_id')
             ->pluck('total_booked', 'schedule_id');
 
-        // Map schedules with available seats, only include those with available seats > 0
         $schedules = $schedules->filter(function ($schedule) use ($bookedSeats) {
             $vehicle = $schedule->routeVehicle->vehicle;
             $booked = $bookedSeats[$schedule->id] ?? 0;
@@ -345,24 +396,43 @@ class BookingController extends Controller
 
             $request->validate([
                 'schedule_id' => 'required|exists:schedules,id',
-                'seats_booked' => 'required|integer|min:1',
+                'seats_selected' => 'required|array|min:1',
             ]);
 
-            $schedule = Schedule::with('routeVehicle.vehicle')->findOrFail($request->schedule_id);
+            $schedule = Schedule::with(['routeVehicle.vehicle', 'routeVehicle.route'])->findOrFail($request->schedule_id);
             $vehicle = $schedule->routeVehicle->vehicle;
+            $route = $schedule->routeVehicle->route;
 
-            $booked = Booking::where('schedule_id', $schedule->id)
+            $bookedSeats = Booking::where('schedule_id', $schedule->id)
                 ->whereIn('status', ['pending', 'confirmed'])
-                ->sum('seats_booked');
-            $available_seats = $vehicle->seat_capacity - $booked;
+                ->pluck('seats_selected')
+                ->flatten()
+                ->toArray();
 
-            if ($request->seats_booked > $available_seats) {
-                return back()->withErrors(['seats_booked' => 'Not enough available seats.']);
+            $selectedSeats = $request->input('seats_selected', []);
+            $selectedSeats = array_filter($selectedSeats, function($seat) {
+                return $seat !== "D" && $seat !== "Sopir";
+            });
+            $conflict = array_intersect($selectedSeats, $bookedSeats);
+            if (count($conflict) > 0) {
+                return back()->withErrors(['seats_selected' => 'Kursi sudah dipesan: ' . implode(', ', $conflict)]);
+            }
+
+            $penumpangCapacity = $vehicle->seat_capacity - 1;
+            if (count($selectedSeats) > $penumpangCapacity) {
+                return back()->withErrors(['seats_selected' => 'Jumlah kursi melebihi kapasitas penumpang.']);
+            }
+
+            $amount = 0;
+            if ($route && isset($route->price)) {
+                $amount = count($selectedSeats) * $route->price;
             }
 
             $booking->update([
                 'schedule_id'  => $request->schedule_id,
-                'seats_booked' => $request->seats_booked,
+                'seats_booked' => count($selectedSeats),
+                'seats_selected' => $selectedSeats,
+                'amount'       => $amount,
             ]);
 
             DB::commit();
