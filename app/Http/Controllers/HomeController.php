@@ -120,12 +120,16 @@ class HomeController extends Controller
                 ->where('destination', $destination)
                 ->get();
 
+            $timezone = config('app.timezone', 'UTC');
+            $now = now($timezone);
+
             foreach ($routes as $route) {
                 foreach ($route->routeVehicles as $rv) {
                     $rv->load('vehicle');
                     $availableSchedules = $rv->schedules()
                         ->where('status', 'ready')
                         ->whereDate('departure_time', $date)
+                        ->where('departure_time', '>', $now)
                         ->get();
 
                     foreach ($availableSchedules as $schedule) {
