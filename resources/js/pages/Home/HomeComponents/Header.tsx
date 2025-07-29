@@ -57,6 +57,14 @@ export default function Header() {
                       {user.name}
                     </DropdownMenu.Label>
                     <DropdownMenu.Separator className="my-1 h-px bg-indigo-100 dark:bg-indigo-800" />
+                    <DropdownMenu.Item asChild>
+                      <Link
+                        href="/profile"
+                        className="px-4 py-2 text-sm text-indigo-700 dark:text-indigo-200 hover:bg-indigo-50 dark:hover:bg-indigo-900 transition block"
+                      >
+                        Profil Saya
+                      </Link>
+                    </DropdownMenu.Item>
                     {user.role === "admin" ? (
                       <DropdownMenu.Item asChild>
                         <Link
