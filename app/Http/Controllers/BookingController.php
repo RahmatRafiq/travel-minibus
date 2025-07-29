@@ -114,17 +114,17 @@ class BookingController extends Controller
 
         $query = match ($filter) {
             'trashed' => Booking::onlyTrashed()->with([
-                'user',
+                'user.profile',
                 'schedule.routeVehicle.vehicle',
                 'schedule.routeVehicle.route'
             ]),
             'all' => Booking::withTrashed()->with([
-                'user',
+                'user.profile',
                 'schedule.routeVehicle.vehicle',
                 'schedule.routeVehicle.route'
             ]),
             default => Booking::with([
-                'user',
+                'user.profile',
                 'schedule.routeVehicle.vehicle',
                 'schedule.routeVehicle.route'
             ]),
@@ -160,6 +160,11 @@ class BookingController extends Controller
                 'user' => $booking->user ? [
                     'id' => $booking->user->id,
                     'name' => $booking->user->name,
+                    'profile' => $booking->user->profile ? [
+                        'phone_number' => $booking->user->profile->phone_number,
+                        'pickup_address' => $booking->user->profile->pickup_address,
+                        'address' => $booking->user->profile->address,
+                    ] : null,
                 ] : null,
                 'schedule' => $booking->schedule ? [
                     'id' => $booking->schedule->id,

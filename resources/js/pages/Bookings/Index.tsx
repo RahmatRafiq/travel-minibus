@@ -9,6 +9,18 @@ import DataTableWrapper, { DataTableWrapperRef } from '@/components/datatables';
 import { BreadcrumbItem } from '@/types';
 import ToggleTabs from '@/components/toggle-tabs';
 
+type Profile = {
+  phone_number?: string;
+  pickup_address?: string;
+  address?: string;
+};
+
+type BookingRow = {
+  user?: {
+    profile?: Profile;
+  };
+};
+
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Manajemen Pemesanan', href: route('bookings.index') },
 ];
@@ -20,6 +32,14 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
   const [bulkStatus, setBulkStatus] = useState('pending');
 
   const columns = [
+    {
+      data: null,
+      title: '',
+      orderable: false,
+      searchable: false,
+      className: 'details-control',
+      render: () => '<span style="cursor: pointer;">+</span>',
+    },
     {
       data: 'id',
       title: 'ID',
@@ -91,6 +111,20 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
     },
   ];
 
+  const formatBookingDetails = (booking: BookingRow) => {
+    const profile = booking.user?.profile;
+    return `
+      <div class="p-4 bg-gray-50 border border-gray-200 rounded shadow-sm">
+        <strong class="block text-gray-800 mb-2">Detail Penumpang:</strong>
+        <ul>
+          <li class="ml-4 list-disc text-gray-700"><b>No. Telepon:</b> ${profile?.phone_number ?? '-'}</li>
+          <li class="ml-4 list-disc text-gray-700"><b>Alamat Penjemputan:</b> ${profile?.pickup_address ?? '-'}</li>
+          <li class="ml-4 list-disc text-gray-700"><b>Alamat Lengkap:</b> ${profile?.address ?? '-'}</li>
+        </ul>
+      </div>
+    `;
+  };
+
   const drawCallback = () => {
     document.querySelectorAll('.inertia-link-cell').forEach((cell) => {
       const id = cell.getAttribute('data-id');
@@ -109,31 +143,22 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
 
     const table = dtRef.current?.dt();
     if (table) {
-      document.querySelectorAll('.btn-delete').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          const id = btn.getAttribute('data-id');
-          if (id) router.delete(route('bookings.destroy', Number(id)), {
-            onSuccess: () => dtRef.current?.reload(),
-          });
+      document.querySelectorAll('.details-control').forEach((cell) => {
+        cell.addEventListener('click', function () {
+          const tr = cell.closest('tr');
+          if (!tr) return;
+          const row = table.row(tr);
+          if (row.child.isShown()) {
+            row.child.hide();
+            tr.classList.remove('shown');
+            cell.innerHTML = '<span style="cursor: pointer;">+</span>';
+          } else {
+            row.child(formatBookingDetails(row.data())).show();
+            tr.classList.add('shown');
+            cell.innerHTML = '<span style="cursor: pointer;">-</span>';
+          }
         });
       });
-      document.querySelectorAll('.btn-restore').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          const id = btn.getAttribute('data-id');
-          if (id) router.post(route('bookings.restore', Number(id)), {}, {
-            onSuccess: () => dtRef.current?.reload(),
-          });
-        });
-      });
-      document.querySelectorAll('.btn-force-delete').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          const id = btn.getAttribute('data-id');
-          if (id) router.delete(route('bookings.force-delete', Number(id)), {
-            onSuccess: () => dtRef.current?.reload(),
-          });
-        });
-      });
-      // Checkbox bulk select
       document.querySelectorAll('.bulk-checkbox').forEach((checkbox) => {
         checkbox.addEventListener('change', (e) => {
           const id = Number(checkbox.getAttribute('data-id'));
@@ -161,17 +186,17 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
     }
   };
 
-  // Bulk update UI
   const handleBulkUpdate = () => {
     if (selectedIds.length === 0) return;
     // Prevent bulk update if any selected booking is already confirmed
     const table = dtRef.current?.dt();
     let confirmedSelected = false;
     if (table) {
-      const data = table.rows().data().toArray();
+      const data: BookingRow[] = table.rows().data().toArray();
       for (const id of selectedIds) {
-        const booking = data.find((row: any) => row.id === id);
-        if (booking && booking.status === 'confirmed') {
+        const booking = data.find((row) => row && 'id' in row && row.id === id);
+        // You may want to extend BookingRow with id and status if not present
+        if (booking && (booking as any).status === 'confirmed') {
           confirmedSelected = true;
           break;
         }
