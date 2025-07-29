@@ -5,7 +5,7 @@ use App\Observers\ActivityObserver;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Activitylog\Models\Activity;
 // use Illuminate\Support\Facades\Broadcast;
-// use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\URL;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -27,6 +27,6 @@ class AppServiceProvider extends ServiceProvider
         Activity::created(function ($activity) {
             broadcast(new \App\Events\ActivityLogCreated($activity));
         });
-        // URL::forceScheme('https');
+        URL::forceScheme('https');
     }
 }

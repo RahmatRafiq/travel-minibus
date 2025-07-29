@@ -26,10 +26,10 @@ export default function ProfileSetting({ profile }: ProfileSettingProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-indigo-900 dark:to-indigo-950 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 flex flex-col">
       <Head title="Pengaturan Profil" />
       <main className="container mx-auto px-2 sm:px-4 md:px-6 py-8 sm:py-12 flex-1 w-full">
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-indigo-950 rounded-3xl shadow-2xl p-4 sm:p-8 border border-indigo-100 dark:border-indigo-800 max-w-xl mx-auto w-full space-y-10">
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-4 sm:p-8 border border-indigo-100 dark:border-slate-700 max-w-xl mx-auto w-full space-y-10">
           <h1 className="text-2xl sm:text-3xl font-bold text-indigo-700 dark:text-indigo-200 mb-6 flex items-center gap-2 justify-center">
             Pengaturan Profil
           </h1>

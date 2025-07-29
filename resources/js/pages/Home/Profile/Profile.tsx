@@ -18,7 +18,7 @@ interface ProfileProps {
 export default function Profile({ profile }: ProfileProps) {
   const [activeTab, setActiveTab] = useState<'account' | 'profile'>('profile');
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-indigo-900 dark:to-indigo-950 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 flex flex-col">
       <Head title="Account & Profile Setting" />
       <Header />
       <main className="container mx-auto px-2 sm:px-4 md:px-6 py-8 sm:py-12 flex-1 w-full">

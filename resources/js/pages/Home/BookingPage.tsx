@@ -107,11 +107,11 @@ export default function BookingDetail({
 
   if (!origin || !destination || !date) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 flex flex-col">
         <Head title="Cari Jadwal - Travel Bone Makassar" />
         <Header />
         <main className="container mx-auto px-6 py-12 flex-1">
-          <div className="bg-white rounded-3xl shadow-2xl p-8 border border-indigo-100 max-w-lg mx-auto">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-8 border border-indigo-100 dark:border-slate-700 max-w-lg mx-auto">
             <FormBooking
               form={search}
               allOrigins={allOrigins}
@@ -127,17 +127,17 @@ export default function BookingDetail({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 flex flex-col">
       <Head title="Booking Detail - Travel Bone Makassar" />
       <Header />
       <main className="container mx-auto px-2 sm:px-4 md:px-6 py-6 sm:py-10 md:py-12 flex-1 w-full">
-        <div className="bg-white rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 border border-indigo-100 max-w-xl mx-auto w-full">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 border border-indigo-100 dark:border-slate-700 max-w-xl mx-auto w-full">
           <h2 className="text-lg sm:text-xl font-bold text-indigo-700 mb-4">
             Jadwal Tersedia Untuk Rute {origin && destination ? `${origin} → ${destination}` : ""}
           </h2>
           {schedules.length === 0 && (
             <>
-              <div className="text-gray-500 text-center mb-6">
+              <div className="text-gray-500 dark:text-slate-400 text-center mb-6">
                 Tidak ada jadwal tersedia untuk pilihan Anda.
               </div>
               <FormBooking
@@ -179,7 +179,7 @@ export default function BookingDetail({
                       <div className="font-semibold text-indigo-800 text-base sm:text-lg">
                         {sch.departure_time} &middot; {sch.vehicle.plate_number} ({sch.vehicle.brand})
                       </div>
-                      <div className="text-xs sm:text-sm text-gray-500">
+                      <div className="text-xs sm:text-sm text-gray-500 dark:text-slate-400">
                         Sisa kursi: {sch.available_seats}
                       </div>
                     </div>

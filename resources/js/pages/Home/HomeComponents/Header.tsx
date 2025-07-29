@@ -15,14 +15,14 @@ export default function Header() {
   };
 
   return (
-    <header className="py-6 sm:py-8 bg-white dark:bg-indigo-950 shadow">
+    <header className="py-6 sm:py-8 bg-white dark:bg-slate-900 shadow">
       <div className="container mx-auto px-3 sm:px-6">
         <div className="grid grid-cols-2 items-center">
           <div>
-            <Link href="/" className="block text-xl sm:text-2xl font-bold text-indigo-700 dark:text-indigo-200 hover:underline">
+            <Link href="/" className="block text-xl sm:text-2xl font-bold text-indigo-700 dark:text-slate-100 hover:underline">
               Zazy Travel
             </Link>
-            <span className="block text-base sm:text-lg text-indigo-500 dark:text-indigo-300 font-medium">
+            <span className="block text-base sm:text-lg text-indigo-500 dark:text-slate-400 font-medium">
               Bone Makassar
             </span>
           </div>
@@ -49,18 +49,18 @@ export default function Header() {
               </DropdownMenu.Trigger>
               <DropdownMenu.Content
                 align="end"
-                className="z-50 bg-white dark:bg-indigo-950 border border-indigo-100 dark:border-indigo-800 rounded-lg shadow-lg min-w-[170px] py-2"
+                className="z-50 bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 rounded-lg shadow-lg min-w-[170px] py-2"
               >
                 {user ? (
                   <>
-                    <DropdownMenu.Label className="px-4 py-2 text-indigo-700 dark:text-indigo-200 font-semibold whitespace-nowrap">
+                    <DropdownMenu.Label className="px-4 py-2 text-indigo-700 dark:text-slate-100 font-semibold whitespace-nowrap">
                       {user.name}
                     </DropdownMenu.Label>
-                    <DropdownMenu.Separator className="my-1 h-px bg-indigo-100 dark:bg-indigo-800" />
+                    <DropdownMenu.Separator className="my-1 h-px bg-indigo-100 dark:bg-slate-700" />
                     <DropdownMenu.Item asChild>
                       <Link
                         href="/profile"
-                        className="px-4 py-2 text-sm text-indigo-700 dark:text-indigo-200 hover:bg-indigo-50 dark:hover:bg-indigo-900 transition block"
+                        className="px-4 py-2 text-sm text-indigo-700 dark:text-slate-100 hover:bg-indigo-50 dark:hover:bg-slate-700 transition block"
                       >
                         Profil Saya
                       </Link>
@@ -69,7 +69,7 @@ export default function Header() {
                       <DropdownMenu.Item asChild>
                         <Link
                           href={route('dashboard')}
-                          className="px-4 py-2 text-sm text-indigo-700 dark:text-indigo-200 hover:bg-indigo-50 dark:hover:bg-indigo-900 transition block"
+                          className="px-4 py-2 text-sm text-indigo-700 dark:text-slate-100 hover:bg-indigo-50 dark:hover:bg-slate-700 transition block"
                         >
                           Dashboard
                         </Link>
@@ -78,7 +78,7 @@ export default function Header() {
                       <DropdownMenu.Item asChild>
                         <Link
                           href="/my-bookings"
-                          className="px-4 py-2 text-sm text-indigo-700 dark:text-indigo-200 hover:bg-indigo-50 dark:hover:bg-indigo-900 transition block"
+                          className="px-4 py-2 text-sm text-indigo-700 dark:text-slate-100 hover:bg-indigo-50 dark:hover:bg-slate-700 transition block"
                         >
                           Booking Saya
                         </Link>
@@ -87,7 +87,7 @@ export default function Header() {
                     <DropdownMenu.Item asChild>
                       <button
                         onClick={handleLogout}
-                        className="px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900 text-left w-full transition"
+                        className="px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-slate-900 text-left w-full transition"
                       >
                         Logout
                       </button>
@@ -97,7 +97,7 @@ export default function Header() {
                   <DropdownMenu.Item asChild>
                     <Link
                       href="/login"
-                      className="block px-4 py-2 text-sm text-indigo-700 dark:text-indigo-200 hover:bg-indigo-50 dark:hover:bg-indigo-900 transition"
+                      className="block px-4 py-2 text-sm text-indigo-700 dark:text-slate-100 hover:bg-indigo-50 dark:hover:bg-slate-700 transition"
                     >
                       Login
                     </Link>

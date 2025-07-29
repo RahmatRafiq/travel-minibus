@@ -85,7 +85,7 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-indigo-200 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-indigo-200 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex flex-col">
       <Head title="Home - Travel Bone Makassar" />
       <Header
       />
@@ -112,7 +112,7 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
                 Travel Minibus Booking
               </span>
             </h1>
-            <p className="text-base sm:text-lg md:text-2xl text-gray-700 max-w-xl font-medium">
+            <p className="text-base sm:text-lg md:text-2xl text-gray-700 dark:text-slate-100 max-w-xl font-medium">
               Pesan perjalanan antar kota dengan mudah, cepat, dan nyaman. Temukan jadwal, pilih kursi, dan nikmati perjalanan Anda bersama kami!
             </p>
             {isLoggedIn && (
@@ -151,7 +151,7 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
               />
               <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-white/60 backdrop-blur rounded-2xl px-6 py-2 shadow-lg flex items-center gap-2 border border-indigo-100">
               <span className="text-indigo-700 font-bold">#1</span>
-              <span className="text-gray-700 text-sm">Pilihan Travel Modern</span>
+              <span className="text-gray-700 dark:text-slate-200 text-sm">Pilihan Travel Modern</span>
               </div>
             </div>
           </div>
@@ -164,8 +164,8 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
         ref={bookingRef}
         className="container mx-auto px-2 sm:px-4 md:px-6 py-10 sm:py-16 flex flex-col md:flex-row gap-8 md:gap-12"
       >
-        <div className="flex-1 bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-4 sm:p-8 md:p-10 border border-indigo-100 glassmorphism max-w-2xl w-full">
-          <h2 className="text-2xl sm:text-3xl font-bold text-indigo-700 mb-6 flex items-center gap-2">
+        <div className="flex-1  rounded-3xl shadow-2xl p-4 sm:p-8 md:p-10 max-w-2xl w-full">
+      <h2 className="text-2xl font-bold text-indigo-700 dark:text-indigo-200 mb-6 flex items-center gap-2 justify-center">
             <svg className="w-8 h-8 text-indigo-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 01-8 0M12 3v4m0 0a4 4 0 01-4 4H4m8-4a4 4 0 014 4h4"></path>
             </svg>
@@ -178,10 +178,9 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
             onChange={handleChange}
             onSubmit={handleBooking}
           />
-        </div>
-        {/* Booking List */}
+        </div> 
         <div className="flex-1 flex flex-col justify-center max-w-2xl w-full mt-8 md:mt-0">
-          <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-4 sm:p-8 md:p-10 border border-indigo-50 glassmorphism">
+          <div className=" backdrop-blur-lg rounded-3xl shadow-2xl p-4 sm:p-8 md:p-10">
             {/* Make BookingList scrollable with fixed max height */}
             <div style={{ maxHeight: '420px', overflowY: 'auto' }}>
               <BookingList bookings={visibleBookings} isLoggedIn={isLoggedIn} />
@@ -190,7 +189,6 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
         </div>
       </section>
 
-      {/* Footer */}
       <Footer />
       <style>{`
         @keyframes float {
