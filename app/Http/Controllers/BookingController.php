@@ -289,8 +289,7 @@ class BookingController extends Controller
                 return back()->withErrors(['seats_selected' => 'Kursi sudah dipesan: ' . implode(', ', $conflict)]);
             }
 
-            $penumpangCapacity = $vehicle->seat_capacity - 1;
-            if (count($selectedSeats) > $penumpangCapacity) {
+            if (count($selectedSeats) > $vehicle->seat_capacity) {
                 return back()->withErrors(['seats_selected' => 'Jumlah kursi melebihi kapasitas penumpang.']);
             }
 
@@ -418,8 +417,7 @@ class BookingController extends Controller
                 return back()->withErrors(['seats_selected' => 'Kursi sudah dipesan: ' . implode(', ', $conflict)]);
             }
 
-            $penumpangCapacity = $vehicle->seat_capacity - 1;
-            if (count($selectedSeats) > $penumpangCapacity) {
+            if (count($selectedSeats) > $vehicle->seat_capacity) {
                 return back()->withErrors(['seats_selected' => 'Jumlah kursi melebihi kapasitas penumpang.']);
             }
 

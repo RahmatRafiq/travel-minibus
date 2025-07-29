@@ -53,7 +53,7 @@ export default function FormBooking({ form, allOrigins, allDestinations, onChang
   return (
     <form onSubmit={onSubmit} className="space-y-6">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Origin</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-slate-400 mb-1">Origin</label>
         <CustomSelect
           name="origin"
           value={originOptions.find(option => option.value === form.origin)}
@@ -63,7 +63,7 @@ export default function FormBooking({ form, allOrigins, allDestinations, onChang
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Destination</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-slate-400 mb-1">Destination</label>
         <CustomSelect
           name="destination"
           value={destinationOptions.find(option => option.value === form.destination)}
@@ -79,7 +79,7 @@ export default function FormBooking({ form, allOrigins, allDestinations, onChang
           value={dateValue}
           onChange={handleDateChange}
           required
-          className="w-full"
+          className="w-full dark:text-slate-400"
           minDate={new Date()}
         />
       </div>

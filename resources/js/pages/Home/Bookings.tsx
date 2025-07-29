@@ -32,11 +32,11 @@ export default function Bookings({ bookings, userName, isLoggedIn }: Props) {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 flex flex-col">
       <Head title="Daftar Booking - Travel Bone Makassar" />
       <Header />
       <main className="container mx-auto px-2 sm:px-4 md:px-6 py-8 sm:py-12 flex-1 w-full">
-        <div className="bg-white rounded-3xl shadow-2xl p-4 sm:p-8 border border-indigo-100 max-w-2xl mx-auto w-full">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-4 sm:p-8 border border-indigo-100 dark:border-slate-700 max-w-2xl mx-auto w-full">
           <BookingList bookings={bookings} isLoggedIn={isLoggedIn} />
         </div>
       </main>

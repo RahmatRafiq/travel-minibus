@@ -9,6 +9,7 @@ return new class extends Migration {
     {
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
+            $table->string('reference', 20)->unique()->after('id');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('schedule_id')->constrained()->onDelete('cascade');
             $table->timestamp('booking_time')->useCurrent();

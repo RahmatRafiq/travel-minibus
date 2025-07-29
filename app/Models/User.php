@@ -13,6 +13,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements HasMedia
+
 {
     use HasFactory, Notifiable, InteractsWithMedia, HasRoles, SoftDeletes, LogsActivity;
 
@@ -69,6 +70,11 @@ class User extends Authenticatable implements HasMedia
     public function bookings()
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function profile()
+    {
+        return $this->hasOne(Profile::class);
     }
 
 
