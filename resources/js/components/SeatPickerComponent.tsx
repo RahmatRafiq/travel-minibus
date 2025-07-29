@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Circle, Armchair as SeatIcon, User as DriverIcon } from "lucide-react";
+import React from "react";
+import { Armchair as SeatIcon, User as DriverIcon } from "lucide-react";
 
 type Seat = {
   id: string | number;
