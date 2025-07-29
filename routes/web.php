@@ -9,13 +9,11 @@ use Inertia\Inertia;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Route for login with OAuth (Google, GitHub)
 Route::get('auth/{provider}', [SocialAuthController::class, 'redirectToProvider'])->name('auth.redirect');
 Route::get('auth/{provider}/callback', [SocialAuthController::class, 'handleProviderCallback'])->name('auth.callback');
 
-// Middleware for pages that require authentication and admin role
 Route::prefix('dashboard')->middleware(['auth', 'verified', 'role:admin'])->group(function () {
-   Route::get('/', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 
     Route::delete('/settings/profile/delete-file', [\App\Http\Controllers\Settings\ProfileController::class, 'deleteFile'])->name('profile.deleteFile');
     Route::post('/settings/profile/upload', [\App\Http\Controllers\Settings\ProfileController::class, 'upload'])->name('profile.upload');
@@ -46,7 +44,6 @@ Route::prefix('dashboard')->middleware(['auth', 'verified', 'role:admin'])->grou
     Route::get('routes', [\App\Http\Controllers\RouteController::class, 'index'])->name('routes.index');
     Route::post('routes/json', [\App\Http\Controllers\RouteController::class, 'json'])->name('routes.json');
 
-    // Booking routes
     Route::post('bookings/json', [\App\Http\Controllers\BookingController::class, 'json'])->name('bookings.json');
     Route::get('bookings', [\App\Http\Controllers\BookingController::class, 'index'])->name('bookings.index');
     Route::get('bookings/create', [\App\Http\Controllers\BookingController::class, 'create'])->name('bookings.create');
@@ -72,20 +69,13 @@ Route::get('/dashboard/activity-logs', function () {
 
 Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-log.index');
 
-// Route untuk halaman booking saya dan booking action, hanya untuk user login
 Route::middleware(['auth'])->group(function () {
     Route::get('/my-bookings', [HomeController::class, 'userBookings'])->name('home.my-bookings');
     Route::post('/home-booking', [HomeController::class, 'storeBooking'])->name('home.booking.store');
+    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'index'])->name('profile.index');
+    Route::post('/profile/update', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
 });
 Route::get('/booking-detail', [HomeController::class, 'bookingDetail'])->name('booking.detail');
 
-
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
-
-// "datatables.net": "^2.2.2",
-// "datatables.net-dt": "^2.2.2",
-// "datatables.net-react": "^1.0.0",
-// "jquery": "^3.7.1",
-// "jquery": "^3.7.1",
-// "jquery": "^3.7.1",
