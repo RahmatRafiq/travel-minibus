@@ -281,6 +281,7 @@ class BookingController extends Controller
                 ->toArray();
 
             $selectedSeats = $request->input('seats_selected', []);
+            // Filter kursi sopir (id "D" atau "Sopir")
             $selectedSeats = array_filter($selectedSeats, function($seat) {
                 return $seat !== "D" && $seat !== "Sopir";
             });
@@ -289,9 +290,17 @@ class BookingController extends Controller
                 return back()->withErrors(['seats_selected' => 'Kursi sudah dipesan: ' . implode(', ', $conflict)]);
             }
 
+            // Validasi kapasitas penumpang (tanpa sopir)
             $penumpangCapacity = $vehicle->seat_capacity - 1;
-            if (count($selectedSeats) > $penumpangCapacity) {
-                return back()->withErrors(['seats_selected' => 'Jumlah kursi melebihi kapasitas penumpang.']);
+            if (count($selectedSeats) < 1 || count($selectedSeats) > $penumpangCapacity) {
+                return back()->withErrors(['seats_selected' => 'Jumlah kursi harus minimal 1 dan maksimal ' . $penumpangCapacity . '.']);
+            }
+            // Pastikan kursi yang dipilih benar-benar ada di layout kendaraan
+            $validSeats = range(1, $vehicle->seat_capacity);
+            foreach ($selectedSeats as $seat) {
+                if (!in_array($seat, $validSeats) && !is_numeric($seat)) {
+                    return back()->withErrors(['seats_selected' => 'Kursi tidak valid: ' . $seat]);
+                }
             }
 
             $amount = 0;

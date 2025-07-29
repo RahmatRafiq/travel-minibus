@@ -14,7 +14,6 @@ class HomeController extends Controller
 {
     public function index()
     {
-        // Ambil 5 booking terbaru, jika login maka booking user, jika tidak booking umum
         $bookings = Booking::with([
             'schedule.routeVehicle.vehicle',
             'schedule.routeVehicle.route'
@@ -135,7 +134,6 @@ class HomeController extends Controller
                             ->sum('seats_booked');
                         $available_seats = $rv->vehicle->seat_capacity - $booked;
 
-                        // Ambil semua kursi yang sudah dipesan (pending/confirmed) untuk jadwal ini
                         $bookedSeats = Booking::where('schedule_id', $schedule->id)
                             ->whereIn('status', ['pending', 'confirmed'])
                             ->pluck('seats_selected')
@@ -165,7 +163,6 @@ class HomeController extends Controller
             }
         }
 
-        // Pastikan reservedSeats unik
         $reservedSeats = array_values(array_unique($reservedSeats));
 
         return Inertia::render('Home/BookingPage', [
@@ -198,7 +195,6 @@ class HomeController extends Controller
             $vehicle = $schedule->routeVehicle->vehicle;
             $route = $schedule->routeVehicle->route;
 
-            // Ambil semua kursi yang sudah di-booking (pending/confirmed) untuk jadwal ini
             $bookedSeats = Booking::where('schedule_id', $schedule->id)
                 ->whereIn('status', ['pending', 'confirmed'])
                 ->pluck('seats_selected')
@@ -206,7 +202,6 @@ class HomeController extends Controller
                 ->toArray();
 
             $selectedSeats = $request->input('seats_selected', []);
-            // Filter kursi sopir (id "D" atau "Sopir")
             $selectedSeats = array_filter($selectedSeats, function($seat) {
                 return $seat !== "D" && $seat !== "Sopir";
             });
@@ -215,13 +210,17 @@ class HomeController extends Controller
                 return back()->withErrors(['seats_selected' => 'Kursi sudah dipesan: ' . implode(', ', $conflict)]);
             }
 
-            // Validasi kapasitas penumpang (tanpa sopir)
-            $penumpangCapacity = $vehicle->seat_capacity - 1; // 1 kursi untuk sopir
-            if (count($selectedSeats) > $penumpangCapacity) {
-                return back()->withErrors(['seats_selected' => 'Jumlah kursi melebihi kapasitas penumpang.']);
+            $penumpangCapacity = $vehicle->seat_capacity - 1;
+            if (count($selectedSeats) < 1 || count($selectedSeats) > $penumpangCapacity) {
+                return back()->withErrors(['seats_selected' => 'Jumlah kursi harus minimal 1 dan maksimal ' . $penumpangCapacity . '.']);
+            }
+            $validSeats = range(1, $vehicle->seat_capacity);
+            foreach ($selectedSeats as $seat) {
+                if (!in_array($seat, $validSeats) && !is_numeric($seat)) {
+                    return back()->withErrors(['seats_selected' => 'Kursi tidak valid: ' . $seat]);
+                }
             }
 
-            // Hitung amount: jumlah kursi x harga route
             $amount = 0;
             if ($route && isset($route->price)) {
                 $amount = count($selectedSeats) * $route->price;
@@ -245,4 +244,3 @@ class HomeController extends Controller
         }
     }
 }
-
