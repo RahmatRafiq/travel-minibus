@@ -72,8 +72,8 @@ Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('act
 Route::middleware(['auth'])->group(function () {
     Route::get('/my-bookings', [HomeController::class, 'userBookings'])->name('home.my-bookings');
     Route::post('/home-booking', [HomeController::class, 'storeBooking'])->name('home.booking.store');
-    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'index'])->name('profile.index');
-    Route::post('/profile/update', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'index'])->name('user.profile.index');
+    Route::patch('/profile/update', [\App\Http\Controllers\ProfileController::class, 'update'])->name('user.profile.update');
 });
 Route::get('/booking-detail', [HomeController::class, 'bookingDetail'])->name('booking.detail');
 
