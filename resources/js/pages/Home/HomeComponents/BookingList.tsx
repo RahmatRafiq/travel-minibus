@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { CheckCircle, Clock, XCircle } from "lucide-react";
 
 type Booking = {
@@ -18,9 +18,33 @@ type Booking = {
 type Props = {
   bookings: Booking[];
   isLoggedIn?: boolean;
+  isHome?: boolean;
 };
 
-const BookingList: React.FC<Props> = ({ bookings }) => {
+const BookingList: React.FC<Props> = ({ bookings, isHome }) => {
+  const [visibleCount, setVisibleCount] = useState(isHome ? 5 : bookings.length);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isHome) return;
+    const handleScroll = () => {
+      if (!containerRef.current) return;
+      const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+      if (scrollTop + clientHeight >= scrollHeight - 50) {
+        setVisibleCount((prev) => Math.min(prev + 5, bookings.length));
+      }
+    };
+    const ref = containerRef.current;
+    if (ref) {
+      ref.addEventListener("scroll", handleScroll);
+    }
+    return () => {
+      if (ref) {
+        ref.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, [bookings.length, isHome]);
+
   function statusIcon(status: string) {
     if (status.toLowerCase() === "confirmed")
       return <CheckCircle className="text-green-500 w-5 h-5" />;
@@ -41,7 +65,11 @@ const BookingList: React.FC<Props> = ({ bookings }) => {
   }
 
   return (
-    <div className="py-0 px-0 booking-list-scroll">
+    <div
+      className="py-0 px-0 booking-list-scroll"
+      ref={isHome ? containerRef : undefined}
+      style={isHome ? { maxHeight: 420, overflowY: 'auto' } : {}}
+    >
       {/* Judul dipindahkan ke Home agar konsisten */}
       <div className="flex flex-col gap-6 items-center">
         {bookings.length === 0 && (
@@ -53,7 +81,7 @@ const BookingList: React.FC<Props> = ({ bookings }) => {
             <span>Belum ada booking perjalanan.</span>
           </div>
         )}
-        {bookings.map((b) => (
+        {bookings.slice(0, visibleCount).map((b) => (
           <div
             key={b.id}
             className="relative w-full max-w-xl mx-auto bg-gradient-to-br from-indigo-50 via-white to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 rounded-[2.5rem] shadow-2xl border-2 border-indigo-200 dark:border-slate-700 overflow-hidden"
@@ -127,6 +155,9 @@ const BookingList: React.FC<Props> = ({ bookings }) => {
             </div>
           </div>
         ))}
+        {isHome && visibleCount < bookings.length && (
+          <div className="py-4 text-indigo-400 text-sm">Memuat data booking berikutnya...</div>
+        )}
       </div>
     </div>
   );

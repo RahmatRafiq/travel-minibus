@@ -189,7 +189,7 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
                 </svg>
                 Daftar Booking Saya
               </h2>
-              <BookingList bookings={visibleBookings} isLoggedIn={isLoggedIn} />
+              <BookingList bookings={visibleBookings} isLoggedIn={isLoggedIn} isHome />
             </div>
           </div>
         </div>
