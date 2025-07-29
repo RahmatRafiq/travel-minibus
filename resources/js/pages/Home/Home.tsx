@@ -158,31 +158,37 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
         </div>
       </header>
 
-      {/* Booking Form Section */}
       <section
         id="booking"
         ref={bookingRef}
-        className="container mx-auto px-2 sm:px-4 md:px-6 py-10 sm:py-16 flex flex-col md:flex-row gap-8 md:gap-12"
+        className="container mx-auto px-2 sm:px-4 md:px-6 py-10 sm:py-16"
       >
-        <div className="flex-1  rounded-3xl shadow-2xl p-4 sm:p-8 md:p-10 max-w-2xl w-full">
-      <h2 className="text-2xl font-bold text-indigo-700 dark:text-indigo-200 mb-6 flex items-center gap-2 justify-center">
-            <svg className="w-8 h-8 text-indigo-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 01-8 0M12 3v4m0 0a4 4 0 01-4 4H4m8-4a4 4 0 014 4h4"></path>
-            </svg>
-            Form Booking
-          </h2>
-          <FormBooking
-            form={form}
-            allOrigins={allOrigins}
-            allDestinations={allDestinations}
-            onChange={handleChange}
-            onSubmit={handleBooking}
-          />
-        </div> 
-        <div className="flex-1 flex flex-col justify-center max-w-2xl w-full mt-8 md:mt-0">
-          <div className=" backdrop-blur-lg rounded-3xl shadow-2xl p-4 sm:p-8 md:p-10">
-            {/* Make BookingList scrollable with fixed max height */}
-            <div style={{ maxHeight: '420px', overflowY: 'auto' }}>
+        <div className="flex flex-col md:flex-row gap-8 md:gap-12">
+          <div className="flex-1 flex flex-col justify-center">
+            <div className="rounded-3xl shadow-2xl p-4 sm:p-8 md:p-10 bg-white/80 dark:bg-slate-900/80 border border-indigo-100 dark:border-slate-700 h-full flex flex-col">
+              <h2 className="text-3xl font-bold text-indigo-700 dark:text-indigo-200 mb-8 flex items-center gap-3 justify-center min-h-[56px]">
+                <svg className="w-9 h-9 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 01-8 0M12 3v4m0 0a4 4 0 01-4 4H4m8-4a4 4 0 014 4h4"></path>
+                </svg>
+                Form Booking
+              </h2>
+              <FormBooking
+                form={form}
+                allOrigins={allOrigins}
+                allDestinations={allDestinations}
+                onChange={handleChange}
+                onSubmit={handleBooking}
+              />
+            </div>
+          </div>
+          <div className="flex-1 flex flex-col justify-center">
+            <div className="rounded-3xl shadow-2xl p-4 sm:p-8 md:p-10 bg-white/80 dark:bg-slate-900/80 border border-indigo-100 dark:border-slate-700 h-full flex flex-col">
+              <h2 className="text-3xl font-bold text-indigo-700 dark:text-indigo-200 mb-8 flex items-center gap-3 justify-center min-h-[56px]">
+                <svg className="w-9 h-9 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 17l4 4 4-4m0-5V3m-8 9v6a2 2 0 002 2h8a2 2 0 002-2v-6"></path>
+                </svg>
+                Daftar Booking Saya
+              </h2>
               <BookingList bookings={visibleBookings} isLoggedIn={isLoggedIn} />
             </div>
           </div>
@@ -199,6 +205,14 @@ export default function Home({ bookings, isLoggedIn, userName, allOrigins = [], 
           background: rgba(255,255,255,0.85);
           box-shadow: 0 8px 32px 0 rgba(99,102,241,0.12);
           backdrop-filter: blur(8px);
+        }
+        /* Hilangkan scrollbar BookingList di Home */
+        .booking-list-scroll::-webkit-scrollbar {
+          display: none;
+        }
+        .booking-list-scroll {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
       `}</style>
       {/* Modal booking dihapus, redirect ke /my-bookings */}

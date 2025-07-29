@@ -41,13 +41,8 @@ const BookingList: React.FC<Props> = ({ bookings }) => {
   }
 
   return (
-    <div className="py-6 px-2 sm:px-0">
-      <h2 className="text-2xl font-bold text-indigo-700 dark:text-indigo-100 mb-6 flex items-center gap-2 justify-center">
-        <svg className="w-7 h-7 text-indigo-500 dark:text-indigo-300" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M8 17l4 4 4-4m0-5V3m-8 9v6a2 2 0 002 2h8a2 2 0 002-2v-6"></path>
-        </svg>
-        Daftar Booking Saya
-      </h2>
+    <div className="py-0 px-0 booking-list-scroll">
+      {/* Judul dipindahkan ke Home agar konsisten */}
       <div className="flex flex-col gap-6 items-center">
         {bookings.length === 0 && (
           <div className="py-12 text-gray-400 dark:text-slate-400 text-center flex flex-col items-center gap-2">
