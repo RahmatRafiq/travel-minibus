@@ -21,6 +21,7 @@ class BookingController extends Controller
 
         $routes = [];
         $schedules = [];
+        $timezone = config('app.timezone', 'UTC');
 
         if ($request->filled(['origin', 'destination'])) {
             $routes = Route::where('origin', $request->origin)
@@ -36,12 +37,13 @@ class BookingController extends Controller
         }
 
         if ($request->filled('route_id')) {
-            $routeVehicles = RouteVehicle::with(['vehicle', 'schedules' => function ($q) use ($request) {
+            $timezone = config('app.timezone', 'UTC');
+            $routeVehicles = RouteVehicle::with(['vehicle', 'schedules' => function ($q) use ($request, $timezone) {
                 $q->where('status', 'ready');
                 if ($request->filled('departure_date')) {
                     $q->whereDate('departure_time', $request->departure_date);
                 } else {
-                    $q->where('departure_time', '>', now());
+                    $q->where('departure_time', '>', now($timezone));
                 }
             }])->where('route_id', $request->route_id)->get();
 
@@ -195,6 +197,7 @@ class BookingController extends Controller
 
         $routes = [];
         $schedules = [];
+        $timezone = config('app.timezone', 'UTC');
 
         if ($request->filled(['origin', 'destination'])) {
             $routes = Route::where('origin', $request->origin)
@@ -210,7 +213,8 @@ class BookingController extends Controller
         }
 
         if ($request->filled('route_id') && $request->filled('departure_date')) {
-            $routeVehicles = RouteVehicle::with(['vehicle', 'schedules' => function ($q) use ($request) {
+            $timezone = config('app.timezone', 'UTC');
+            $routeVehicles = RouteVehicle::with(['vehicle', 'schedules' => function ($q) use ($request, $timezone) {
                 $q->where('status', 'ready')
                   ->whereDate('departure_time', $request->departure_date);
             }])->where('route_id', $request->route_id)->get();
