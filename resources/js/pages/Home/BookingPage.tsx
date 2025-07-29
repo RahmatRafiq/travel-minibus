@@ -87,6 +87,12 @@ export default function BookingDetail({
       setError("Pilih kursi terlebih dahulu.");
       return;
     }
+    const seatCapacity = schedules.find(s => s.id === selectedSchedule)?.vehicle?.seat_capacity || 8;
+    const filteredSeats = selectedSeats.filter(seat => seat !== "D" && seat !== "Sopir" && seat !== 0);
+    if (filteredSeats.length > seatCapacity) {
+      setError(`Jumlah kursi melebihi kapasitas penumpang (${seatCapacity}).`);
+      return;
+    }
     setError(null);
     setShowConfirm(true);
   };
@@ -185,15 +191,15 @@ export default function BookingDetail({
                 <div ref={seatsRef}>
                   <SeatPickerComponent
                     layout={generateMinibusLayout(
-                      schedules.find(s => s.id === selectedSchedule)?.vehicle?.seat_capacity || 8,
-                      [2,4,3], 
-                      true 
+                      (schedules.find(s => s.id === selectedSchedule)?.vehicle?.seat_capacity || 8) + 1,
+                      [2,4,3],
+                      true
                     )}
                     reservedSeats={reservedSeats}
                     selectedSeats={selectedSeats}
                     onSelect={(seats) => {
-                      console.log('Kursi dipilih sekarang:', seats);
-                      setSelectedSeats(seats);
+                      const filteredSeats = seats.filter(seat => seat !== "D" && seat !== "Sopir" && seat !== 0);
+                      setSelectedSeats(filteredSeats);
                       setError(null);
                     }}
                   />

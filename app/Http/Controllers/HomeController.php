@@ -210,15 +210,8 @@ class HomeController extends Controller
                 return back()->withErrors(['seats_selected' => 'Kursi sudah dipesan: ' . implode(', ', $conflict)]);
             }
 
-            $penumpangCapacity = $vehicle->seat_capacity - 1;
-            if (count($selectedSeats) < 1 || count($selectedSeats) > $penumpangCapacity) {
-                return back()->withErrors(['seats_selected' => 'Jumlah kursi harus minimal 1 dan maksimal ' . $penumpangCapacity . '.']);
-            }
-            $validSeats = range(1, $vehicle->seat_capacity);
-            foreach ($selectedSeats as $seat) {
-                if (!in_array($seat, $validSeats) && !is_numeric($seat)) {
-                    return back()->withErrors(['seats_selected' => 'Kursi tidak valid: ' . $seat]);
-                }
+            if (count($selectedSeats) > $vehicle->seat_capacity) {
+                return back()->withErrors(['seats_selected' => 'Jumlah kursi melebihi kapasitas penumpang.']);
             }
 
             $amount = 0;
