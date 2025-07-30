@@ -114,17 +114,20 @@ class BookingController extends Controller
 
         $query = match ($filter) {
             'trashed' => Booking::onlyTrashed()->with([
-                'user.profile',
+                'user',
+                'passengers',
                 'schedule.routeVehicle.vehicle',
                 'schedule.routeVehicle.route'
             ]),
             'all' => Booking::withTrashed()->with([
-                'user.profile',
+                'user',
+                'passengers',
                 'schedule.routeVehicle.vehicle',
                 'schedule.routeVehicle.route'
             ]),
             default => Booking::with([
-                'user.profile',
+                'user',
+                'passengers',
                 'schedule.routeVehicle.vehicle',
                 'schedule.routeVehicle.route'
             ]),
@@ -160,12 +163,17 @@ class BookingController extends Controller
                 'user' => $booking->user ? [
                     'id' => $booking->user->id,
                     'name' => $booking->user->name,
-                    'profile' => $booking->user->profile ? [
-                        'phone_number' => $booking->user->profile->phone_number,
-                        'pickup_address' => $booking->user->profile->pickup_address,
-                        'address' => $booking->user->profile->address,
-                    ] : null,
                 ] : null,
+                'passengers' => $booking->passengers ? $booking->passengers->map(function($p) {
+                    return [
+                        'id' => $p->id,
+                        'name' => $p->name,
+                        'phone_number' => $p->phone_number,
+                        'pickup_address' => $p->pickup_address,
+                        'pickup_latitude' => $p->pickup_latitude,
+                        'pickup_longitude' => $p->pickup_longitude,
+                    ];
+                }) : [],
                 'schedule' => $booking->schedule ? [
                     'id' => $booking->schedule->id,
                     'departure_time' => $booking->schedule->departure_time,

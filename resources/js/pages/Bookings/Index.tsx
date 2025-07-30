@@ -9,30 +9,15 @@ import DataTableWrapper, { DataTableWrapperRef } from '@/components/datatables';
 import { BreadcrumbItem } from '@/types';
 import ToggleTabs from '@/components/toggle-tabs';
 import { Booking } from '@/types/Booking';
-
-type Profile = {
-  phone_number?: string;
-  pickup_address?: string;
-  address?: string;
-};
-
-type Schedule = {
-  departure_time?: string;
-  vehicle?: {
-    plate_number?: string;
-    brand?: string;
-  };
-  route?: {
-    origin?: string;
-    destination?: string;
-  };
-};
+import { BookingPassenger } from '@/types/BookingPassenger';
+import { ProfileCustomer } from '@/types/ProfileCustomer';
+import { Schedule } from '@/types/Schedule';
 
 type BookingTableRow = {
   id: number;
   user?: {
     name?: string;
-    profile?: Profile;
+    profile?: ProfileCustomer;
   };
   schedule?: Schedule;
   seats_booked?: number;
@@ -144,14 +129,21 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
   ];
 
   const formatBookingDetails = (booking: BookingTableRow) => {
-    const profile = booking.user?.profile;
+ 
+    const passengers: BookingPassenger[] = (booking as any).passengers || [];
     return `
       <div class="p-4 bg-gray-50 border border-gray-200 rounded shadow-sm">
         <strong class="block text-gray-800 mb-2">Detail Penumpang:</strong>
         <ul>
-          <li class="ml-4 list-disc text-gray-700"><b>No. Telepon:</b> ${profile?.phone_number ?? '-'}</li>
-          <li class="ml-4 list-disc text-gray-700"><b>Alamat Penjemputan:</b> ${profile?.pickup_address ?? '-'}</li>
-          <li class="ml-4 list-disc text-gray-700"><b>Alamat Lengkap:</b> ${profile?.address ?? '-'}</li>
+          ${passengers.length === 0 ? '<li class="ml-4 list-disc text-gray-700">Tidak ada data penumpang</li>' :
+            passengers.map((p) => `
+              <li class="ml-4 list-disc text-gray-700">
+                <b>Nama:</b> ${p.name ?? '-'}<br/>
+                <b>No. Telepon:</b> ${p.phone_number ?? '-'}<br/>
+                <b>Alamat Penjemputan:</b> ${p.pickup_address ?? '-'}<br/>
+              </li>
+            `).join('')
+          }
         </ul>
       </div>
     `;
