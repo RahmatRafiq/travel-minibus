@@ -277,6 +277,12 @@ class BookingController extends Controller
             $request->validate([
                 'schedule_id' => 'required|exists:schedules,id',
                 'seats_selected' => 'required|array|min:1',
+                'passengers' => 'required|array|min:1',
+                'passengers.*.name' => 'required|string',
+                'passengers.*.phone_number' => 'nullable|string',
+                'passengers.*.pickup_address' => 'nullable|string',
+                'passengers.*.pickup_latitude' => 'nullable|numeric',
+                'passengers.*.pickup_longitude' => 'nullable|numeric',
             ]);
 
             $schedule = Schedule::with(['routeVehicle.vehicle', 'routeVehicle.route'])->findOrFail($request->schedule_id);
@@ -307,7 +313,7 @@ class BookingController extends Controller
                 $amount = count($selectedSeats) * $route->price;
             }
 
-            Booking::create([
+            $booking = Booking::create([
                 'user_id'      => auth()->id(),
                 'schedule_id'  => $request->schedule_id,
                 'seats_booked' => count($selectedSeats),
@@ -315,6 +321,16 @@ class BookingController extends Controller
                 'amount'       => $amount,
                 'status'       => 'pending',
             ]);
+
+            foreach ($request->input('passengers', []) as $passenger) {
+                $booking->passengers()->create([
+                    'name' => $passenger['name'],
+                    'phone_number' => $passenger['phone_number'] ?? null,
+                    'pickup_address' => $passenger['pickup_address'] ?? null,
+                    'pickup_latitude' => $passenger['pickup_latitude'] ?? null,
+                    'pickup_longitude' => $passenger['pickup_longitude'] ?? null,
+                ]);
+            }
 
             DB::commit();
             return redirect()->route('bookings.index')->with('success', 'Booking created successfully.');
@@ -329,7 +345,8 @@ class BookingController extends Controller
     {
         $booking = Booking::with([
             'schedule.routeVehicle.vehicle',
-            'schedule.routeVehicle.route'
+            'schedule.routeVehicle.route',
+            'passengers'
         ])->withTrashed()->findOrFail($id);
 
         $schedules = Schedule::with([
@@ -405,6 +422,12 @@ class BookingController extends Controller
             $request->validate([
                 'schedule_id' => 'required|exists:schedules,id',
                 'seats_selected' => 'required|array|min:1',
+                'passengers' => 'required|array|min:1',
+                'passengers.*.name' => 'required|string',
+                'passengers.*.phone_number' => 'nullable|string',
+                'passengers.*.pickup_address' => 'nullable|string',
+                'passengers.*.pickup_latitude' => 'nullable|numeric',
+                'passengers.*.pickup_longitude' => 'nullable|numeric',
             ]);
 
             $schedule = Schedule::with(['routeVehicle.vehicle', 'routeVehicle.route'])->findOrFail($request->schedule_id);
@@ -441,6 +464,17 @@ class BookingController extends Controller
                 'seats_selected' => $selectedSeats,
                 'amount'       => $amount,
             ]);
+
+            $booking->passengers()->delete();
+            foreach ($request->input('passengers', []) as $passenger) {
+                $booking->passengers()->create([
+                    'name' => $passenger['name'],
+                    'phone_number' => $passenger['phone_number'] ?? null,
+                    'pickup_address' => $passenger['pickup_address'] ?? null,
+                    'pickup_latitude' => $passenger['pickup_latitude'] ?? null,
+                    'pickup_longitude' => $passenger['pickup_longitude'] ?? null,
+                ]);
+            }
 
             DB::commit();
             return redirect()->route('bookings.index')->with('success', 'Booking updated successfully.');
