@@ -5,6 +5,7 @@ import Footer from "./HomeComponents/Footer";
 import FormBooking from "./HomeComponents/FormBooking";
 import SeatPickerComponent, { generateMinibusLayout } from "@/components/SeatPickerComponent";
 import BookingConfirmModal from "@/components/BookingConfirmModal";
+import { ProfileCustomer } from "@/types/ProfileCustomer";
 
 type Schedule = {
   id: number;
@@ -34,6 +35,7 @@ type Props = {
   userName?: string;
   allOrigins?: string[];
   allDestinations?: string[];
+  profile?: ProfileCustomer;
 };
 
 export default function BookingDetail({
@@ -46,6 +48,7 @@ export default function BookingDetail({
   userName,
   allOrigins = [],
   allDestinations = [],
+  profile,
 }: Props) {
   const [search, setSearch] = useState({
     origin: origin || "",
@@ -57,6 +60,20 @@ export default function BookingDetail({
   const [error, setError] = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const seatsRef = useRef<HTMLDivElement>(null);
+  const [passenger, setPassenger] = useState({
+    name: userName || "",
+    phone_number: profile?.phone_number || "",
+    pickup_address: profile?.pickup_address || "",
+  });
+
+  // Inisialisasi dan sinkronisasi data profile ke form penumpang
+  React.useEffect(() => {
+    setPassenger({
+      name: userName || "",
+      phone_number: profile?.phone_number || "",
+      pickup_address: profile?.pickup_address || "",
+    });
+  }, [userName, profile]);
 
   const handleFormBookingChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -102,6 +119,7 @@ export default function BookingDetail({
     router.post(route("home.booking.store"), {
       schedule_id: selectedSchedule,
       seats_selected: selectedSeats,
+      passengers: [passenger],
     });
   };
 
@@ -203,6 +221,42 @@ export default function BookingDetail({
                       setError(null);
                     }}
                   />
+                </div>
+              )}
+              {/* Form input data penumpang muncul setelah kursi dipilih */}
+              {selectedSchedule && selectedSeats.length > 0 && (
+                <div className="space-y-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Nama Penumpang</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={passenger.name}
+                      onChange={e => setPassenger({ ...passenger, name: e.target.value })}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-indigo-400"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Nomor Telepon</label>
+                    <input
+                      type="text"
+                      name="phone_number"
+                      value={passenger.phone_number}
+                      onChange={e => setPassenger({ ...passenger, phone_number: e.target.value })}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-indigo-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Alamat Pickup</label>
+                    <input
+                      type="text"
+                      name="pickup_address"
+                      value={passenger.pickup_address}
+                      onChange={e => setPassenger({ ...passenger, pickup_address: e.target.value })}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-indigo-400"
+                    />
+                  </div>
                 </div>
               )}
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">

@@ -103,10 +103,10 @@ class HomeController extends Controller
         $allOrigins = Route::query()->distinct()->pluck('origin')->filter()->values()->all();
         $allDestinations = Route::query()->distinct()->pluck('destination')->filter()->values()->all();
 
-        $schedules = [];
         $origin = $request->origin;
         $destination = $request->destination;
         $date = $request->date;
+        $schedules = [];
         $reservedSeats = [];
 
         if ($origin && $destination && $date) {
@@ -119,9 +119,7 @@ class HomeController extends Controller
             $routes = Route::where('origin', $origin)
                 ->where('destination', $destination)
                 ->get();
-
-            $timezone = config('app.timezone', 'UTC');
-            $now = now($timezone);
+            $now = now(config('app.timezone', 'UTC'));
 
             foreach ($routes as $route) {
                 foreach ($route->routeVehicles as $rv) {
@@ -137,14 +135,12 @@ class HomeController extends Controller
                             ->whereIn('status', ['pending', 'confirmed'])
                             ->sum('seats_booked');
                         $available_seats = $rv->vehicle->seat_capacity - $booked;
-
                         $bookedSeats = Booking::where('schedule_id', $schedule->id)
                             ->whereIn('status', ['pending', 'confirmed'])
                             ->pluck('seats_selected')
                             ->flatten()
                             ->toArray();
                         $reservedSeats = array_merge($reservedSeats, $bookedSeats);
-
                         $schedules[] = [
                             'id' => $schedule->id,
                             'departure_time' => $schedule->departure_time,
@@ -169,6 +165,18 @@ class HomeController extends Controller
 
         $reservedSeats = array_values(array_unique($reservedSeats));
 
+        $profile = null;
+        if (auth()->check() && auth()->user()->profile) {
+            $profileModel = auth()->user()->profile;
+            $profile = [
+                'phone_number' => $profileModel->phone_number,
+                'pickup_address' => $profileModel->pickup_address,
+                'address' => $profileModel->address,
+                'pickup_latitude' => $profileModel->pickup_latitude,
+                'pickup_longitude' => $profileModel->pickup_longitude,
+            ];
+        }
+
         return Inertia::render('Home/BookingPage', [
             'origin' => $origin,
             'destination' => $destination,
@@ -179,6 +187,7 @@ class HomeController extends Controller
             'userName' => auth()->user()?->name,
             'allOrigins' => $allOrigins,
             'allDestinations' => $allDestinations,
+            'profile' => $profile,
         ]);
     }
 
@@ -193,6 +202,10 @@ class HomeController extends Controller
             $request->validate([
                 'schedule_id' => 'required|exists:schedules,id',
                 'seats_selected' => 'required|array|min:1',
+                'passengers' => 'required|array|min:1',
+                'passengers.*.name' => 'required|string',
+                'passengers.*.phone_number' => 'nullable|string',
+                'passengers.*.pickup_address' => 'nullable|string',
             ]);
 
             $schedule = Schedule::with(['routeVehicle.vehicle', 'routeVehicle.route'])->findOrFail($request->schedule_id);
@@ -223,7 +236,7 @@ class HomeController extends Controller
                 $amount = count($selectedSeats) * $route->price;
             }
 
-            Booking::create([
+            $booking = Booking::create([
                 'user_id'      => auth()->id(),
                 'schedule_id'  => $request->schedule_id,
                 'seats_booked' => count($selectedSeats),
@@ -231,6 +244,14 @@ class HomeController extends Controller
                 'amount'       => $amount,
                 'status'       => 'pending',
             ]);
+
+            foreach ($request->input('passengers', []) as $passenger) {
+                $booking->passengers()->create([
+                    'name' => $passenger['name'],
+                    'phone_number' => $passenger['phone_number'] ?? null,
+                    'pickup_address' => $passenger['pickup_address'] ?? null,
+                ]);
+            }
 
             DB::commit();
             return redirect()->route('home.my-bookings')->with('success', 'Booking created successfully.');
