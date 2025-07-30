@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import DataTableWrapper, { DataTableWrapperRef } from '@/components/datatables';
 import { BreadcrumbItem } from '@/types';
 import ToggleTabs from '@/components/toggle-tabs';
+import { Booking } from '@/types/Booking';
 
 type Profile = {
   phone_number?: string;
@@ -15,10 +16,31 @@ type Profile = {
   address?: string;
 };
 
-type BookingRow = {
+type Schedule = {
+  departure_time?: string;
+  vehicle?: {
+    plate_number?: string;
+    brand?: string;
+  };
+  route?: {
+    origin?: string;
+    destination?: string;
+  };
+};
+
+type BookingTableRow = {
+  id: number;
   user?: {
+    name?: string;
     profile?: Profile;
   };
+  schedule?: Schedule;
+  seats_booked?: number;
+  status?: string;
+  trashed?: boolean;
+  booking_time?: string;
+  created_at?: string;
+  updated_at?: string;
 };
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -43,48 +65,58 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
     {
       data: 'id',
       title: 'ID',
-      render: (data: any, type: string, row: any) => {
-        // Disable bulk checkbox if status is confirmed
-        const disabled = row.status === 'confirmed' ? 'disabled' : '';
-        return `<input type="checkbox" class="bulk-checkbox" data-id="${row.id}" ${selectedIds.includes(row.id) ? 'checked' : ''} ${disabled} /> ${row.id}`;
+      render: (data: unknown, _type: string, row: unknown, _meta: unknown) => {
+        const booking = row as BookingTableRow;
+        const disabled = booking.status === 'confirmed' ? 'disabled' : '';
+        return `<input type="checkbox" class="bulk-checkbox" data-id="${booking.id}" ${selectedIds.includes(booking.id) ? 'checked' : ''} ${disabled} /> ${booking.id}`;
       },
     },
     {
       data: 'user',
       title: 'Pengguna',
-      render: (data: any) => data ? data.name : '-',
+      render: (data: unknown, _type: string, row: unknown, _meta: unknown) => {
+        const booking = row as BookingTableRow;
+        return booking.user?.name ?? '-';
+      },
     },
     {
       data: 'schedule',
       title: 'Jadwal',
-      render: (data: any) =>
-        data
-          ? `${data.departure_time} | ${data.vehicle?.plate_number ?? '-'} (${data.vehicle?.brand ?? '-'})`
-          : '-',
+      render: (data: unknown, _type: string, row: unknown, _meta: unknown) => {
+        const booking = row as BookingTableRow;
+        const schedule = booking.schedule;
+        return schedule
+          ? `${schedule.departure_time ?? '-'} | ${schedule.vehicle?.plate_number ?? '-'} (${schedule.vehicle?.brand ?? '-'})`
+          : '-';
+      },
     },
     {
       data: 'schedule',
       title: 'Rute',
-      render: (data: any) =>
-        data && data.route
-          ? `${data.route.origin} - ${data.route.destination}`
-          : '-',
+      render: (data: unknown, _type: string, row: unknown, _meta: unknown) => {
+        const booking = row as BookingTableRow;
+        const schedule = booking.schedule;
+        return schedule && schedule.route
+          ? `${schedule.route.origin ?? '-'} - ${schedule.route.destination ?? '-'}`
+          : '-';
+      },
     },
     { data: 'seats_booked', title: 'Kursi Dipesan' },
     {
       data: 'status',
       title: 'Status',
-      render: (data: any, type: string, row: any) => {
-        if (!row.trashed) {
-          // Disable dropdown if status is confirmed
-          const disabled = data === 'confirmed' ? 'disabled' : '';
-          return `<select class="booking-status-dropdown bg-blue-100 text-blue-900 font-semibold rounded px-2 py-1" data-id="${row.id}" ${disabled}>
-            <option value="pending"${data === 'pending' ? ' selected' : ''} style="background:#fef3c7;color:#92400e;">Pending</option>
-            <option value="confirmed"${data === 'confirmed' ? ' selected' : ''} style="background:#d1fae5;color:#065f46;">Confirmed</option>
-            <option value="cancelled"${data === 'cancelled' ? ' selected' : ''} style="background:#fee2e2;color:#991b1b;">Cancelled</option>
+      render: (data: unknown, _type: string, row: unknown, _meta: unknown) => {
+        const booking = row as BookingTableRow;
+        const status = booking.status ?? '';
+        if (!booking.trashed) {
+          const disabled = status === 'confirmed' ? 'disabled' : '';
+          return `<select class="booking-status-dropdown bg-blue-100 text-blue-900 font-semibold rounded px-2 py-1" data-id="${booking.id}" ${disabled}>
+            <option value="pending"${status === 'pending' ? ' selected' : ''} style="background:#fef3c7;color:#92400e;">Pending</option>
+            <option value="confirmed"${status === 'confirmed' ? ' selected' : ''} style="background:#d1fae5;color:#065f46;">Confirmed</option>
+            <option value="cancelled"${status === 'cancelled' ? ' selected' : ''} style="background:#fee2e2;color:#991b1b;">Cancelled</option>
           </select>`;
         }
-        return data;
+        return status;
       },
     },
     { data: 'booking_time', title: 'Waktu Pemesanan' },
@@ -95,7 +127,8 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
       title: 'Aksi',
       orderable: false,
       searchable: false,
-      render: (_: null, __: string, booking: any) => {
+      render: (_data: unknown, _type: string, row: unknown, _meta: unknown) => {
+        const booking = row as BookingTableRow;
         let html = '';
         if (booking.trashed) {
           html += `<button class="btn-restore ml-2 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 border border-green-700" data-id="${booking.id}">Pulihkan</button>`;
@@ -111,7 +144,7 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
     },
   ];
 
-  const formatBookingDetails = (booking: BookingRow) => {
+  const formatBookingDetails = (booking: BookingTableRow) => {
     const profile = booking.user?.profile;
     return `
       <div class="p-4 bg-gray-50 border border-gray-200 rounded shadow-sm">
@@ -169,10 +202,8 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
           }
         });
       });
-      // Pada drawCallback tambahkan event handler untuk dropdown status
       document.querySelectorAll('.booking-status-dropdown').forEach((dropdown) => {
         dropdown.addEventListener('change', (e) => {
-          // Prevent action if dropdown is disabled
           if ((e.target as HTMLSelectElement).disabled) return;
           const id = dropdown.getAttribute('data-id');
           const value = (e.target as HTMLSelectElement).value;
@@ -188,15 +219,13 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
 
   const handleBulkUpdate = () => {
     if (selectedIds.length === 0) return;
-    // Prevent bulk update if any selected booking is already confirmed
     const table = dtRef.current?.dt();
     let confirmedSelected = false;
     if (table) {
-      const data: BookingRow[] = table.rows().data().toArray();
+      const data: BookingTableRow[] = table.rows().data().toArray();
       for (const id of selectedIds) {
         const booking = data.find((row) => row && 'id' in row && row.id === id);
-        // You may want to extend BookingRow with id and status if not present
-        if (booking && (booking as any).status === 'confirmed') {
+        if (booking && (booking as Booking).status === 'confirmed') {
           confirmedSelected = true;
           break;
         }
@@ -253,7 +282,7 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
               ajax={{
                 url: route('bookings.json') + '?filter=' + filter,
                 type: 'POST',
-                data: function (d: any) {
+                data: function (d: Record<string, unknown>) {
                   d._token = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content;
                   return d;
                 },
