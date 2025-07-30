@@ -14,8 +14,14 @@ type AdminSchedule = Schedule & {
 };
 import type { Booking } from '@/types/Booking';
 
+type Errors = {
+    seats_selected?: string;
+    error?: string;
+    [key: string]: string | undefined;
+};
+
 type Props = {
-    errors: any;
+    errors: Errors;
     origin?: string;
     destination?: string;
     route_id?: number;
@@ -42,8 +48,8 @@ export default function BookingForm(props: Props) {
     const [selectedSchedule, setSelectedSchedule] = useState<number | null>(
         isEdit ? props.booking?.schedule_id ?? null : null
     );
-    const initialSeats = isEdit && Array.isArray((props.booking as any)?.seats_selected)
-        ? (props.booking as any).seats_selected
+    const initialSeats = isEdit && Array.isArray(props.booking?.seats_selected)
+        ? props.booking!.seats_selected
         : [];
 
     const { data, setData, post, put, processing, errors, reset } = useForm<{
@@ -153,7 +159,13 @@ export default function BookingForm(props: Props) {
                                         <CustomSelect
                                             options={originOptions}
                                             value={originOptions.find(opt => opt.value === search.origin) || null}
-                                            onChange={(opt: any) => setSearch(s => ({ ...s, origin: opt?.value || '' }))}
+                                            onChange={(newValue) => {
+                                                if (!newValue || Array.isArray(newValue)) {
+                                                    setSearch(s => ({ ...s, origin: '' }));
+                                                } else {
+                                                    setSearch(s => ({ ...s, origin: (newValue as { value: string }).value }));
+                                                }
+                                            }}
                                             placeholder="Pilih Asal"
                                             isClearable
                                             required
@@ -164,7 +176,13 @@ export default function BookingForm(props: Props) {
                                         <CustomSelect
                                             options={destinationOptions}
                                             value={destinationOptions.find(opt => opt.value === search.destination) || null}
-                                            onChange={(opt: any) => setSearch(s => ({ ...s, destination: opt?.value || '' }))}
+                                            onChange={(newValue) => {
+                                                if (!newValue || Array.isArray(newValue)) {
+                                                    setSearch(s => ({ ...s, destination: '' }));
+                                                } else {
+                                                    setSearch(s => ({ ...s, destination: (newValue as { value: string }).value }));
+                                                }
+                                            }}
                                             placeholder="Pilih Tujuan"
                                             isClearable
                                             required
