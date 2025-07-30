@@ -6,4 +6,5 @@ export interface Booking {
     seats_booked: number;
     seats_selected: string[];
     status: string;
+    BookingPassenger?: BookingPassenger[];
 }
