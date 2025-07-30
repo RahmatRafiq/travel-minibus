@@ -131,33 +131,42 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
   const formatBookingDetails = (booking: BookingTableRow) => {
  
     const passengers: BookingPassenger[] = (booking as any).passengers || [];
-    const lucideCopySvg = `<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><rect x=\"9\" y=\"9\" width=\"13\" height=\"13\" rx=\"2\" stroke-width=\"2\"/><rect x=\"3\" y=\"3\" width=\"13\" height=\"13\" rx=\"2\" stroke-width=\"2\"/></svg>`;
     return `
       <div class="p-4 bg-gray-50 border border-gray-200 rounded shadow-sm">
-        <strong class="block text-gray-800 mb-2">Detail Penumpang:</strong>
-        <ul>
-          ${passengers.length === 0
-            ? '<li class="ml-4 list-disc text-gray-700">Tidak ada data penumpang</li>'
-            : passengers.map((p, idx) => {
-                const nama = p.name ?? '-';
-                const telp = p.phone_number ?? '-';
-                const alamat = p.pickup_address ?? '-';
-                const allText = `Nama: ${nama}\nNo. Telepon: ${telp}\nAlamat Penjemputan: ${alamat}`;
-                const waLink = telp && telp !== '-' ? `https://wa.me/${telp.replace(/[^0-9]/g, '')}` : '';
-                return `
-                  <li class="ml-4 list-disc text-gray-700 relative">
-                    <span><b>Nama:</b> ${nama}<br/>
-                    <b>No. Telepon:</b> ${waLink ? `<a href='${waLink}' target='_blank' rel='noopener noreferrer' class='text-green-700 underline hover:text-green-900'>${telp}</a>` : telp}<br/>
-                    <b>Alamat Penjemputan:</b> ${alamat}</span>
-                    <button class="copy-passenger-details absolute right-2 top-2 bg-white p-1 rounded border border-gray-300 hover:bg-gray-100" data-copy="${encodeURIComponent(allText)}" title="Copy semua detail" data-icon="copy">
-                      <span class="lucide-copy" style="display:inline-block;width:18px;height:18px;vertical-align:middle;">${lucideCopySvg}</span>
-                    </button>
-                  </li>
-                `;
-              }).join('')
-          }
-        </ul>
+      <div class="flex items-center justify-between mb-2">
+        <strong class="block text-gray-800">Detail Penumpang:</strong>
+        <button class="btn-copy-passenger px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm" style="margin-left:8px;">Copy</button>
       </div>
+      <ul id="passenger-list-${booking.id}">
+        ${passengers.length === 0 ? '<li class="ml-4 list-disc text-gray-700">Tidak ada data penumpang</li>' :
+        passengers.map((p) => `
+          <li class="ml-4 list-disc text-gray-700">
+          <b>Nama:</b> ${p.name ?? '-'}<br/>
+          <b>No. Telepon:</b> ${p.phone_number ?? '-'}<br/>
+          <b>Alamat Penjemputan:</b> ${p.pickup_address ?? '-'}<br/>
+          </li>
+        `).join('')
+        }
+      </ul>
+      </div>
+      <script>
+      setTimeout(() => {
+        const btn = document.querySelector('.btn-copy-passenger');
+        if (btn) {
+        btn.onclick = function() {
+          const ul = document.getElementById('passenger-list-${booking.id}');
+          if (!ul) return;
+          let text = '';
+          ul.querySelectorAll('li').forEach(li => {
+          text += li.innerText + '\\n';
+          });
+          navigator.clipboard.writeText(text.trim());
+          btn.innerText = 'Copied!';
+          setTimeout(() => btn.innerText = 'Copy', 1200);
+        };
+        }
+      }, 100);
+      </script>
     `;
   };
   const handleDelete = (id: number) => {
@@ -208,26 +217,6 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
             row.child(formatBookingDetails(row.data())).show();
             tr.classList.add('shown');
             cell.innerHTML = '<span style="cursor: pointer;">-</span>';
-            setTimeout(() => {
-              const detailTr = tr.nextElementSibling as HTMLElement | null;
-              if (detailTr && detailTr.classList.contains('child')) {
-                const btns = detailTr.querySelectorAll<HTMLButtonElement>('.copy-passenger-details');
-                btns.forEach((btn: HTMLButtonElement) => {
-                  btn.addEventListener('click', (e: MouseEvent) => {
-                    e.stopPropagation();
-                    const text = decodeURIComponent(btn.getAttribute('data-copy') || '');
-                    if (text) {
-                      navigator.clipboard.writeText(text).then(() => {
-                        btn.innerHTML = `<span class='lucide-copy' style='display:inline-block;width:18px;height:18px;vertical-align:middle;'><svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' viewBox='0 0 24 24' stroke='green' stroke-width='2'><polyline points='20 6 9 17 4 12' fill='none'/></svg></span>`;
-                        setTimeout(() => {
-                          btn.innerHTML = `<span class='lucide-copy' style='display:inline-block;width:18px;height:18px;vertical-align:middle;'><svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' viewBox='0 0 24 24' stroke='currentColor'><rect x='9' y='9' width='13' height='13' rx='2' stroke-width='2'/><rect x='3' y='3' width='13' height='13' rx='2' stroke-width='2'/></svg></span>`;
-                        }, 1200);
-                      });
-                    }
-                  });
-                });
-              }
-            }, 100);
           }
         });
       });
