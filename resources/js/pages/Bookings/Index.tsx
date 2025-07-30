@@ -134,7 +134,6 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
           html += `<button class="btn-restore ml-2 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 border border-green-700" data-id="${booking.id}">Pulihkan</button>`;
           html += `<button class="btn-force-delete ml-2 px-2 py-1 bg-destructive text-white rounded hover:bg-destructive/80 border border-destructive" data-id="${booking.id}">Hapus Permanen</button>`;
         } else {
-          html += `<span class="inertia-link-cell" data-id="${booking.id}"></span>`;
           html += `<button data-id="${booking.id}" class="ml-2 px-2 py-1 bg-destructive text-white rounded hover:bg-destructive/80 border border-destructive btn-delete">
             Hapus
           </button>`;
@@ -157,7 +156,23 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
       </div>
     `;
   };
+  const handleDelete = (id: number) => {
+    router.delete(route('bookings.destroy', id), {
+      onSuccess: () => dtRef.current?.reload(),
+    });
+  };
 
+  const handleRestore = (id: number) => {
+    router.post(route('bookings.restore', id), {}, {
+      onSuccess: () => dtRef.current?.reload(),
+    });
+  };
+
+  const handleForceDelete = (id: number) => {
+    router.delete(route('bookings.force-delete', id), {
+      onSuccess: () => dtRef.current?.reload(),
+    });
+  };
   const drawCallback = () => {
     document.querySelectorAll('.inertia-link-cell').forEach((cell) => {
       const id = cell.getAttribute('data-id');
@@ -214,8 +229,26 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
           }
         });
       });
-    }
-  };
+      document.querySelectorAll('.btn-delete').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-id');
+          if (id) handleDelete(Number(id));
+        });
+      });
+      document.querySelectorAll('.btn-restore').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-id');
+          if (id) handleRestore(Number(id));
+        });
+      });
+      document.querySelectorAll('.btn-force-delete').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-id');
+          if (id) handleForceDelete(Number(id));
+        });
+      });
+    };
+  }
 
   const handleBulkUpdate = () => {
     if (selectedIds.length === 0) return;
