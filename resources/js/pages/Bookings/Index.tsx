@@ -56,6 +56,7 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
         return `<input type="checkbox" class="bulk-checkbox" data-id="${booking.id}" ${selectedIds.includes(booking.id) ? 'checked' : ''} ${disabled} /> ${booking.id}`;
       },
     },
+    { data: 'reference', title: 'Referensi' },
     {
       data: 'user',
       title: 'Pengguna',
@@ -106,7 +107,6 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
     },
     { data: 'booking_time', title: 'Waktu Pemesanan' },
     { data: 'created_at', title: 'Dibuat Pada' },
-    { data: 'updated_at', title: 'Diperbarui Pada' },
     {
       data: null,
       title: 'Aksi',

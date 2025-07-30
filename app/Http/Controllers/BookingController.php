@@ -142,13 +142,13 @@ class BookingController extends Controller
 
         $columns = [
             'id',
+            'reference',
             'user_id',
             'schedule_id',
             'booking_time',
             'seats_booked',
             'status',
             'created_at',
-            'updated_at',
         ];
 
         if ($request->filled('order') && isset($request->order[0]['column'])) {
@@ -160,6 +160,7 @@ class BookingController extends Controller
         $data['data'] = collect($data['data'])->map(function ($booking) {
             return [
                 'id' => $booking->id,
+                'reference' => $booking->reference,
                 'user' => $booking->user ? [
                     'id' => $booking->user->id,
                     'name' => $booking->user->name,
@@ -196,7 +197,6 @@ class BookingController extends Controller
                 'status' => $booking->status,
                 'trashed' => method_exists($booking, 'trashed') ? $booking->trashed() : false,
                 'created_at' => $booking->created_at ? $booking->created_at->toDateTimeString() : null,
-                'updated_at' => $booking->updated_at ? $booking->updated_at->toDateTimeString() : null,
             ];
         });
 
@@ -289,8 +289,6 @@ class BookingController extends Controller
                 'passengers.*.name' => 'required|string',
                 'passengers.*.phone_number' => 'nullable|string',
                 'passengers.*.pickup_address' => 'nullable|string',
-                'passengers.*.pickup_latitude' => 'nullable|numeric',
-                'passengers.*.pickup_longitude' => 'nullable|numeric',
             ]);
 
             $schedule = Schedule::with(['routeVehicle.vehicle', 'routeVehicle.route'])->findOrFail($request->schedule_id);
@@ -335,8 +333,6 @@ class BookingController extends Controller
                     'name' => $passenger['name'],
                     'phone_number' => $passenger['phone_number'] ?? null,
                     'pickup_address' => $passenger['pickup_address'] ?? null,
-                    'pickup_latitude' => $passenger['pickup_latitude'] ?? null,
-                    'pickup_longitude' => $passenger['pickup_longitude'] ?? null,
                 ]);
             }
 

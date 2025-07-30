@@ -20,8 +20,7 @@ export default function BookingPassengerForm({ passengers, setPassengers, errors
         name: '',
         phone_number: '',
         pickup_address: '',
-        pickup_latitude: 0,
-        pickup_longitude: 0,
+
       });
       setPassengers(newPassengers);
     }
@@ -65,20 +64,6 @@ export default function BookingPassengerForm({ passengers, setPassengers, errors
               />
             </div>
             <div className="flex flex-col gap-2">
-              <input
-                type="number"
-                className="border rounded px-2 py-1"
-                placeholder="Latitude Jemput"
-                value={p.pickup_latitude ?? ''}
-                onChange={e => handleChange(idx, 'pickup_latitude', Number(e.target.value))}
-              />
-              <input
-                type="number"
-                className="border rounded px-2 py-1"
-                placeholder="Longitude Jemput"
-                value={p.pickup_longitude ?? ''}
-                onChange={e => handleChange(idx, 'pickup_longitude', Number(e.target.value))}
-              />
               <InputError message={errors?.[`passengers.${idx}.name`]} />
             </div>
           </div>
