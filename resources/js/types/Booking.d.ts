@@ -4,5 +4,6 @@ export interface Booking {
     schedule_id: number;
     booking_time: string; 
     seats_booked: number;
+    seats_selected: string[];
     status: string;
 }
