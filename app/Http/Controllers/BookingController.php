@@ -227,13 +227,16 @@ class BookingController extends Controller
 
         if ($request->filled('route_id') && $request->filled('departure_date')) {
             $timezone = config('app.timezone', 'UTC');
-            $routeVehicles = RouteVehicle::with(['vehicle', 'schedules' => function ($q) use ($request, $timezone) {
+            $now = now($timezone);
+            $routeVehicles = RouteVehicle::with(['vehicle', 'schedules' => function ($q) use ($request, $timezone, $now) {
                 $q->where('status', 'ready')
-                  ->whereDate('departure_time', $request->departure_date);
+                  ->whereDate('departure_time', $request->departure_date)
+                  ->where('departure_time', '>=', $now);
             }])->where('route_id', $request->route_id)->get();
 
             foreach ($routeVehicles as $rv) {
                 foreach ($rv->schedules as $schedule) {
+                    if (strtotime($schedule->departure_time) < strtotime($now)) continue;
                     $vehicle = $rv->vehicle;
                     $booked = Booking::where('schedule_id', $schedule->id)
                         ->whereIn('status', ['pending', 'confirmed'])
