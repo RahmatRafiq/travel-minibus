@@ -10,9 +10,11 @@ import CustomSelect from '@/components/select';
 import type { Vehicle } from '@/types/Vehicle';
 import type { Schedule } from '@/types/Schedule';
 type AdminSchedule = Schedule & {
-    reservedSeats?: (string|number)[];
+    reservedSeats?: (string | number)[];
 };
 import type { Booking } from '@/types/Booking';
+import BookingPassengerForm from './BookingPassengerForm';
+import { BookingPassenger } from '@/types/BookingPassenger';
 
 type Errors = {
     seats_selected?: string;
@@ -27,7 +29,6 @@ type Props = {
     route_id?: number;
     routes?: Route[];
     schedules?: AdminSchedule[];
-    booking?: Booking;
     success?: string;
     allOrigins?: string[];
     allDestinations?: string[];
@@ -35,7 +36,6 @@ type Props = {
 };
 
 export default function BookingForm(props: Props) {
-    const isEdit = !!props.booking;
     const [search, setSearch] = useState({
         origin: props.origin || '',
         destination: props.destination || '',
@@ -45,28 +45,27 @@ export default function BookingForm(props: Props) {
     const [selectedRoute, setSelectedRoute] = useState<number | null>(
         props.route_id ? Number(props.route_id) : autoSelectedRoute
     );
-    const [selectedSchedule, setSelectedSchedule] = useState<number | null>(
-        isEdit ? props.booking?.schedule_id ?? null : null
-    );
-    const initialSeats = isEdit && Array.isArray(props.booking?.seats_selected)
-        ? props.booking!.seats_selected
-        : [];
+    const [selectedSchedule, setSelectedSchedule] = useState<number | null>(null);
 
-    const { data, setData, post, put, processing, errors, reset } = useForm<{
+    const { data, setData, post, processing, errors, reset } = useForm<{
         schedule_id: string;
         seats_booked: number;
-        seats_selected: (string|number)[];
+        seats_selected: (string | number)[];
+        passengers: BookingPassenger[];
     }>({
-        schedule_id: isEdit ? String(props.booking?.schedule_id) : '',
-        seats_booked: isEdit && typeof props.booking?.seats_booked === 'number' ? props.booking.seats_booked : 1,
-        seats_selected: initialSeats,
+        schedule_id: '',
+        seats_booked: 1,
+        seats_selected: [],
+        passengers: [],
     });
 
-    const [selectedSeats, setSelectedSeats] = useState<(string|number)[]>(initialSeats);
+    const [selectedSeats, setSelectedSeats] = useState<(string | number)[]>([]);
     const [formError, setFormError] = useState<string | null>(null);
+    const [passengers, setPassengers] = useState<BookingPassenger[]>([]);
     React.useEffect(() => {
         setData('seats_selected', selectedSeats.filter(seat => seat !== 'D' && seat !== 'Sopir'));
-    }, [selectedSeats]);
+        setData('passengers', passengers);
+    }, [selectedSeats, passengers]);
 
     const validSelectedSeats = selectedSeats.filter(seat => seat !== 'D' && seat !== 'Sopir');
 
@@ -95,6 +94,7 @@ export default function BookingForm(props: Props) {
         setFormError(null);
         const seatsToSend = selectedSeats.filter(seat => seat !== 'D' && seat !== 'Sopir');
         setData('seats_selected', seatsToSend);
+        setData('passengers', passengers);
         if (!selectedSchedule) {
             setFormError('Pilih jadwal terlebih dahulu.');
             return;
@@ -103,11 +103,12 @@ export default function BookingForm(props: Props) {
             setFormError('Pilih kursi terlebih dahulu.');
             return;
         }
-        if (isEdit) {
-            put(route('bookings.update', props.booking!.id));
-        } else {
-            post(route('bookings.store'));
+        const emptyNames = passengers.filter(p => !p.name || p.name.trim() === '');
+        if (emptyNames.length > 0) {
+            setFormError('Semua penumpang wajib diisi nama.');
+            return;
         }
+        post(route('bookings.store'));
     };
 
     const originOptions = props.allOrigins?.map(origin => ({ value: origin, label: origin })) || [];
@@ -137,127 +138,77 @@ export default function BookingForm(props: Props) {
 
     const breadcrumbs = [
         { title: 'Pemesanan', href: route('bookings.index') },
-        { title: isEdit ? 'Edit Pemesanan' : 'Buat Pemesanan', href: '' }
+        { title: 'Buat Pemesanan', href: '' }
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={isEdit ? 'Edit Pemesanan' : 'Buat Pemesanan'} />
+            <Head title="Buat Pemesanan" />
             <div className="px-4 py-6">
                 <h1 className="text-2xl font-semibold mb-4">Manajemen Pemesanan</h1>
                 <div className="flex flex-col space-y-8 lg:flex-row lg:space-y-0 lg:space-x-12">
                     <div className="flex-1 md:max-w-2xl space-y-6">
                         <HeadingSmall
-                            title={isEdit ? 'Edit Pemesanan' : 'Buat Pemesanan'}
+                            title="Buat Pemesanan"
                             description="Isi detail pemesanan di bawah ini"
                         />
                         <div className="space-y-4">
-                            {!isEdit ? (
-                                <form onSubmit={handleSearch} className="space-y-4">
-                                    <div>
-                                        <label className="block text-xs text-muted-foreground mb-1">Asal</label>
-                                        <CustomSelect
-                                            options={originOptions}
-                                            value={originOptions.find(opt => opt.value === search.origin) || null}
-                                            onChange={(newValue) => {
-                                                if (!newValue || Array.isArray(newValue)) {
-                                                    setSearch(s => ({ ...s, origin: '' }));
-                                                } else {
-                                                    setSearch(s => ({ ...s, origin: (newValue as { value: string }).value }));
-                                                }
-                                            }}
-                                            placeholder="Pilih Asal"
-                                            isClearable
-                                            required
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs text-muted-foreground mb-1">Tujuan</label>
-                                        <CustomSelect
-                                            options={destinationOptions}
-                                            value={destinationOptions.find(opt => opt.value === search.destination) || null}
-                                            onChange={(newValue) => {
-                                                if (!newValue || Array.isArray(newValue)) {
-                                                    setSearch(s => ({ ...s, destination: '' }));
-                                                } else {
-                                                    setSearch(s => ({ ...s, destination: (newValue as { value: string }).value }));
-                                                }
-                                            }}
-                                            placeholder="Pilih Tujuan"
-                                            isClearable
-                                            required
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs text-muted-foreground mb-1">Tanggal Berangkat</label>
-                                        <DatePicker
-                                            id="booking-date"
-                                            value={dateValue}
-                                            onChange={handleDateChange}
-                                            required
-                                            className="w-full"
-                                            minDate={new Date()}
-                                        />
-                                    </div>
-                                    <div className="flex items-center space-x-4">
-                                        <Button type="submit" className="h-10">Cari Jadwal</Button>
-                                        <Link
-                                            href={route('bookings.index')}
-                                            className="px-4 py-2 bg-muted text-foreground rounded hover:bg-muted/70 border border-input"
-                                        >
-                                            Batal
-                                        </Link>
-                                    </div>
-                                </form>
-                            ) : (
-                                <div className="space-y-2">
-                                    {(() => {
-                                        const currentSchedule = props.schedules?.find(
-                                            s => s.id === props.booking?.schedule_id
-                                        );
-                                        const origin = props.origin ?? currentSchedule?.routeVehicle?.route?.origin ?? '-';
-                                        const destination = props.destination ?? currentSchedule?.routeVehicle?.route?.destination ?? '-';
-                                        const departureDate = props.departure_date
-                                            ? props.departure_date
-                                            : (currentSchedule?.departure_time
-                                                ? currentSchedule.departure_time.slice(0, 10)
-                                                : '-');
-                                        return (
-                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                                                <div>
-                                                    <label className="text-xs text-muted-foreground mb-1">Asal</label>
-                                                    <input
-                                                        type="text"
-                                                        value={origin}
-                                                        className="border border-input rounded px-2 py-1 w-full bg-muted text-foreground"
-                                                        disabled
-                                                        placeholder="Asal"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="text-xs text-muted-foreground mb-1">Tujuan</label>
-                                                    <input
-                                                        type="text"
-                                                        value={destination}
-                                                        className="border border-input rounded px-2 py-1 w-full bg-muted text-foreground"
-                                                        disabled
-                                                        placeholder="Tujuan"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="text-xs text-muted-foreground mb-1">Tanggal</label>
-                                                    <input
-                                                        type="date"
-                                                        value={departureDate !== '-' ? departureDate : ''}
-                                                        className="border border-input rounded px-2 py-1 w-full bg-muted text-foreground"
-                                                        disabled
-                                                    />
-                                                </div>
-                                            </div>
-                                        );
-                                    })()}
+                            <form onSubmit={handleSearch} className="space-y-4">
+                                <div>
+                                    <label className="block text-xs text-muted-foreground mb-1">Asal</label>
+                                    <CustomSelect
+                                        options={originOptions}
+                                        value={originOptions.find(opt => opt.value === search.origin) || null}
+                                        onChange={(newValue) => {
+                                            if (!newValue || Array.isArray(newValue)) {
+                                                setSearch(s => ({ ...s, origin: '' }));
+                                            } else {
+                                                setSearch(s => ({ ...s, origin: (newValue as { value: string }).value }));
+                                            }
+                                        }}
+                                        placeholder="Pilih Asal"
+                                        isClearable
+                                        required
+                                    />
                                 </div>
-                            )}
+                                <div>
+                                    <label className="block text-xs text-muted-foreground mb-1">Tujuan</label>
+                                    <CustomSelect
+                                        options={destinationOptions}
+                                        value={destinationOptions.find(opt => opt.value === search.destination) || null}
+                                        onChange={(newValue) => {
+                                            if (!newValue || Array.isArray(newValue)) {
+                                                setSearch(s => ({ ...s, destination: '' }));
+                                            } else {
+                                                setSearch(s => ({ ...s, destination: (newValue as { value: string }).value }));
+                                            }
+                                        }}
+                                        placeholder="Pilih Tujuan"
+                                        isClearable
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-muted-foreground mb-1">Tanggal Berangkat</label>
+                                    <DatePicker
+                                        id="booking-date"
+                                        value={dateValue}
+                                        onChange={handleDateChange}
+                                        required
+                                        className="w-full"
+                                        minDate={new Date()}
+                                    />
+                                </div>
+                                <div className="flex items-center space-x-4">
+                                    <Button type="submit" className="h-10">Cari Jadwal</Button>
+                                    <Link
+                                        href={route('bookings.index')}
+                                        className="px-4 py-2 bg-muted text-foreground rounded hover:bg-muted/70 border border-input"
+                                    >
+                                        Batal
+                                    </Link>
+                                </div>
+                            </form>
                             {props.schedules && props.schedules.length > 0 && (
                                 <div>
                                     <div className="font-semibold mb-2">Pilih Jadwal:</div>
@@ -283,12 +234,12 @@ export default function BookingForm(props: Props) {
                                         <SeatPickerComponent
                                             layout={generateMinibusLayout(
                                                 props.schedules?.find(s => s.id === selectedSchedule)?.vehicle?.seat_capacity || 8,
-                                                [2,4,3],
+                                                [2, 4, 3],
                                                 true
                                             )}
                                             reservedSeats={reservedSeats}
                                             selectedSeats={selectedSeats}
-                                            onSelect={(seats: (string|number)[]) => {
+                                            onSelect={(seats: (string | number)[]) => {
                                                 setSelectedSeats(Array.isArray(seats) ? seats : []);
                                                 setFormError(null);
                                             }}
@@ -296,9 +247,17 @@ export default function BookingForm(props: Props) {
                                         <InputError message={errors.seats_selected} />
                                         {formError && <div className="text-red-600 text-sm mt-2">{formError}</div>}
                                     </div>
+                                    {validSelectedSeats.length > 0 && (
+                                        <BookingPassengerForm
+                                            passengers={passengers}
+                                            setPassengers={setPassengers}
+                                            errors={errors}
+                                            seatsCount={validSelectedSeats.length}
+                                        />
+                                    )}
                                     <div className="flex items-center space-x-4">
                                         <Button type="submit" disabled={processing || !selectedSchedule || validSelectedSeats.length === 0}>
-                                            {isEdit ? 'Perbarui Pemesanan' : 'Buat Pemesanan'}
+                                            Buat Pemesanan
                                         </Button>
                                         <Link
                                             href={route('bookings.index')}
