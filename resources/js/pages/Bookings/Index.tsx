@@ -9,30 +9,15 @@ import DataTableWrapper, { DataTableWrapperRef } from '@/components/datatables';
 import { BreadcrumbItem } from '@/types';
 import ToggleTabs from '@/components/toggle-tabs';
 import { Booking } from '@/types/Booking';
-
-type Profile = {
-  phone_number?: string;
-  pickup_address?: string;
-  address?: string;
-};
-
-type Schedule = {
-  departure_time?: string;
-  vehicle?: {
-    plate_number?: string;
-    brand?: string;
-  };
-  route?: {
-    origin?: string;
-    destination?: string;
-  };
-};
+import { BookingPassenger } from '@/types/BookingPassenger';
+import { ProfileCustomer } from '@/types/ProfileCustomer';
+import { Schedule } from '@/types/Schedule';
 
 type BookingTableRow = {
   id: number;
   user?: {
     name?: string;
-    profile?: Profile;
+    profile?: ProfileCustomer;
   };
   schedule?: Schedule;
   seats_booked?: number;
@@ -71,6 +56,7 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
         return `<input type="checkbox" class="bulk-checkbox" data-id="${booking.id}" ${selectedIds.includes(booking.id) ? 'checked' : ''} ${disabled} /> ${booking.id}`;
       },
     },
+    { data: 'reference', title: 'Referensi' },
     {
       data: 'user',
       title: 'Pengguna',
@@ -121,7 +107,6 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
     },
     { data: 'booking_time', title: 'Waktu Pemesanan' },
     { data: 'created_at', title: 'Dibuat Pada' },
-    { data: 'updated_at', title: 'Diperbarui Pada' },
     {
       data: null,
       title: 'Aksi',
@@ -134,7 +119,6 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
           html += `<button class="btn-restore ml-2 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 border border-green-700" data-id="${booking.id}">Pulihkan</button>`;
           html += `<button class="btn-force-delete ml-2 px-2 py-1 bg-destructive text-white rounded hover:bg-destructive/80 border border-destructive" data-id="${booking.id}">Hapus Permanen</button>`;
         } else {
-          html += `<span class="inertia-link-cell" data-id="${booking.id}"></span>`;
           html += `<button data-id="${booking.id}" class="ml-2 px-2 py-1 bg-destructive text-white rounded hover:bg-destructive/80 border border-destructive btn-delete">
             Hapus
           </button>`;
@@ -145,19 +129,63 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
   ];
 
   const formatBookingDetails = (booking: BookingTableRow) => {
-    const profile = booking.user?.profile;
+ 
+    const passengers: BookingPassenger[] = (booking as any).passengers || [];
     return `
       <div class="p-4 bg-gray-50 border border-gray-200 rounded shadow-sm">
-        <strong class="block text-gray-800 mb-2">Detail Penumpang:</strong>
-        <ul>
-          <li class="ml-4 list-disc text-gray-700"><b>No. Telepon:</b> ${profile?.phone_number ?? '-'}</li>
-          <li class="ml-4 list-disc text-gray-700"><b>Alamat Penjemputan:</b> ${profile?.pickup_address ?? '-'}</li>
-          <li class="ml-4 list-disc text-gray-700"><b>Alamat Lengkap:</b> ${profile?.address ?? '-'}</li>
-        </ul>
+      <div class="flex items-center justify-between mb-2">
+        <strong class="block text-gray-800">Detail Penumpang:</strong>
+        <button class="btn-copy-passenger px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm" style="margin-left:8px;">Copy</button>
       </div>
+      <ul id="passenger-list-${booking.id}">
+        ${passengers.length === 0 ? '<li class="ml-4 list-disc text-gray-700">Tidak ada data penumpang</li>' :
+        passengers.map((p) => `
+          <li class="ml-4 list-disc text-gray-700">
+          <b>Nama:</b> ${p.name ?? '-'}<br/>
+          <b>No. Telepon:</b> ${p.phone_number ?? '-'}<br/>
+          <b>Alamat Penjemputan:</b> ${p.pickup_address ?? '-'}<br/>
+          </li>
+        `).join('')
+        }
+      </ul>
+      </div>
+      <script>
+      setTimeout(() => {
+        const btn = document.querySelector('.btn-copy-passenger');
+        if (btn) {
+        btn.onclick = function() {
+          const ul = document.getElementById('passenger-list-${booking.id}');
+          if (!ul) return;
+          let text = '';
+          ul.querySelectorAll('li').forEach(li => {
+          text += li.innerText + '\\n';
+          });
+          navigator.clipboard.writeText(text.trim());
+          btn.innerText = 'Copied!';
+          setTimeout(() => btn.innerText = 'Copy', 1200);
+        };
+        }
+      }, 100);
+      </script>
     `;
   };
+  const handleDelete = (id: number) => {
+    router.delete(route('bookings.destroy', id), {
+      onSuccess: () => dtRef.current?.reload(),
+    });
+  };
 
+  const handleRestore = (id: number) => {
+    router.post(route('bookings.restore', id), {}, {
+      onSuccess: () => dtRef.current?.reload(),
+    });
+  };
+
+  const handleForceDelete = (id: number) => {
+    router.delete(route('bookings.force-delete', id), {
+      onSuccess: () => dtRef.current?.reload(),
+    });
+  };
   const drawCallback = () => {
     document.querySelectorAll('.inertia-link-cell').forEach((cell) => {
       const id = cell.getAttribute('data-id');
@@ -214,8 +242,26 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
           }
         });
       });
-    }
-  };
+      document.querySelectorAll('.btn-delete').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-id');
+          if (id) handleDelete(Number(id));
+        });
+      });
+      document.querySelectorAll('.btn-restore').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-id');
+          if (id) handleRestore(Number(id));
+        });
+      });
+      document.querySelectorAll('.btn-force-delete').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-id');
+          if (id) handleForceDelete(Number(id));
+        });
+      });
+    };
+  }
 
   const handleBulkUpdate = () => {
     if (selectedIds.length === 0) return;

@@ -45,12 +45,7 @@ Route::prefix('dashboard')->middleware(['auth', 'verified', 'role:admin'])->grou
     Route::post('routes/json', [\App\Http\Controllers\RouteController::class, 'json'])->name('routes.json');
 
     Route::post('bookings/json', [\App\Http\Controllers\BookingController::class, 'json'])->name('bookings.json');
-    Route::get('bookings', [\App\Http\Controllers\BookingController::class, 'index'])->name('bookings.index');
-    Route::get('bookings/create', [\App\Http\Controllers\BookingController::class, 'create'])->name('bookings.create');
-    Route::post('bookings', [\App\Http\Controllers\BookingController::class, 'store'])->name('bookings.store');
-    Route::get('bookings/{id}/edit', [\App\Http\Controllers\BookingController::class, 'edit'])->name('bookings.edit');
-    Route::put('bookings/{id}', [\App\Http\Controllers\BookingController::class, 'update'])->name('bookings.update');
-    Route::delete('bookings/{id}', [\App\Http\Controllers\BookingController::class, 'destroy'])->name('bookings.destroy');
+    Route::resource('bookings', \App\Http\Controllers\BookingController::class);
     Route::post('bookings/{id}/restore', [\App\Http\Controllers\BookingController::class, 'restore'])->name('bookings.restore');
     Route::delete('bookings/{id}/force-delete', [\App\Http\Controllers\BookingController::class, 'forceDelete'])->name('bookings.force-delete');
     Route::post('bookings/{id}/update-status', [\App\Http\Controllers\BookingController::class, 'updateStatus'])->name('bookings.update-status');

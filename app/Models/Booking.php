@@ -33,6 +33,10 @@ class Booking extends Model
     {
         return $this->belongsTo(Schedule::class);
     }
+    public function passengers()
+    {
+        return $this->hasMany(BookingPassenger::class);
+    }
     protected static function boot()
     {
         parent::boot();
