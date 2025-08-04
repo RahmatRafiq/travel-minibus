@@ -44,22 +44,32 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
       title: '',
       orderable: false,
       searchable: false,
-      className: 'details-control',
-      render: () => '<span style="cursor: pointer;">+</span>',
+      className: 'details-control w-8 text-center',
+      render: () => '<span class="cursor-pointer text-blue-600 font-bold text-lg select-none">+</span>',
+      responsivePriority: 1,
     },
     {
       data: 'id',
       title: 'ID',
+      className: 'text-center text-sm',
+      responsivePriority: 2,
       render: (data: unknown, _type: string, row: unknown, _meta: unknown) => {
         const booking = row as BookingTableRow;
         const disabled = booking.status === 'confirmed' ? 'disabled' : '';
-        return `<input type="checkbox" class="bulk-checkbox" data-id="${booking.id}" ${selectedIds.includes(booking.id) ? 'checked' : ''} ${disabled} /> ${booking.id}`;
+        return `<input type="checkbox" class="bulk-checkbox mr-2" data-id="${booking.id}" ${selectedIds.includes(booking.id) ? 'checked' : ''} ${disabled} /> <span class="text-xs font-mono">${booking.id}</span>`;
       },
     },
-    { data: 'reference', title: 'Referensi' },
+    { 
+      data: 'reference', 
+      title: 'Referensi',
+      className: 'text-sm',
+      responsivePriority: 8,
+    },
     {
       data: 'user',
       title: 'Pengguna',
+      className: 'text-sm',
+      responsivePriority: 7,
       render: (data: unknown, _type: string, row: unknown, _meta: unknown) => {
         const booking = row as BookingTableRow;
         return booking.user?.name ?? '-';
@@ -68,6 +78,8 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
     {
       data: 'schedule',
       title: 'Jadwal',
+      className: 'text-sm',
+      responsivePriority: 5,
       render: (data: unknown, _type: string, row: unknown, _meta: unknown) => {
         const booking = row as BookingTableRow;
         const schedule = booking.schedule;
@@ -79,6 +91,8 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
     {
       data: 'schedule',
       title: 'Rute',
+      className: 'text-sm font-medium',
+      responsivePriority: 4,
       render: (data: unknown, _type: string, row: unknown, _meta: unknown) => {
         const booking = row as BookingTableRow;
         const schedule = booking.schedule;
@@ -87,16 +101,23 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
           : '-';
       },
     },
-    { data: 'seats_booked', title: 'Kursi Dipesan' },
+    { 
+      data: 'seats_booked', 
+      title: 'Kursi Dipesan',
+      className: 'text-center text-sm font-semibold',
+      responsivePriority: 6,
+    },
     {
       data: 'status',
       title: 'Status',
+      className: 'text-center text-sm',
+      responsivePriority: 3,
       render: (data: unknown, _type: string, row: unknown, _meta: unknown) => {
         const booking = row as BookingTableRow;
         const status = booking.status ?? '';
         if (!booking.trashed) {
           const disabled = status === 'confirmed' ? 'disabled' : '';
-          return `<select class="booking-status-dropdown bg-blue-100 text-blue-900 font-semibold rounded px-2 py-1" data-id="${booking.id}" ${disabled}>
+          return `<select class="booking-status-dropdown bg-blue-100 text-blue-900 font-semibold rounded px-2 py-1 text-xs" data-id="${booking.id}" ${disabled}>
             <option value="pending"${status === 'pending' ? ' selected' : ''} style="background:#fef3c7;color:#92400e;">Pending</option>
             <option value="confirmed"${status === 'confirmed' ? ' selected' : ''} style="background:#d1fae5;color:#065f46;">Confirmed</option>
             <option value="cancelled"${status === 'cancelled' ? ' selected' : ''} style="background:#fee2e2;color:#991b1b;">Cancelled</option>
@@ -105,23 +126,44 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
         return status;
       },
     },
-    { data: 'booking_time', title: 'Waktu Pemesanan' },
-    { data: 'created_at', title: 'Dibuat Pada' },
+    { 
+      data: 'booking_time', 
+      title: 'Waktu Pemesanan',
+      className: 'text-sm',
+      responsivePriority: 9,
+    },
+    { 
+      data: 'created_at', 
+      title: 'Dibuat Pada',
+      className: 'text-sm',
+      responsivePriority: 10,
+    },
     {
       data: null,
       title: 'Aksi',
       orderable: false,
       searchable: false,
+      className: 'text-center',
+      responsivePriority: 1,
       render: (_data: unknown, _type: string, row: unknown, _meta: unknown) => {
         const booking = row as BookingTableRow;
         let html = '';
+        
         if (booking.trashed) {
-          html += `<button class="btn-restore ml-2 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 border border-green-700" data-id="${booking.id}">Pulihkan</button>`;
-          html += `<button class="btn-force-delete ml-2 px-2 py-1 bg-destructive text-white rounded hover:bg-destructive/80 border border-destructive" data-id="${booking.id}">Hapus Permanen</button>`;
+          html += `<button class="btn-restore px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 border border-green-700 text-xs sm:text-sm" data-id="${booking.id}">Pulihkan</button>`;
+          html += `<button class="btn-force-delete ml-1 px-2 py-1 bg-destructive text-white rounded hover:bg-destructive/80 border border-destructive text-xs sm:text-sm" data-id="${booking.id}">Hapus Permanen</button>`;
         } else {
-          html += `<button data-id="${booking.id}" class="ml-2 px-2 py-1 bg-destructive text-white rounded hover:bg-destructive/80 border border-destructive btn-delete">
-            Hapus
-          </button>`;
+          // Hanya tampilkan tombol hapus jika status bukan confirmed
+          if (booking.status !== 'confirmed') {
+            html += `<button data-id="${booking.id}" class="px-2 py-1 bg-destructive text-white rounded hover:bg-destructive/80 border border-destructive btn-delete text-xs sm:text-sm">
+              Hapus
+            </button>`;
+          } else {
+            // Untuk booking confirmed, tampilkan pesan bahwa booking terkunci
+            html += `<span class="px-2 py-1 bg-gray-100 text-gray-500 rounded text-xs border border-gray-300 cursor-not-allowed" title="Booking yang sudah confirmed tidak dapat dihapus">
+              Terkunci
+            </span>`;
+          }
         }
         return html;
       },
@@ -212,11 +254,11 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
           if (row.child.isShown()) {
             row.child.hide();
             tr.classList.remove('shown');
-            cell.innerHTML = '<span style="cursor: pointer;">+</span>';
+            cell.innerHTML = '<span class="cursor-pointer text-blue-600 font-bold text-lg select-none">+</span>';
           } else {
             row.child(formatBookingDetails(row.data())).show();
             tr.classList.add('shown');
-            cell.innerHTML = '<span style="cursor: pointer;">-</span>';
+            cell.innerHTML = '<span class="cursor-pointer text-blue-600 font-bold text-lg select-none">-</span>';
           }
         });
       });
@@ -292,40 +334,48 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Pemesanan" />
-      <div className="px-4 py-6">
-        <h1 className="text-2xl font-semibold mb-4">Manajemen Pemesanan</h1>
+      <div className="px-2 sm:px-4 py-6">
+        <h1 className="text-xl sm:text-2xl font-semibold mb-4">Manajemen Pemesanan</h1>
         <div className="flex flex-col space-y-8 lg:flex-row lg:space-y-0 lg:space-x-12">
           <div className="w-full flex-grow">
             <HeadingSmall title="Pemesanan" description="Kelola pemesanan untuk aplikasi Anda" />
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Daftar Pemesanan</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+              <h2 className="text-lg sm:text-xl font-semibold">Daftar Pemesanan</h2>
               <Link href={route('bookings.create')}>
-                <Button>Buat Pemesanan</Button>
+                <Button className="w-full sm:w-auto">Buat Pemesanan</Button>
               </Link>
             </div>
-            <div className="flex items-center gap-4 mb-4">
-              <span className="font-semibold">Bulk Update Status:</span>
-              <select
-                className="bg-blue-100 text-blue-900 font-semibold rounded px-2 py-1"
-                value={bulkStatus}
-                onChange={e => setBulkStatus(e.target.value)}
-              >
-                <option value="pending" style={{ background: '#fef3c7', color: '#92400e' }}>Pending</option>
-                <option value="confirmed" style={{ background: '#d1fae5', color: '#065f46' }}>Confirmed</option>
-                <option value="cancelled" style={{ background: '#fee2e2', color: '#991b1b' }}>Cancelled</option>
-              </select>
-              <Button onClick={handleBulkUpdate} disabled={selectedIds.length === 0} variant="default">
-                Update Status ({selectedIds.length})
-              </Button>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mb-4">
+              <span className="font-semibold text-sm sm:text-base">Bulk Update Status:</span>
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <select
+                  className="bg-blue-100 text-blue-900 font-semibold rounded px-2 py-1 text-sm"
+                  value={bulkStatus}
+                  onChange={e => setBulkStatus(e.target.value)}
+                >
+                  <option value="pending" style={{ background: '#fef3c7', color: '#92400e' }}>Pending</option>
+                  <option value="confirmed" style={{ background: '#d1fae5', color: '#065f46' }}>Confirmed</option>
+                  <option value="cancelled" style={{ background: '#fee2e2', color: '#991b1b' }}>Cancelled</option>
+                </select>
+                <Button 
+                  onClick={handleBulkUpdate} 
+                  disabled={selectedIds.length === 0} 
+                  variant="default"
+                  className="text-sm w-full sm:w-auto"
+                >
+                  Update Status ({selectedIds.length})
+                </Button>
+              </div>
             </div>
             <ToggleTabs tabs={['active', 'trashed', 'all']} active={filter} onChange={setFilter} />
             {success && (
-              <div className="p-2 bg-green-100 text-green-800 rounded border border-green-300">{success}</div>
+              <div className="p-2 bg-green-100 text-green-800 rounded border border-green-300 text-sm">{success}</div>
             )}
-            <DataTableWrapper
-              key={filter}
-              ref={dtRef}
-              ajax={{
+            <div className="overflow-x-auto">
+              <DataTableWrapper
+                key={filter}
+                ref={dtRef}
+                ajax={{
                 url: route('bookings.json') + '?filter=' + filter,
                 type: 'POST',
                 data: function (d: Record<string, unknown>) {
@@ -334,8 +384,24 @@ export default function BookingIndex({ filter: initialFilter, success }: { filte
                 },
               }}
               columns={columns}
-              options={{ drawCallback }}
+              options={{ 
+                drawCallback,
+                responsive: true,
+                scrollX: true,
+                language: {
+                  search: '',
+                  searchPlaceholder: 'Cari booking...',
+                  lengthMenu: 'Tampilkan _MENU_ data',
+                  info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ data',
+                  infoEmpty: 'Tidak ada data',
+                  paginate: {
+                    previous: 'Sebelumnya',
+                    next: 'Selanjutnya'
+                  }
+                }
+              }}
             />
+            </div>
           </div>
         </div>
       </div>
