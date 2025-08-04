@@ -1,7 +1,7 @@
-
 import { User } from '@/types/UserRolePermission';
 import { ProfileCustomer } from '@/types/ProfileCustomer';
 import { Head, useForm, usePage } from '@inertiajs/react';
+import { MapPin, Navigation } from 'lucide-react';
 
 interface ProfileSettingProps {
   profile: ProfileCustomer;
@@ -16,13 +16,51 @@ export default function ProfileSetting({ profile }: ProfileSettingProps) {
     phone_number: profile?.phone_number || '',
     pickup_address: profile?.pickup_address || '',
     address: profile?.address || '',
-    pickup_latitude: profile?.pickup_latitude || '',
-    pickup_longitude: profile?.pickup_longitude || '',
   });
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     patch(route('user.profile.update'));
+  }
+
+  function handleAddressChange(e: React.ChangeEvent<HTMLInputElement>) {
+    let value = e.target.value;
+    value = value.replace(/https?:\/\/[^\s]+/g, '').trim();
+    setData('pickup_address', value);
+  }
+
+  function getCurrentLocation() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          const mapsUrl = `https://www.google.com/maps/@${latitude},${longitude},15z`;
+          window.open(mapsUrl, '_blank');
+        },
+        (error) => {
+          alert('Tidak dapat mengakses lokasi. Pastikan Anda mengizinkan akses lokasi.');
+          console.error('Error getting location:', error);
+        }
+      );
+    } else {
+      alert('Geolocation tidak didukung oleh browser ini.');
+    }
+  }
+
+  function openGoogleMaps() {
+    if (data.pickup_address.trim()) {
+      let cleanAddress = data.pickup_address.trim();
+      cleanAddress = cleanAddress.replace(/https?:\/\/[^\s]+/g, '').trim();
+      if (cleanAddress) {
+        const searchQuery = encodeURIComponent(cleanAddress);
+        const mapsUrl = `https://www.google.com/maps/search/${searchQuery}`;
+        window.open(mapsUrl, '_blank');
+      } else {
+        alert('Alamat tidak valid. Silakan masukkan alamat yang benar.');
+      }
+    } else {
+      alert('Silakan masukkan alamat penjemputan terlebih dahulu.');
+    }
   }
 
   return (
@@ -41,23 +79,37 @@ export default function ProfileSetting({ profile }: ProfileSettingProps) {
             </div>
             <div>
               <label className="block font-semibold text-indigo-700 dark:text-indigo-200 mb-1">Alamat Penjemputan</label>
-              <input type="text" className="w-full border border-indigo-300 dark:border-indigo-800 rounded-xl px-3 py-2 focus:ring focus:ring-indigo-100 dark:focus:ring-indigo-900 bg-indigo-50 dark:bg-indigo-900 text-indigo-900 dark:text-indigo-200" value={data.pickup_address} onChange={e => setData('pickup_address', e.target.value)} />
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  className="flex-1 border border-indigo-300 dark:border-indigo-800 rounded-xl px-3 py-2 focus:ring focus:ring-indigo-100 dark:focus:ring-indigo-900 bg-indigo-50 dark:bg-indigo-900 text-indigo-900 dark:text-indigo-200" 
+                  value={data.pickup_address} 
+                  onChange={handleAddressChange}
+                  placeholder="Masukkan alamat penjemputan"
+                />
+                <button
+                  type="button"
+                  onClick={openGoogleMaps}
+                  className="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl transition-colors flex items-center gap-1"
+                  title="Buka di Google Maps"
+                >
+                  <MapPin size={16} />
+                </button>
+                <button
+                  type="button"
+                  onClick={getCurrentLocation}
+                  className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors flex items-center gap-1"
+                  title="Gunakan Lokasi Sekarang"
+                >
+                  <Navigation size={16} />
+                </button>
+              </div>
               {errors.pickup_address && <div className="text-red-500 text-sm">{errors.pickup_address}</div>}
             </div>
             <div>
               <label className="block font-semibold text-indigo-700 dark:text-indigo-200 mb-1">Alamat Lengkap</label>
               <input type="text" className="w-full border border-indigo-300 dark:border-indigo-800 rounded-xl px-3 py-2 focus:ring focus:ring-indigo-100 dark:focus:ring-indigo-900 bg-indigo-50 dark:bg-indigo-900 text-indigo-900 dark:text-indigo-200" value={data.address} onChange={e => setData('address', e.target.value)} />
               {errors.address && <div className="text-red-500 text-sm">{errors.address}</div>}
-            </div>
-            <div>
-              <label className="block font-semibold text-indigo-700 dark:text-indigo-200 mb-1">Latitude</label>
-              <input type="number" step="any" className="w-full border border-indigo-300 dark:border-indigo-800 rounded-xl px-3 py-2 focus:ring focus:ring-indigo-100 dark:focus:ring-indigo-900 bg-indigo-50 dark:bg-indigo-900 text-indigo-900 dark:text-indigo-200" value={data.pickup_latitude} onChange={e => setData('pickup_latitude', e.target.value)} />
-              {errors.pickup_latitude && <div className="text-red-500 text-sm">{errors.pickup_latitude}</div>}
-            </div>
-            <div>
-              <label className="block font-semibold text-indigo-700 dark:text-indigo-200 mb-1">Longitude</label>
-              <input type="number" step="any" className="w-full border border-indigo-300 dark:border-indigo-800 rounded-xl px-3 py-2 focus:ring focus:ring-indigo-100 dark:focus:ring-indigo-900 bg-indigo-50 dark:bg-indigo-900 text-indigo-900 dark:text-indigo-200" value={data.pickup_longitude} onChange={e => setData('pickup_longitude', e.target.value)} />
-              {errors.pickup_longitude && <div className="text-red-500 text-sm">{errors.pickup_longitude}</div>}
             </div>
           </div>
           <div className="flex gap-2 mt-10 justify-center">
