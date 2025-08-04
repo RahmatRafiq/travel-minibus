@@ -15,6 +15,7 @@ import {
     BusFront, // Travel Management
     CalendarCheck2, // Bookings management
     CalendarClock, // Schedule Management
+    BarChart3, // Rekapitulasi
 } from 'lucide-react';
 
 const mainNavItems: NavItem[] = [
@@ -22,6 +23,11 @@ const mainNavItems: NavItem[] = [
         title: 'Beranda',
         href: '/dashboard',
         icon: Gauge,
+    },
+    {
+        title: 'Rekapitulasi',
+        href: '/dashboard/rekapitulasi',
+        icon: BarChart3,
     },
     {
         title: 'Manajemen Pengguna',
