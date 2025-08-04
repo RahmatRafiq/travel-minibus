@@ -15,60 +15,11 @@ import { MdDateRange, MdTrendingUp, MdEventSeat } from 'react-icons/md';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import { Bar, Line, Doughnut } from 'react-chartjs-2';
 import AppLayout from '@/layouts/app-layout';
+import { Vehicle } from '@/types/Vehicle';
+import { Booking } from '@/types/Booking';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, ArcElement);
 
-// Types based on our models
-type User = {
-  id: number;
-  name: string;
-  email: string;
-};
-
-type Driver = {
-  id: number;
-  name: string;
-  phone: string;
-};
-
-type Vehicle = {
-  id: number;
-  plate_number: string;
-  brand: string;
-  seat_capacity: number;
-  driver_id: number;
-  driver?: Driver;
-};
-
-type Route = {
-  id: number;
-  name: string;
-  origin: string;
-  destination: string;
-  duration: string;
-  price: number;
-};
-
-type Schedule = {
-  id: number;
-  route_vehicle_id: number;
-  departure_time: string;
-  status: string;
-};
-
-type Booking = {
-  id: number;
-  user_id: number;
-  schedule_id: number;
-  booking_time: string;
-  seats_booked: number;
-  status: string;
-  seats_selected: number[];
-  amount: number;
-  reference: string;
-  user?: User;
-  schedule?: Schedule;
-};
 
 type RekapitulasiStats = {
   totalBooking: number;
