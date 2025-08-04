@@ -18,6 +18,8 @@ class HomeController extends Controller
             'schedule.routeVehicle.vehicle',
             'schedule.routeVehicle.route'
         ])
+        ->whereHas('schedule.routeVehicle.route') 
+        ->whereHas('schedule.routeVehicle.vehicle') 
         ->when(auth()->check(), function ($q) {
             $q->where('user_id', auth()->id());
         })
@@ -67,6 +69,8 @@ class HomeController extends Controller
             'schedule.routeVehicle.vehicle',
             'schedule.routeVehicle.route'
         ])
+        ->whereHas('schedule.routeVehicle.route') 
+        ->whereHas('schedule.routeVehicle.vehicle') 
         ->where('user_id', auth()->id())
         ->latest()
         ->get()

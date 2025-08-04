@@ -15,6 +15,10 @@ Route::get('auth/{provider}/callback', [SocialAuthController::class, 'handleProv
 Route::prefix('dashboard')->middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 
+    // Rekapitulasi routes
+    Route::get('/rekapitulasi', [\App\Http\Controllers\RecapitulationController::class, 'index'])->name('rekapitulasi.index');
+    Route::get('/rekapitulasi/export', [\App\Http\Controllers\RecapitulationController::class, 'export'])->name('rekapitulasi.export');
+
     Route::delete('/settings/profile/delete-file', [\App\Http\Controllers\Settings\ProfileController::class, 'deleteFile'])->name('profile.deleteFile');
     Route::post('/settings/profile/upload', [\App\Http\Controllers\Settings\ProfileController::class, 'upload'])->name('profile.upload');
     Route::post('/temp/storage', [\App\Http\Controllers\StorageController::class, 'store'])->name('storage.store');

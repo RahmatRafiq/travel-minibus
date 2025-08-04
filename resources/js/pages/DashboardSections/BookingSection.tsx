@@ -1,13 +1,6 @@
 import React from 'react';
 import { FaClipboardList, FaChevronRight } from 'react-icons/fa';
-
-interface Booking {
-  user: string;
-  rute: string;
-  kursi: number;
-  tanggal: string;
-  status: string;
-}
+import { Booking } from '@/types/Booking';
 
 interface BookingSectionProps {
   bookingTerbaru: Booking[];
@@ -36,7 +29,7 @@ const BookingSection: React.FC<BookingSectionProps> = ({ bookingTerbaru }) => (
           <thead>
             <tr className="bg-gradient-to-r from-gray-50 to-green-50 dark:from-gray-800 dark:to-gray-700">
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">User</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Rute</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Reference</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Kursi</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tanggal</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Status</th>
@@ -61,25 +54,25 @@ const BookingSection: React.FC<BookingSectionProps> = ({ bookingTerbaru }) => (
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                        {b.user.charAt(0).toUpperCase()}
+                        {b.user?.name?.charAt(0).toUpperCase() || 'U'}
                       </div>
-                      <span className="font-semibold text-gray-900 dark:text-white">{b.user}</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{b.user?.name || 'Unknown User'}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{b.rute}</td>
+                  <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{b.reference}</td>
                   <td className="px-4 py-3">
                     <span className="inline-flex items-center px-2 py-1 rounded-full bg-indigo-100 text-indigo-800 font-semibold text-sm">
-                      {b.kursi}
+                      {b.seats_booked}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="font-mono text-gray-600 dark:text-gray-300 text-sm">{b.tanggal}</span>
+                    <span className="font-mono text-gray-600 dark:text-gray-300 text-sm">{new Date(b.booking_time).toLocaleDateString('id-ID')}</span>
                   </td>
                   <td className="px-4 py-3">
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold tracking-wide ${
-                      b.status === 'Sukses' 
+                      b.status === 'confirmed' 
                         ? 'bg-green-100 text-green-700 border border-green-200' 
-                        : b.status === 'Pending' 
+                        : b.status === 'pending' 
                         ? 'bg-yellow-100 text-yellow-700 border border-yellow-200' 
                         : 'bg-gray-100 text-gray-700 border border-gray-200'
                     }`}>
