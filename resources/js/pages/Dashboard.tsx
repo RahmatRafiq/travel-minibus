@@ -71,7 +71,7 @@ export default function Dashboard() {
           animation: float 6s ease-in-out infinite;
         }
         `}</style>
-        <div className="flex flex-col gap-6 p-3 sm:p-6 max-w-7xl mx-auto">
+        <div className="flex flex-col gap-6 p-3 sm:p-6">
           <HeaderSection />
           <InsightSection topRute={topRute} topRuteJumlah={topRuteJumlah} topBooking={topBooking} topBookingStatus={topBookingStatus} />
           <StatsSection stats={safeStats} />
