@@ -7,11 +7,15 @@ import StatsSection from './DashboardSections/StatsSection';
 import JadwalSection from './DashboardSections/JadwalSection';
 import BookingSection from './DashboardSections/BookingSection';
 import RutePopulerSection from './DashboardSections/RutePopulerSection';
+import { Booking } from '@/types/Booking';
+import { Schedule } from '@/types/Schedule';
 
-type Stat = { label: string; value: number };
-type Jadwal = { jam: string; rute: string; armada: string; driver: string; kursi: string; status: string };
-type Booking = { user: string; rute: string; kursi: number; tanggal: string; status: string };
-type RutePopuler = {
+type DashboardStats = {
+  label: string;
+  value: number;
+};
+
+type RutePopulerChart = {
   labels: string[];
   datasets: Array<{
     label: string;
@@ -20,11 +24,12 @@ type RutePopuler = {
     borderRadius: number;
   }>;
 };
+
 type DashboardPageProps = {
-   stats: Stat[];
-  jadwalHariIni: Jadwal[];
+  stats: DashboardStats[];
+  jadwalHariIni: Schedule[];
   bookingTerbaru: Booking[];
-  rutePopuler: RutePopuler;
+  rutePopuler: RutePopulerChart;
 };
 
 const breadcrumbs = [
@@ -34,14 +39,14 @@ const breadcrumbs = [
 export default function Dashboard() {
   const { stats, jadwalHariIni, bookingTerbaru, rutePopuler } = usePage<DashboardPageProps>().props;
   const safeStats = stats ?? [];
-  const safeJadwal = jadwalHariIni ?? [];
-  const safeBooking = bookingTerbaru ?? [];
-  const safeRutePopuler = rutePopuler ?? { labels: [], datasets: [] };
+  const safeJadwalHariIni = jadwalHariIni ?? [];
+  const safeBookingTerbaru = bookingTerbaru ?? [];
+  const safeRutePopulerChart = rutePopuler ?? { labels: [], datasets: [] };
 
-  const topRute = safeRutePopuler.labels?.[0] || '-';
-  const topRuteJumlah = safeRutePopuler.datasets?.[0]?.data?.[0] || 0;
-  const topBooking = safeBooking[0]?.user ? `${safeBooking[0].user} (${safeBooking[0].rute})` : '-';
-  const topBookingStatus = safeBooking[0]?.status || '';
+  const topRute = safeRutePopulerChart.labels?.[0] || '-';
+  const topRuteJumlah = safeRutePopulerChart.datasets?.[0]?.data?.[0] || 0;
+  const topBooking = safeBookingTerbaru[0]?.user?.name ? `${safeBookingTerbaru[0].user.name} (${safeBookingTerbaru[0].reference})` : '-';
+  const topBookingStatus = safeBookingTerbaru[0]?.status || '';
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -75,9 +80,9 @@ export default function Dashboard() {
           <HeaderSection />
           <InsightSection topRute={topRute} topRuteJumlah={topRuteJumlah} topBooking={topBooking} topBookingStatus={topBookingStatus} />
           <StatsSection stats={safeStats} />
-          <JadwalSection jadwalHariIni={safeJadwal} />
-          <BookingSection bookingTerbaru={safeBooking} />
-          <RutePopulerSection rutePopuler={safeRutePopuler} />
+          <JadwalSection jadwalHariIni={safeJadwalHariIni} />
+          <BookingSection bookingTerbaru={safeBookingTerbaru} />
+          <RutePopulerSection rutePopuler={safeRutePopulerChart} />
         </div>
       </div>
     </AppLayout>

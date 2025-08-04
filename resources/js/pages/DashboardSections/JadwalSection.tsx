@@ -1,10 +1,9 @@
 import React from 'react';
 import { MdEventSeat, MdAccessTime } from 'react-icons/md';
-
-type Jadwal = { jam: string; rute: string; armada: string; driver: string; kursi: string; status: string };
+import { Schedule } from '@/types/Schedule';
 
 interface JadwalSectionProps {
-  jadwalHariIni: Jadwal[];
+  jadwalHariIni: Schedule[];
 }
 
 const JadwalSection: React.FC<JadwalSectionProps> = ({ jadwalHariIni }) => (
@@ -55,20 +54,20 @@ const JadwalSection: React.FC<JadwalSectionProps> = ({ jadwalHariIni }) => (
                 >
                   <td className="px-4 py-3">
                     <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-800 font-mono font-semibold text-sm">
-                      {j.jam}
+                      {new Date(j.departure_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </td>
-                  <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">{j.rute}</td>
-                  <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{j.armada}</td>
-                  <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{j.driver}</td>
+                  <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">{j.route?.name || '-'}</td>
+                  <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{j.vehicle?.plate_number || '-'}</td>
+                  <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{j.vehicle?.driver?.name || '-'}</td>
                   <td className="px-4 py-3">
-                    <span className="font-semibold text-indigo-600 dark:text-indigo-400">{j.kursi}</span>
+                    <span className="font-semibold text-indigo-600 dark:text-indigo-400">{j.available_seats || 0}</span>
                   </td>
                   <td className="px-4 py-3">
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold tracking-wide ${
-                      j.status === 'Berangkat' 
+                      j.status === 'active' 
                         ? 'bg-green-100 text-green-700 border border-green-200' 
-                        : j.status === 'Penuh' 
+                        : j.status === 'full' 
                         ? 'bg-yellow-100 text-yellow-700 border border-yellow-200' 
                         : 'bg-gray-100 text-gray-700 border border-gray-200'
                     }`}>
