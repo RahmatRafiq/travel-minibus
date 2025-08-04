@@ -18,8 +18,13 @@ class RecapitulationController extends Controller
         $filters = $request->only(['dateFrom', 'dateTo', 'status', 'route']);
         $dateFrom = $filters['dateFrom'] ?? Carbon::now()->startOfMonth()->format('Y-m-d');
         $dateTo = $filters['dateTo'] ?? Carbon::now()->format('Y-m-d');
+        
+        // Pastikan hanya mengambil data yang tidak soft deleted
         $bookingsQuery = Booking::with(['user', 'schedule.routeVehicle.route', 'schedule.routeVehicle.vehicle.driver'])
-            ->whereBetween('booking_time', [$dateFrom, $dateTo]);
+            ->whereBetween('booking_time', [$dateFrom, $dateTo])
+            ->whereHas('schedule.routeVehicle.route') // Pastikan route tidak soft deleted
+            ->whereHas('schedule.routeVehicle.vehicle'); // Pastikan vehicle tidak soft deleted
+            
         if (!empty($filters['status'])) {
             $bookingsQuery->where('status', $filters['status']);
         }
@@ -33,8 +38,11 @@ class RecapitulationController extends Controller
         $bookingTrend = $this->getBookingTrend($dateFrom, $dateTo);
         $rutePerforma = $this->getRutePerforma($dateFrom, $dateTo);
         $statusDistribution = $this->getStatusDistribution($dateFrom, $dateTo);
+        
+        // Pastikan routes dan vehicles hanya yang tidak soft deleted
         $routes = Route::all();
         $vehicles = Vehicle::with('driver')->get();
+        
         return Inertia::render('Recapitulation', [
             'stats' => $stats,
             'bookings' => $bookings,
@@ -81,15 +89,20 @@ class RecapitulationController extends Controller
     
     private function getBookingTrend(string $dateFrom, string $dateTo): array
     {
+        // Pastikan hanya mengambil booking yang tidak soft deleted
         $bookingData = Booking::selectRaw('DATE(booking_time) as date, COUNT(*) as count')
             ->whereBetween('booking_time', [$dateFrom, $dateTo])
+            ->whereHas('schedule.routeVehicle.route') // Pastikan route tidak soft deleted
+            ->whereHas('schedule.routeVehicle.vehicle') // Pastikan vehicle tidak soft deleted
             ->groupBy('date')
             ->orderBy('date')
             ->get();
+        
         $labels = [];
         $data = [];
         $currentDate = Carbon::parse($dateFrom);
         $endDate = Carbon::parse($dateTo);
+        
         while ($currentDate <= $endDate) {
             $dateStr = $currentDate->format('Y-m-d');
             $labels[] = $currentDate->format('d M');
@@ -97,6 +110,7 @@ class RecapitulationController extends Controller
             $data[] = $booking ? $booking->count : 0;
             $currentDate->addDay();
         }
+        
         return [
             'labels' => $labels,
             'datasets' => [
@@ -113,22 +127,28 @@ class RecapitulationController extends Controller
     
     private function getRutePerforma(string $dateFrom, string $dateTo): array
     {
+        // Pastikan hanya mengambil data yang tidak soft deleted
         $ruteData = DB::table('bookings')
             ->join('schedules', 'bookings.schedule_id', '=', 'schedules.id')
             ->join('route_vehicle', 'schedules.route_vehicle_id', '=', 'route_vehicle.id')
             ->join('routes', 'route_vehicle.route_id', '=', 'routes.id')
             ->selectRaw('routes.name, COUNT(bookings.id) as booking_count')
             ->whereBetween('bookings.booking_time', [$dateFrom, $dateTo])
+            ->whereNull('bookings.deleted_at') // Pastikan booking tidak soft deleted
+            ->whereNull('schedules.deleted_at') // Pastikan schedule tidak soft deleted
+            ->whereNull('routes.deleted_at') // Pastikan route tidak soft deleted
             ->groupBy('routes.id', 'routes.name')
             ->orderByDesc('booking_count')
             ->limit(10)
             ->get();
+        
         $labels = $ruteData->pluck('name')->toArray();
         $data = $ruteData->pluck('booking_count')->toArray();
         $colors = [
             '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6',
             '#06B6D4', '#F97316', '#84CC16', '#EC4899', '#6366F1'
         ];
+        
         return [
             'labels' => $labels,
             'datasets' => [
@@ -143,10 +163,14 @@ class RecapitulationController extends Controller
     
     private function getStatusDistribution(string $dateFrom, string $dateTo): array
     {
+        // Pastikan hanya mengambil booking yang tidak soft deleted
         $statusData = Booking::selectRaw('status, COUNT(*) as count')
             ->whereBetween('booking_time', [$dateFrom, $dateTo])
+            ->whereHas('schedule.routeVehicle.route') // Pastikan route tidak soft deleted
+            ->whereHas('schedule.routeVehicle.vehicle') // Pastikan vehicle tidak soft deleted
             ->groupBy('status')
             ->get();
+        
         $labels = [];
         $data = [];
         $colors = [];
@@ -155,11 +179,13 @@ class RecapitulationController extends Controller
             'confirmed' => '#10B981',
             'cancelled' => '#EF4444',
         ];
+        
         foreach ($statusData as $status) {
             $labels[] = ucfirst($status->status);
             $data[] = $status->count;
             $colors[] = $statusColors[$status->status] ?? '#6B7280';
         }
+        
         return [
             'labels' => $labels,
             'datasets' => [
@@ -176,8 +202,13 @@ class RecapitulationController extends Controller
         $filters = $request->only(['dateFrom', 'dateTo', 'status', 'route']);
         $dateFrom = $filters['dateFrom'] ?? Carbon::now()->startOfMonth()->format('Y-m-d');
         $dateTo = $filters['dateTo'] ?? Carbon::now()->format('Y-m-d');
+        
+        // Pastikan hanya mengambil data yang tidak soft deleted
         $bookingsQuery = Booking::with(['user', 'schedule.routeVehicle.route', 'schedule.routeVehicle.vehicle.driver'])
-            ->whereBetween('booking_time', [$dateFrom, $dateTo]);
+            ->whereBetween('booking_time', [$dateFrom, $dateTo])
+            ->whereHas('schedule.routeVehicle.route') // Pastikan route tidak soft deleted
+            ->whereHas('schedule.routeVehicle.vehicle'); // Pastikan vehicle tidak soft deleted
+            
         if (!empty($filters['status'])) {
             $bookingsQuery->where('status', $filters['status']);
         }
@@ -187,11 +218,13 @@ class RecapitulationController extends Controller
             });
         }
         $bookings = $bookingsQuery->orderBy('booking_time', 'desc')->get();
+        
         $filename = 'rekapitulasi_' . $dateFrom . '_to_' . $dateTo . '.csv';
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ];
+        
         $callback = function () use ($bookings) {
             $file = fopen('php://output', 'w');
             fputcsv($file, [
@@ -222,6 +255,7 @@ class RecapitulationController extends Controller
             }
             fclose($file);
         };
+        
         return response()->stream($callback, 200, $headers);
     }
 }

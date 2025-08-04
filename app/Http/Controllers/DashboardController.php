@@ -15,6 +15,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        // Hanya menghitung data yang tidak di-soft delete
         $totalBooking = Booking::count();
         $totalUser = User::count();
         $totalDriver = Driver::count();
@@ -22,8 +23,11 @@ class DashboardController extends Controller
         $ruteAktif = Route::count();
         $jadwalHariIni = Schedule::whereDate('departure_time', now()->toDateString())->count();
 
+        // Menggunakan with untuk eager loading dan memastikan tidak termasuk soft deleted
         $jadwalList = Schedule::with(['routeVehicle.route', 'routeVehicle.vehicle.driver', 'bookings'])
             ->whereDate('departure_time', now()->toDateString())
+            ->whereHas('routeVehicle.route') // Pastikan route tidak soft deleted
+            ->whereHas('routeVehicle.vehicle') // Pastikan vehicle tidak soft deleted
             ->get()
             ->map(function ($s) {
                 $route = $s->routeVehicle ? $s->routeVehicle->route : null;
@@ -39,6 +43,7 @@ class DashboardController extends Controller
                 ];
             });
 
+        // Untuk booking terbaru, pastikan hanya data yang tidak soft deleted
         $bookingTerbaru = Booking::with(['user', 'schedule.routeVehicle.route'])
             ->latest()
             ->take(5)
@@ -54,7 +59,9 @@ class DashboardController extends Controller
                 ];
             });
 
+        // Untuk rute populer, pastikan hanya data yang tidak soft deleted
         $rutePopuler = Booking::with(['schedule.routeVehicle.route'])
+            ->whereHas('schedule.routeVehicle.route') // Pastikan route tidak soft deleted
             ->get()
             ->groupBy(function ($b) {
                 $route = $b->schedule && $b->schedule->routeVehicle ? $b->schedule->routeVehicle->route : null;

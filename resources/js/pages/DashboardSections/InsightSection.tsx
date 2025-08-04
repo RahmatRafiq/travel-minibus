@@ -42,9 +42,9 @@ const InsightSection: React.FC<InsightSectionProps> = ({ topRute, topRuteJumlah,
           <div className="font-bold text-sm sm:text-xl text-white mb-1 truncate">{topBooking}</div>
           {topBookingStatus && (
             <span className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-bold tracking-wide ${
-              topBookingStatus === 'Sukses' 
+              topBookingStatus === 'confirmed' 
                 ? 'bg-green-100 text-green-700' 
-                : topBookingStatus === 'Pending' 
+                : topBookingStatus === 'pending' 
                 ? 'bg-yellow-100 text-yellow-700' 
                 : 'bg-gray-100 text-gray-700'
             }`}>
